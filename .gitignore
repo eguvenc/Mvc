@@ -1,0 +1,7 @@
+website/.couscous/
+tests/var/cache/
+tests/var/log/
+public/
+vendor/
+App/
+composer.lock
