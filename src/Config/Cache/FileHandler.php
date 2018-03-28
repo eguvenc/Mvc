@@ -79,7 +79,7 @@ class FileHandler implements CacheInterface
      * @param  string $file file
      * @return string
      */
-    protected static function getFile(string $file)
+    protected function getFile(string $file)
     {
         $filestr  = str_replace(array(ROOT, '/'), array('',':'), $file);
         $filename = strstr($filestr, '.', true);
