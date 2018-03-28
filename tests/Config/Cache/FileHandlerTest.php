@@ -6,7 +6,7 @@ class FileHandlerTest extends PHPUnit_Framework_TestCase
 {
     public function setup()
     {
-       $this->cache = new FileHandler;
+       $this->cache = new FileHandler('/tests/var/cache/config');
     }
 
     public function testHas()

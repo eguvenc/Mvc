@@ -9,6 +9,8 @@ ini_set('session.use_cookies', 0);
 // Enable Composer autoloader
 $autoloader = require ROOT . 'vendor/autoload.php';
 
+var_dump(ROOT);
+
 // require dirname(__FILE__) . '/getallheaders.php';
 // 
 // Register test classes

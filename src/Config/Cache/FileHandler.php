@@ -10,7 +10,17 @@ namespace Obullo\Mvc\Config\Cache;
  */
 class FileHandler implements CacheInterface
 {
-    protected $data = array();
+    protected $path;
+
+    /**
+     * Set save path
+     * 
+     * @param string $path path
+     */
+    public function __construct(string $path = '/var/cache/config')
+    {
+        $this->path = rtrim($path, '/');
+    }
 
     /**
      * Checks the file has cached
@@ -54,8 +64,8 @@ class FileHandler implements CacheInterface
      */
     public function write(string $file, array $data)
     {
-        if (! is_dir(ROOT.'/var/cache/config')) {
-            mkdir(ROOT.'/var/cache/config', 0777);
+        if (! is_dir(ROOT.$this->path)) {
+            mkdir(ROOT.$this->path, 0777);
         }
         $id = $this->getFile($file);
         $data['__mtime__'] = filemtime($file);
@@ -74,6 +84,6 @@ class FileHandler implements CacheInterface
         $filestr  = str_replace(array(ROOT, '/'), array('',':'), $file);
         $filename = strstr($filestr, '.', true);
 
-        return ROOT.'/var/cache/config/'.ltrim($filename, ':');
+        return ROOT.$this->path.'/'.ltrim($filename, ':');
     }
 }
