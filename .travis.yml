@@ -10,6 +10,10 @@ matrix:
   allow_failures:
     - php: 7.2
 
+services:
+  - memcached
+  - redis-server
+
 cache:
     directories:
         - $HOME/.composer/cache
