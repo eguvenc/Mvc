@@ -21,6 +21,7 @@ class FileHandler implements CacheInterface
     public function has(string $file) : bool
     {
         $id = $this->getFile($file);
+
         return file_exists($id);
     }
 

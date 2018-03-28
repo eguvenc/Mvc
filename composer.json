@@ -1,7 +1,28 @@
 {
+    "name": "obullo/mvc",
+    "type": "library",
+    "description": "Create your mvc framework using composer packages.",
+    "keywords": [
+        "obullo",
+        "mvc",
+        "framework",
+        "psr-7",
+        "psr-15"
+    ],
+    "homepage": "http://mvc.obullo.com",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ersin Guvenc",
+            "email": "eguvenc@gmail.com",
+            "homepage": "http://obullo.com",
+            "role": "Developer"
+        }
+    ],
     "autoload": {
         "psr-4": {
-            "": "src/"
+            "Obullo\\Mvc\\": "src/",
+            "": ""
         }
     },
     "require": {
