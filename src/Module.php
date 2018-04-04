@@ -16,34 +16,34 @@ use Obullo\Http\Stack\StackInterface as Stack;
  */
 class Module
 {
- 	use ContainerAwareTrait;
+    use ContainerAwareTrait;
 
-	protected $name;
-	protected $class;
-	protected $router;
-	protected $method;
-	protected $methods = array();
-	protected $classInstance;
-	protected $isCallable = false;
+    protected $name;
+    protected $class;
+    protected $router;
+    protected $method;
+    protected $methods = array();
+    protected $classInstance;
+    protected $isCallable = false;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param Router $router router
-	 */
-	public function __construct(Router $router)
-	{
-		$this->router = $router;
+    /**
+     * Constructor
+     * 
+     * @param Router $router router
+     */
+    public function __construct(Router $router)
+    {
+        $this->router = $router;
         $this->name = 'App';
-	}
+    }
 
-	/**
-	 * Initialize to module
-	 * 
-	 * @return void
-	 */
-	protected function init()
-	{
+    /**
+     * Initialize to module
+     * 
+     * @return void
+     */
+    protected function init()
+    {
         $container = $this->getContainer();
         $container->share('router', $this->router);
 
@@ -67,27 +67,27 @@ class Module
                 }
             }
         }
-	}
+    }
 
-	/**
-	 * Build services
-	 * 
-	 * @return void
-	 */
-	public function build()
-	{
-		$this->init();
-	}
+    /**
+     * Build services
+     * 
+     * @return void
+     */
+    public function build()
+    {
+        $this->init();
+    }
 
-	/**
-	 * Returns to module name if it's not empty
-	 * otherwise returns to 'App' module.
-	 * 
-	 * @return string
-	 */
+    /**
+     * Returns to module name if it's not empty
+     * otherwise returns to 'App' module.
+     * 
+     * @return string
+     */
     public function getName() : string
     {
-    	return $this->name;
+        return $this->name;
     }
 
     /**
@@ -97,7 +97,7 @@ class Module
      */
     public function getClassIsCallable() : bool
     {
-    	return $this->isCallable;
+        return $this->isCallable;
     }
 
     /**
@@ -107,7 +107,7 @@ class Module
      */
     public function getClassName() : string
     {
-    	return $this->class;
+        return $this->class;
     }
 
     /**
@@ -117,7 +117,7 @@ class Module
      */
     public function getClassMethod() : string
     {
-    	return $this->method;
+        return $this->method;
     }
 
     /**
@@ -127,7 +127,7 @@ class Module
      */
     public function getClassMethods() : array
     {
-    	return $this->methods;
+        return $this->methods;
     }
 
     /**
@@ -137,7 +137,7 @@ class Module
      */
     public function getClassInstance()
     {
-    	return $this->classInstance;
+        return $this->classInstance;
     }
 
     /**
@@ -147,6 +147,6 @@ class Module
      */
     public function getRouteArguments() : array
     {
-    	return $this->router->getMatchedRoute()->getArguments();
+        return $this->router->getMatchedRoute()->getArguments();
     }
 }
