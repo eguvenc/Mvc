@@ -8,9 +8,9 @@ interface CacheInterface
      * Checks the file has cached
      * 
      * @param  string $file filename
-     * @return boolean
+     * @return boolean|array
      */
-    public function has(string $file) : bool;
+    public function has(string $file);
 
     /**
      * Read file

@@ -17,7 +17,7 @@ class FileHandler implements CacheInterface
      * 
      * @param string $path path
      */
-    public function __construct(string $path = '/var/cache/config')
+    public function __construct(string $path = '/var/cache/config/')
     {
         $this->path = rtrim($path, '/');
     }
@@ -26,13 +26,24 @@ class FileHandler implements CacheInterface
      * Checks the file has cached
      * 
      * @param  string $file filename
-     * @return boolean
+     * @return boolean|array
      */
-    public function has(string $file) : bool
+    public function has(string $file)
     {
-        $id = $this->getFile($file);
-
-        return file_exists($id);
+        $key = Self::getKey($file, $this->path);
+        $mtime = filemtime($file);
+        if (file_exists($key)) {
+            $serializedData = file_get_contents(Self::getKey($file, $this->path));
+            $data = unserialize($serializedData);
+            $time = (int)$data['__mtime__'];
+            if ($mtime > $time) {
+                $this->delete($file);
+                return false;
+            }
+            unset($data['__mtime__']);
+            return $data;
+        }
+        return false;
     }
 
     /**
@@ -43,14 +54,9 @@ class FileHandler implements CacheInterface
      */
     public function read(string $file) : array
     {
-        $id = $this->getFile($file);
         $mtime = filemtime($file);
-        $serializedData = file_get_contents($id);
+        $serializedData = file_get_contents(Self::getKey($file, $this->path));
         $data = unserialize($serializedData);
-        $time = (int)$data['__mtime__'];
-        if ($mtime > $time) {
-            unlink($id);
-        }
         unset($data['__mtime__']);
         return $data;
     }
@@ -67,10 +73,22 @@ class FileHandler implements CacheInterface
         if (! is_dir(ROOT.$this->path)) {
             mkdir(ROOT.$this->path, 0777);
         }
-        $id = $this->getFile($file);
+        $key = Self::getKey($file, $this->path);
         $data['__mtime__'] = filemtime($file);
         $serializedData = serialize($data);
-        file_put_contents($id, $serializedData);
+        file_put_contents($key, $serializedData);
+    }
+
+    /**
+     * Delete file
+     * 
+     * @param  string $file file
+     * @return void
+     */
+    public function delete(string $file)
+    {
+        $key = Self::getKey($file, $this->path);
+        unlink($key);
     }
 
     /**
@@ -79,11 +97,11 @@ class FileHandler implements CacheInterface
      * @param  string $file file
      * @return string
      */
-    protected function getFile(string $file)
+    protected static function getKey(string $file, string $path)
     {
         $filestr  = str_replace(array(ROOT, '/'), array('',':'), $file);
         $filename = strstr($filestr, '.', true);
 
-        return ROOT.$this->path.'/'.ltrim($filename, ':');
+        return ROOT.$path.'/'.ltrim($filename, ':');
     }
 }

@@ -5,7 +5,7 @@ namespace Obullo\Mvc\Config\Reader;
 use Zend\Config\Exception;
 use Symfony\Component\Yaml\Yaml;
 use Zend\Config\Reader\ReaderInterface;
-use Obullo\Mvc\Config\Cache\CacheInterface as ConfigCache;
+use Obullo\Mvc\Config\Cache\CacheInterface as CacheHandler;
 
 /**
  * YAML config reader for Zend\Config
@@ -29,9 +29,9 @@ class YamlReader implements ReaderInterface
     /**
      * Constructor
      * 
-     * @param ConfigCache $cache cache
+     * @param CacheHandler $cache cache
      */
-    public function __construct(ConfigCache $cache)
+    public function __construct(CacheHandler $cache)
     {
         $this->cache = $cache;
     }
@@ -53,12 +53,11 @@ class YamlReader implements ReaderInterface
             ));
         }
         $this->directory = dirname($filename);
-
-        if ($this->cache->has($filename)) {
-            $config = $this->cache->read($filename);
-        } else {
+        
+        $config = $this->cache->has($filename);
+        if (false == $config) {
             $config = Yaml::parse(file_get_contents($filename));
-            $this->cache->write($filename, $config);
+            $this->cache->write($filename, $config);   
         }
         if (null === $config) {
             throw new Exception\RuntimeException("Error parsing YAML data");

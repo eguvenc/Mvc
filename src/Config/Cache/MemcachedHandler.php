@@ -37,15 +37,23 @@ class MemcachedHandler implements CacheInterface
 	 * Checks the file has cached
 	 * 
 	 * @param  string $file filename
-	 * @return boolean
+	 * @return boolean|array
 	 */
-    public function has(string $file) : bool
+    public function has(string $file)
     {
         $key = Self::getKey($file);
-        if ($this->memcached->get($key)) {
-        	return true;
+        $mtime = filemtime($file);
+        if ($data = $this->memcached->get($key)) {
+            $time = (int)$data['__mtime__'];
+            if ($mtime > $time) {
+                $this->delete($file);
+                return false;
+            }
+            unset($data['__mtime__']);
+            return $data;
         }
         return false;
+
     }
 
     /**
@@ -61,7 +69,7 @@ class MemcachedHandler implements CacheInterface
         $mtime = filemtime($file);
 		$time = (int)$data['__mtime__'];
 		if ($mtime > $time) {
-		    $this->memcached->delete($key);
+		    $this->delete($file);
 		}
         unset($data['__mtime__']);
         return $data;
@@ -79,6 +87,18 @@ class MemcachedHandler implements CacheInterface
         $key = Self::getKey($file);
         $data['__mtime__'] = filemtime($file);
         $this->memcached->set($key, $data, 0);
+    }
+
+    /**
+     * Delete cache
+     * 
+     * @param  string $file file
+     * @return void
+     */
+    public function delete(string $file)
+    {
+        $key = Self::getKey($file);
+        $this->memcached->delete($key);
     }
 
     /**

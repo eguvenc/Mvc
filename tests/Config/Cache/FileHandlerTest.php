@@ -6,14 +6,15 @@ class FileHandlerTest extends PHPUnit_Framework_TestCase
 {
     public function setup()
     {
-        $this->filename = ROOT.'/tests/Resources/app.yaml';
+        $this->filename = ROOT.'/tests/var/config/app.yaml';
         $this->cache = new FileHandler('/tests/var/cache/config');
     }
 
     public function testHas()
     {
         $this->cache->write($this->filename, array('test' => 123456));
-        $this->assertTrue($this->cache->has($this->filename));
+        $data = $this->cache->has($this->filename);
+        $this->assertEquals($data['test'], 123456);
     }
 
     public function testRead()
@@ -40,5 +41,12 @@ class FileHandlerTest extends PHPUnit_Framework_TestCase
         );
         $data = $this->cache->read($this->filename);
         $this->assertEquals($data['app']['session']['name'], 'sessions');
+    }
+
+    public function testDelete()
+    {
+        $this->cache->write($this->filename, array('test' => 123456));
+        $this->cache->delete($this->filename);
+        $this->assertFalse($this->cache->has($this->filename));
     }
 }

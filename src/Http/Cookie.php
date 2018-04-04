@@ -72,7 +72,7 @@ class Cookie implements CookieInterface
      *
      * @return array
      */
-    public function getDefaults()
+    public function getDefaults() : array
     {
         return $this->defaults;
     }
@@ -222,9 +222,9 @@ class Cookie implements CookieInterface
     /**
      * Convert to array
      *
-     * @return string[]
+     * @return array
      */
-    public function toArray()
+    public function toArray() : array
     {
         return $this->responseCookies;
     }
@@ -234,7 +234,7 @@ class Cookie implements CookieInterface
      *
      * @return string[]
      */
-    public function toHeaders()
+    public function toHeaders() : array
     {
         $headers = [];
         foreach ($this->responseCookies as $name => $properties) {
@@ -251,7 +251,7 @@ class Cookie implements CookieInterface
      *
      * @return string
      */
-    public function toString($name, array $properties)
+    public function toString($name, array $properties) : string
     {
         $result = urlencode($name) . '=' . urlencode($properties['value']);
 

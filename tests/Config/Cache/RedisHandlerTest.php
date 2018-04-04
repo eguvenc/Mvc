@@ -1,18 +1,18 @@
 <?php
 
-use Obullo\Mvc\Config\Cache\MemcachedHandler;
+use Obullo\Mvc\Config\Cache\RedisHandler;
 
-class MemcachedHandlerTest extends PHPUnit_Framework_TestCase
+class RedisHandlerTest extends PHPUnit_Framework_TestCase
 {
     public function setup()
     {
         $this->filename = ROOT.'/tests/var/config/app.yaml';
 
-        $memcached = new Memcached;
-        $memcached->addServer('127.0.0.1', 11211);
-        $memcached->setOption(Memcached::OPT_SERIALIZER, Memcached::SERIALIZER_PHP);
+        $client = new Redis;
+        $client->connect('127.0.0.1', 6379);
+        $client->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_PHP);
 
-        $this->cache = new MemcachedHandler($memcached);
+        $this->cache = new RedisHandler($client);
     }
 
     public function testHas()

@@ -30,11 +30,12 @@ abstract class Application implements ContainerAwareInterface
     use ContainerAwareTrait;
 
     protected $env;
-    protected $response;
-    
+    protected $stack;
+    protected $module;
+
     abstract protected function configureConfig(Container $container);
     abstract protected function configureContainer(Container $container);
-    abstract protected function configureRouter(Container $container, Loader $loader, Request $request);
+    abstract protected function configureMiddleware(Stack $stack) : Stack;
     
     /**
      * Constructor
@@ -47,36 +48,92 @@ abstract class Application implements ContainerAwareInterface
     }
 
     /**
-     * Initialize to configurations
+     * Set module
+     * 
+     * @param object $module module
+     */
+    public function setModule($module)
+    {
+        $this->module = $module;
+        $this->setContainer($module->getContainer());
+    }
+
+    /**
+     * Returns to module object
+     * 
+     * @return object
+     */
+    public function getModule()
+    {
+        return $this->module;
+    }
+
+    /**
+     * Set stack builder
+     * 
+     * @param StackInterface $stack builder
+     */
+    public function setStack(Stack $stack)
+    {
+        $this->stack = $stack;
+    }
+
+    /**
+     * Process request
      *
      * @param Request $request request
      * 
      * @return void
      */
-    public function start(Request $request)
+    public function process(Request $request)
     {
         $container = $this->getContainer();
         $container->share('request', $request);
         $this->configureConfig($container);
         $this->configureContainer($container);
-        $this->configureRouter($container, $container->get('loader'), $request);
-
-        $container->get('router')->matchRequest($request);
+        $handler = $this->configureMiddleware($this->stack);
+        return $handler->process($request);
     }
     
     /**
-     * Build route middlewares
+     * Build route middlewares with dependencies
      * 
      * @return handler
      */
     public function build() : array
     {
         $container = $this->getContainer();
+        $appMiddlewares = array();
+        $controllerStack = array();
+        $routerStack = $container->get('router')->getStack();
+        if ($container->has('middleware')) {
+            $controllerStack = $container->get('middleware')->getStack();
+        }
+        $appMiddlewares = array_merge($routerStack, $controllerStack);
+        return $this->resolveMiddlewares($appMiddlewares);
+    }
+
+    /**
+     * Resolve middlewares
+     * 
+     * @param array $appMiddlewares middlewares
+     * 
+     * @return array
+     */
+    protected function resolveMiddlewares(array $appMiddlewares)
+    {
         $middlewares = array();
-        foreach ($container->get('router')->getStack() as $class) {
+        foreach ($appMiddlewares as $data) {
+            $class = $data;
+            $arguments = array();
+            if (is_array($data)) {
+                $class = $data['class'];
+                $arguments = $data['arguments'];
+            }
             $reflection = new ReflectionClass($class);
             $resolver = new Resolver($reflection);
-            $resolver->setContainer($container);
+            $resolver->setArguments($arguments);
+            $resolver->setContainer($this->getContainer());
             $args = array();
             if ($reflection->hasMethod('__construct')) {
                 $args = $resolver->resolve('__construct');
@@ -99,33 +156,25 @@ abstract class Application implements ContainerAwareInterface
     /**
      * Handle application process
      * 
-     * @param  Request $request Psr Request
-     * @param  Route   $router  Router
+     * @param Request $request Psr7 Request
      * 
      * @return null|Response
      */
-    public function handle(Request $request, Router $router)
+    public function handle(Request $request)
     {
         $container = $this->getContainer();
-        $container->share('request', $request);
-
-        $route = $router->getMatchedRoute();
-        $handler = $route->getHandler();
         $response = null;
-        if (is_callable($handler)) {
-            $exp = explode('::', $handler);
-            $class  = $exp[0];
-            $method = $exp[1];
-            $arguments = $route->getArguments();
-            $resolver = new Resolver(new ReflectionClass($class));
-            $resolver->setContainer($this->getContainer());
-            $resolver->setArguments($arguments);
+        if ($this->module->getClassIsCallable()) {
+            $class  = $this->module->getClassInstance();
+            $method = $this->module->getClassMethod();
+            $reflection = new ReflectionClass($class);
+            $resolver = new Resolver($reflection);
+            $resolver->setContainer($container);
+            $resolver->setArguments($this->module->getRouteArguments());
             $injectedParameters = $resolver->resolve($method);
-            $controller = new $class;
-            $controller->setContainer($container);
             $response = call_user_func_array(
                 array(
-                    $controller,
+                    $class,
                     $method
                 ),
                 $injectedParameters
@@ -147,9 +196,8 @@ abstract class Application implements ContainerAwareInterface
         if (ob_get_level() > 0 && ob_get_length() > 0) {
             throw new RuntimeException('Output has been emitted previously; cannot emit response');
         }
-        $this->response = $response;
-        $this->emitHeaders();
-        $this->emitBody();
+        $this->emitHeaders($response);
+        $this->emitBody($response);
     }
 
     /**
@@ -157,10 +205,10 @@ abstract class Application implements ContainerAwareInterface
      *
      * @return void
      */
-    protected function emitHeaders()
+    protected function emitHeaders($response)
     {
-        $statusCode = $this->response->getStatusCode();
-        foreach ($this->response->getHeaders() as $header => $values) {
+        $statusCode = $response->getStatusCode();
+        foreach ($response->getHeaders() as $header => $values) {
             $name = $header;
             foreach ($values as $value) {
                 header(sprintf(
@@ -191,9 +239,9 @@ abstract class Application implements ContainerAwareInterface
      * 
      * @return void
      */
-    protected function emitBody()
+    protected function emitBody($response)
     {
-        echo $this->response->getBody();
+        echo $response->getBody();
     }
 
     /**

@@ -32,5 +32,9 @@
         "league/plates": "^3.3",
         "league/container": "^2.4",
         "zendframework/zend-config": "^3.1"
+    },
+    "require-dev": {
+        "monolog/monolog": "^1.23",
+        "doctrine/dbal": "^2.7"
     }
 }

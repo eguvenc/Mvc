@@ -98,9 +98,9 @@ class DoctrineDBAL implements SQLLoggerInterface
             [
                 'time'   => number_format(microtime(true) - $this->start, 4),
                 'output' => $this->format($this->sql)
-            ],
-            ($this->queryNumber * -1)  // priority
+            ]
         );
+        // ($this->queryNumber * -1)  // priority
     }
 
     /**

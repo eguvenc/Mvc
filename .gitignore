@@ -2,6 +2,8 @@ website/.couscous/
 tests/var/cache/
 tests/var/log/
 public/
+config/
 vendor/
 App/
+Services/
 composer.lock
