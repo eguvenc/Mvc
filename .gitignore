@@ -1,8 +1,8 @@
 website/.couscous/
 tests/var/cache/
 tests/var/log/
-public/
-config/
+/public/
+/config/
 vendor/
 /App/
 Services/
