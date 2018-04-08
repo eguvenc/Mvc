@@ -21,7 +21,11 @@
     ],
     "autoload": {
         "psr-4": {
-            "Obullo\\Mvc\\": "src/",
+            "Obullo\\Mvc\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": { 
             "": ""
         }
     },
