@@ -11,6 +11,7 @@ services:
 
 before_script:
   - composer install
+  - composer dump-autoload
   - phpenv config-add .travis.ini
 
 cache:
