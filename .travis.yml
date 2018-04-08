@@ -9,7 +9,9 @@ services:
   - memcached
   - redis-server
 
-before_script: phpenv config-add .travis.ini
+before_script:
+  - composer install
+  - phpenv config-add .travis.ini
 
 cache:
     directories:
