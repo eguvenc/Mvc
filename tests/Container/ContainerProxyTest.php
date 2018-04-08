@@ -19,7 +19,7 @@ class ContainerProxyTest extends PHPUnit_Framework_TestCase
 		$this->container->delegate(
 		    new ReflectionContainer
 		);
-		$this->container->share('cache', new FileHandler);
+		$this->container->share('cache', new FileHandler('/tests/var/cache/config/'));
 	}
 
 	public function testContainer()
@@ -36,7 +36,7 @@ class ContainerProxyTest extends PHPUnit_Framework_TestCase
 
 	public function testSetterMethod()
 	{
-		$this->test = new FileHandler;
+		$this->test = new FileHandler('/tests/var/cache/config/');
 		$this->assertInstanceOf('Obullo\Mvc\Config\Cache\FileHandler', $this->cache);
 	}
 }

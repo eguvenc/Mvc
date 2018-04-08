@@ -115,16 +115,25 @@ class DoctrineDBAL implements SQLLoggerInterface
         $sql = preg_replace('/\n\r\t/', ' ', trim($sql, "\n"));
         $newValues = array();
         if (! empty($this->params)) {
-            foreach ($this->params as $key => $value) {
-                if (is_string($value)) {
-                    $newValues[$key] = "'".addslashes($value)."'";
-                } else {
-                    $newValues[$key] = $value;
+            $firstKey = key($this->params);
+            if (is_string($firstKey)) { // named parameters
+                foreach ($this->params as $key => $value) {
+                    $value = is_string($value) ? "'".addslashes($value)."'" : $value;
+                    $sql = str_replace(':'.$key, $value, $sql);
                 }
+                return $sql;
             }
-            $sql = preg_replace('/(?:[?])/', '%s', $sql);  // question mark binds
-            $sql = preg_replace('/:\w+/', '%s', $sql);     // bounded parameters
-            return vsprintf($sql, $newValues);
+            if (is_numeric($firstKey)) { // numeric parameters
+                foreach ($this->params as $key => $value) {
+                    if (is_string($value)) {
+                        $newValues[$key] = "'".addslashes($value)."'";
+                    } else {
+                        $newValues[$key] = $value;
+                    }
+                }
+                $sql = preg_replace('/(?:[?])/', '%s', $sql);  // question mark binds
+                $sql = vsprintf($sql, $newValues);
+            }
         }
         return $sql;
     }

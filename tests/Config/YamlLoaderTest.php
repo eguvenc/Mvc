@@ -11,7 +11,8 @@ class YamlLoaderTest extends PHPUnit_Framework_TestCase
     public function setup()
     {
         $this->filename = ROOT.'/tests/var/config/app.yaml';
-        $this->loader = new YamlLoader('/tests/var/cache/config/');
+        $fileHandler = new FileHandler('/tests/var/cache/config/');
+        $this->loader = new YamlLoader($fileHandler);
     }
 
     public function testLoad()

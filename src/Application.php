@@ -88,7 +88,6 @@ abstract class Application implements ContainerAwareInterface
     public function process(Request $request)
     {
         $container = $this->getContainer();
-        $container->share('request', $request);
         $this->configureConfig($container);
         $this->configureContainer($container);
         $handler = $this->configureMiddleware($this->stack);
@@ -163,6 +162,7 @@ abstract class Application implements ContainerAwareInterface
     public function handle(Request $request)
     {
         $container = $this->getContainer();
+        $container->share('request', $request);
         $response = null;
         if ($this->module->getClassIsCallable()) {
             $class  = $this->module->getClassInstance();

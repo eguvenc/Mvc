@@ -17,7 +17,7 @@ class FileHandler implements CacheInterface
      * 
      * @param string $path path
      */
-    public function __construct(string $path = '/var/cache/config/')
+    public function __construct(string $path)
     {
         $this->path = rtrim($path, '/');
     }
@@ -99,7 +99,7 @@ class FileHandler implements CacheInterface
      */
     protected static function getKey(string $file, string $path)
     {
-        $filestr  = str_replace(array(ROOT, '/'), array('',':'), $file);
+        $filestr  = str_replace(array(ROOT,'/'), array('',':'), $file);
         $filename = strstr($filestr, '.', true);
 
         return ROOT.$path.'/'.ltrim($filename, ':');

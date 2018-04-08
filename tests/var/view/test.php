@@ -1,0 +1,1 @@
+Test variable:<?php echo $var ?>

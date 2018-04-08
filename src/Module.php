@@ -60,7 +60,7 @@ class Module
                 $this->classInstance = $reflection->newInstanceWithoutConstructor();
                 $this->methods = get_class_methods($this->classInstance);
                 $container->share('middleware', 'Obullo\Mvc\Middleware')
-                ->withArgument($this);
+                    ->withArgument($this);
                 $this->classInstance->setContainer($container);
                 if ($reflection->hasMethod('__construct')) {
                     $this->classInstance->__construct();

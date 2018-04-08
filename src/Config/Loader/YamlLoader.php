@@ -23,10 +23,9 @@ class YamlLoader implements LoaderInterface
      * 
      * @param string $path path
      */
-    public function __construct(string $path = '/var/cache/config/')
+    public function __construct(FileHandler $fileHandler)
     {
-        $cacheHandler = new FileHandler($path);
-        \Zend\Config\Factory::registerReader('yaml', new YamlReader($cacheHandler));
+        \Zend\Config\Factory::registerReader('yaml', new YamlReader($fileHandler));
     }
 
     /**

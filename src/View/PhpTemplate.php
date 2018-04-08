@@ -8,14 +8,14 @@ use Obullo\Mvc\Container\{
 };
 use League\Plates\Engine;
 use Obullo\Router\Generator;
-use Obullo\Mvc\View\Plates\Template;
 use Zend\Diactoros\Response;
+use Obullo\Mvc\View\Plates\Template;
 use Zend\Diactoros\Response\HtmlResponse;
 
 /**
  * Plates template engine - http://platesphp.com/
  *
- * @copyright 2009-2016 Obullo
+ * @copyright 2018 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
 class PhpTemplate implements ContainerAwareInterface

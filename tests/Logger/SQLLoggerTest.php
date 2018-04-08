@@ -35,7 +35,7 @@ class SQLLoggerTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('SQL-1 ( Query ):', $debug['message']);
         $this->assertEquals("SELECT * FROM users WHERE id = 5 AND name = 'test'", $debug['context']['output']);
 
-        $this->logger->startQuery("SELECT * FROM users WHERE id = :id AND name = :name", array('id' => 5, 'name' => 'test'));
+        $this->logger->startQuery("SELECT * FROM users WHERE id = :id AND name = :name", array('name' => 'test', 'id' => 5));
         $this->logger->stopQuery();
         $debug = $this->log->getMessages()['debug'];
 
