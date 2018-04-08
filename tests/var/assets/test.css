@@ -1,0 +1,10 @@
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+/* Space out content a bit */
+body {
+  margin-bottom: 60px; /* Margin bottom by footer height */
+}
