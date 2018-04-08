@@ -4,6 +4,6 @@ tests/var/log/
 public/
 config/
 vendor/
-App/
+/App/
 Services/
 composer.lock
