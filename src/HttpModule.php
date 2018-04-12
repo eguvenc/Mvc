@@ -9,17 +9,18 @@ use Obullo\Mvc\Container\ContainerAwareTrait;
 use Obullo\Http\Stack\StackInterface as Stack;
 
 /**
- * Module
+ * Http module
  *
  * @copyright 2018 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class Module
+class HttpModule
 {
     use ContainerAwareTrait;
 
     protected $name;
     protected $class;
+    protected $module;
     protected $router;
     protected $method;
     protected $methods = array();
@@ -38,6 +39,26 @@ class Module
     }
 
     /**
+     * Set stack
+     * 
+     * @param Stack $stack stack
+     */
+    public function setStack(Stack $stack)
+    {
+        $this->stack = $stack;
+    }
+
+    /**
+     * Returns to http stack
+     * 
+     * @return object
+     */
+    public function getStack() : Stack
+    {
+        return $this->stack;
+    }
+
+    /**
      * Initialize to module
      * 
      * @return void
@@ -45,7 +66,6 @@ class Module
     protected function init()
     {
         $container = $this->getContainer();
-        $container->share('router', $this->router);
 
         if ($this->router->hasMatch() && $handler = $this->router->getMatchedRoute()
             ->getHandler()) {
@@ -59,8 +79,10 @@ class Module
                 $reflection = new ReflectionClass($this->class);
                 $this->classInstance = $reflection->newInstanceWithoutConstructor();
                 $this->methods = get_class_methods($this->classInstance);
-                $container->share('middleware', 'Obullo\Mvc\Middleware')
-                    ->withArgument($this);
+                
+                $container->setFactory('middleware', function(){
+                    return new \Obullo\Mvc\Middleware($this);
+                });
                 $this->classInstance->setContainer($container);
                 if ($reflection->hasMethod('__construct')) {
                     $this->classInstance->__construct();
@@ -74,9 +96,16 @@ class Module
      * 
      * @return void
      */
-    public function build()
+    public function build(string $env)
     {
+        $this->env = $env;
         $this->init();
+        $class = $this->getName().'\\Module';
+        $module = new $class($this);
+        $module->init();
+        $module->buildServices();
+
+        return $module;
     }
 
     /**
@@ -88,6 +117,16 @@ class Module
     public function getName() : string
     {
         return $this->name;
+    }
+
+    /**
+     * Returns to env
+     * 
+     * @return string
+     */
+    public function getEnv() : string
+    {
+        return $this->env;
     }
 
     /**

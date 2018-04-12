@@ -2,7 +2,7 @@
 
 namespace Obullo\Mvc;
 
-use Obullo\Mvc\Module;
+use Obullo\Mvc\HttpModule;
 
 /**
  * Middleware
@@ -22,7 +22,7 @@ class Middleware
      * 
      * @param Module $module module
      */
-    public function __construct(Module $module)
+    public function __construct(HttpModule $module)
     {
         $this->module = $module;
     }

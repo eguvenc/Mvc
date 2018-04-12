@@ -16,8 +16,8 @@ use Obullo\Router\Types\{
     IntType,
     TranslationType
 };
-use Tests\App\Config;
-use Obullo\Mvc\Module;
+use Tests\App\Module;
+use Obullo\Mvc\HttpModule;
 use Obullo\Mvc\Config\Loader\YamlLoader;
 use Obullo\Mvc\Config\Cache\FileHandler;
 use Zend\Diactoros\ServerRequestFactory;
@@ -27,7 +27,7 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
 {
 	public function setUp()
 	{
-        $this->app = new Config('dev');
+        $this->app = new Module('dev');
         $context = new RequestContext;
         $context->setPath('/');
         $context->setMethod('GET');
@@ -64,12 +64,12 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
     {
         $router = new Router($this->collection);
         $router->match('/','example.com');
-        $module = new Module($router);
+        $module = new HttpModule($router);
         $module->setContainer($this->container);
         $module->build();
 
         $this->app->setModule($module);
-        $this->assertInstanceOf('Obullo\Mvc\Module', $this->app->getModule());
+        $this->assertInstanceOf('Obullo\Mvc\HttpModule', $this->app->getModule());
         $this->assertEquals('Tests', $module->getName());
     }
 
@@ -98,7 +98,7 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
 
         $router = new Router($this->collection);
         $router->match('/','example.com');
-        $module = new Module($router);
+        $module = new HttpModule($router);
         $module->setContainer($this->container);
         $module->build();
 
@@ -115,7 +115,7 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
     {
         $router = new Router($this->collection);
         $router->match('/','example.com');
-        $module = new Module($router);
+        $module = new HttpModule($router);
         $module->setContainer($this->container);
         $module->build();
 
@@ -153,7 +153,7 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
         $router = new Router($collection);
         $router->match('/en/test','example.com');
 
-        $module = new Module($router);
+        $module = new HttpModule($router);
         $module->setContainer($this->container);
         $module->build();
 

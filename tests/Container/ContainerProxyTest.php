@@ -1,7 +1,6 @@
 <?php
 
 use Obullo\Mvc\Exception;
-
 use League\Container\{
     Container,
     ReflectionContainer

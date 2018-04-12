@@ -15,44 +15,25 @@ use Obullo\Mvc\{
 use ReflectionClass;
 use RuntimeException;
 
-use Obullo\Router\Router;
-use Obullo\Mvc\Config\LoaderInterface as Loader;
-use Obullo\Http\Stack\StackInterface as Stack;
-
 /**
  * Mvc application
  *
  * @copyright 2018 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-abstract class Application implements ContainerAwareInterface
+class Application implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
 
-    protected $env;
-    protected $stack;
-    protected $module;
+    private $stack;
+    private $module;
 
-    abstract protected function configureConfig(Container $container);
-    abstract protected function configureContainer(Container $container);
-    abstract protected function configureMiddleware(Stack $stack) : Stack;
-    
     /**
      * Constructor
      * 
-     * @param string $env env
+     * @param object $module
      */
-    public function __construct(string $env)
-    {
-        $this->env = $env;
-    }
-
-    /**
-     * Set module
-     * 
-     * @param object $module module
-     */
-    public function setModule($module)
+    public function __construct(HttpModule $module)
     {
         $this->module = $module;
         $this->setContainer($module->getContainer());
@@ -69,13 +50,13 @@ abstract class Application implements ContainerAwareInterface
     }
 
     /**
-     * Set stack builder
+     * Returns to env
      * 
-     * @param StackInterface $stack builder
+     * @return string
      */
-    public function setStack(Stack $stack)
+    public function getEnv() : string
     {
-        $this->stack = $stack;
+        return $this->module->getEnv();
     }
 
     /**
@@ -87,10 +68,7 @@ abstract class Application implements ContainerAwareInterface
      */
     public function process(Request $request)
     {
-        $container = $this->getContainer();
-        $this->configureConfig($container);
-        $this->configureContainer($container);
-        $handler = $this->configureMiddleware($this->stack);
+        $handler = $this->getMiddleware();
         return $handler->process($request);
     }
     
@@ -106,7 +84,8 @@ abstract class Application implements ContainerAwareInterface
         $controllerStack = array();
         $routerStack = $container->get('router')->getStack();
         if ($container->has('middleware')) {
-            $controllerStack = $container->get('middleware')->getStack();
+            $controllerStack = $container->get('middleware')
+                ->getStack();
         }
         $appMiddlewares = array_merge($routerStack, $controllerStack);
         return $this->resolveMiddlewares($appMiddlewares);
@@ -143,16 +122,6 @@ abstract class Application implements ContainerAwareInterface
     }
 
     /**
-     * Returns to env
-     * 
-     * @return string
-     */
-    public function getEnv() : string
-    {
-        return $this->env;
-    }
-
-    /**
      * Handle application process
      * 
      * @param Request $request Psr7 Request
@@ -162,7 +131,7 @@ abstract class Application implements ContainerAwareInterface
     public function handle(Request $request)
     {
         $container = $this->getContainer();
-        $container->share('request', $request);
+        $container->setService('request', $request);
         $response = null;
         if ($this->module->getClassIsCallable()) {
             $class  = $this->module->getClassInstance();

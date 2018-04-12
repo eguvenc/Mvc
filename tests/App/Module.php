@@ -6,7 +6,7 @@ use Obullo\Mvc\Application;
 use Obullo\Http\Stack\StackInterface as Stack;
 use Psr\Container\ContainerInterface as Container;
 
-class Config extends Application
+class Module extends Application
 {
 	protected function configureConfig(Container $container)
 	{
