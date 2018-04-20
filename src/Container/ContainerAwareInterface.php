@@ -4,9 +4,6 @@ namespace Obullo\Mvc\Container;
 
 use Psr\Container\ContainerInterface;
 
-/**
- * Immutable container aware interface
- */
 interface ContainerAwareInterface
 {
     /**
@@ -21,5 +18,5 @@ interface ContainerAwareInterface
      *
      * @return \Psr\Container\ContainerInterface
      */
-    public function getContainer();
+    public function getContainer() : ContainerInterface;
 }

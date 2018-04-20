@@ -23,8 +23,6 @@ trait LoaderAwareTrait
     public function setLoader(Loader $loader)
     {
         $this->loader = $loader;
-
-        return $this;
     }
 
     /**

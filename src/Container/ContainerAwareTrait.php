@@ -4,9 +4,6 @@ namespace Obullo\Mvc\Container;
 
 use Psr\Container\ContainerInterface;
 
-/**
- * Immutable container aware trait
- */
 trait ContainerAwareTrait
 {
     /**
@@ -32,7 +29,7 @@ trait ContainerAwareTrait
      * 
      * @return object
      */
-    public function getContainer()
+    public function getContainer() : ContainerInterface
     {
         return $this->container;
     }

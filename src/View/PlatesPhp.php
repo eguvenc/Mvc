@@ -8,9 +8,9 @@ use Obullo\Mvc\Container\{
 };
 use League\Plates\Engine;
 use Obullo\Router\Generator;
-use Zend\Diactoros\Response;
 use Obullo\Mvc\View\Plates\Template;
 use Zend\Diactoros\Response\HtmlResponse;
+use Psr\Http\Message\ResponseInterface as Response;
 
 /**
  * Plates template engine - http://platesphp.com/
@@ -18,7 +18,7 @@ use Zend\Diactoros\Response\HtmlResponse;
  * @copyright 2018 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class PhpTemplate implements ContainerAwareInterface
+class PlatesPhp implements ContainerAwareInterface, ViewInterface
 {
     use ContainerAwareTrait;
 
@@ -38,27 +38,7 @@ class PhpTemplate implements ContainerAwareInterface
     {
         $this->engine = $engine;
     }
-
-    /**
-     * Register Obullo helpers
-     * 
-     * @return void
-     */
-    public function registerFunctions()
-    {
-        $router = $this->getContainer()
-            ->get('router');
-
-        $this->engine->registerFunction('url', function (string $url, $params = array()) use($router) {
-            $scheme = parse_url($url, PHP_URL_SCHEME);
-            if ($scheme != null) {
-                return $url;
-            }
-            $generator = new Generator($router->getCollection());
-            return $generator->generate($url, $params);
-        });
-    }
-
+    
     /**
      * Render template as html response
      * 

@@ -3,6 +3,7 @@
 namespace Obullo\Mvc\View\Plates;
 
 use Obullo\Mvc\Container\{
+    ContainerAwareTrait,
     ContainerProxyTrait,
     ContainerAwareInterface
 };
@@ -18,6 +19,7 @@ use League\Plates\Template\Template as PlatesTemplate;
  */
 class Template extends PlatesTemplate implements ContainerAwareInterface
 {
+    use ContainerAwareTrait;
     use ContainerProxyTrait;
 
     /**

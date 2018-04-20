@@ -2,42 +2,10 @@
 
 namespace Obullo\Mvc\Container;
 
-use Psr\Container\ContainerInterface;
 use Obullo\Mvc\Exception\DefinedServiceException;
 
-/**
- * Container proxy trait
- */
 trait ContainerProxyTrait
 {
-    /**
-     * @var \Psr\Container\ContainerInterface
-     */
-    protected $container;
-
-    /**
-     * Set a container.
-     *
-     * @param  \Psr\Container\ContainerInterface $container
-     * @return $this
-     */
-    public function setContainer(ContainerInterface $container)
-    {
-        $this->container = $container;
-
-        return $this;
-    }
-
-    /**
-     * Returns to container
-     * 
-     * @return object
-     */
-    public function getContainer()
-    {
-        return $this->container;
-    }
-    
     /**
      * Container proxy:
      * Provides access to container variables from everywhere

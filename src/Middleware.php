@@ -2,29 +2,29 @@
 
 namespace Obullo\Mvc;
 
-use Obullo\Mvc\HttpModule;
+use Obullo\Mvc\Dispatcher;
 
 /**
  * Middleware
  *
- * @copyright 2018 Obullo
+ * @copyright Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
 class Middleware
 {
     protected $count = 0;
-    protected $module;
+    protected $dispatcher;
     protected $stack = array();
     protected $middleware = array();
 
     /**
      * Constructor
      * 
-     * @param Module $module module
+     * @param Dispatcher $dispatcher dispatcher
      */
-    public function __construct(HttpModule $module)
+    public function __construct(Dispatcher $dispatcher)
     {
-        $this->module = $module;
+        $this->dispatcher = $dispatcher;
     }
 
     /**
@@ -37,7 +37,7 @@ class Middleware
         ++$this->count;
         $this->middleware[$this->count] = array(
             'method' => array('__construct'),
-            'class' => $this->module->getName().'\Middleware\\'.$name,
+            'class' => $this->dispatcher->getFirstNamespace().'\Middleware\\'.$name,
             'arguments' => array(),
         );
         return $this;
@@ -50,7 +50,7 @@ class Middleware
      * @param  mixed $arg arguments
      * @return object
      */
-    public function withArgument(string $name, $arg)
+    public function addArgument(string $name, $arg)
     {
         $this->middleware[$this->count]['arguments'][$name] = $arg;
         return $this;
@@ -62,7 +62,7 @@ class Middleware
      * @param string|array $names method
      * @return object
      */
-    public function includeMethods($names)
+    public function addMethod($names)
     {
         unset($this->middleware[$this->count]['method'][0]);
         $this->middleware[$this->count]['method'] = (array)$names;
@@ -75,7 +75,7 @@ class Middleware
      * @param string|array $names method
      * @return object
      */
-    public function excludeMethods($names)
+    public function removeMethod($names)
     {
         foreach ($this->getClassMethods() as $classMethod) {
             if ($classMethod != '__construct' && ! in_array($classMethod, (array)$names))  {
@@ -92,7 +92,7 @@ class Middleware
      */
     protected function getClassMethods()
     {
-        $methods = $this->module->getClassMethods();
+        $methods = $this->dispatcher->getClassMethods();
         if ($methods[0] == '__construct') {
             unset($methods[0]);
             unset($this->middleware[$this->count]['method'][0]);
@@ -108,7 +108,7 @@ class Middleware
     public function getStack() : array
     {
         foreach ($this->middleware as $data) {
-            if ((isset($data['method'][0]) && $data['method'][0] == '__construct') || in_array($this->module->getClassMethod(), $data['method'])) {
+            if ((isset($data['method'][0]) && $data['method'][0] == '__construct') || in_array($this->dispatcher->getClassMethod(), $data['method'])) {
                 $this->stack[] = $data;
             }
         }

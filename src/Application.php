@@ -8,105 +8,220 @@ use Psr\{
     Http\Message\ResponseInterface as Response
 };
 use Obullo\Mvc\Dependency\Resolver;
-use Obullo\Mvc\{
-    Container\ContainerAwareTrait,
-    Container\ContainerAwareInterface
+use Obullo\Mvc\Container\{
+    ContainerAwareTrait,
+    ContainerAwareInterface
+};
+use Obullo\Stack\Builder as Stack;
+use Obullo\Mvc\Middleware\{
+    SendResponse,
+    ErrorMiddlewareInterface
+};
+use Obullo\Router\{
+    RequestContext,
+    RouteCollection,
+    Builder,
+    Router
 };
 use ReflectionClass;
 use RuntimeException;
+use Zend\EventManager\EventManagerInterface;
 
 /**
  * Mvc application
  *
- * @copyright 2018 Obullo
+ * @copyright Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
 class Application implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
 
-    private $stack;
-    private $module;
+    protected $router;
+    protected $events;
+    protected $dispatcher;
 
     /**
      * Constructor
      * 
-     * @param object $module
+     * @param Container $container zend service manager
+     * @param array     $listeners event listeners
      */
-    public function __construct(HttpModule $module)
+    public function __construct(Container $container, array $listeners = [])
     {
-        $this->module = $module;
-        $this->setContainer($module->getContainer());
+        $this->events = $container->get('events');
+        $this->container = $container;
+        $this->createListeners($listeners);
     }
 
     /**
-     * Returns to module object
+     * Boot
+     * 
+     * @param array $listeners event listeners
+     * 
+     * @return void
+     */
+    protected function createListeners(array $listeners = [])
+    {
+        $events    = $this->events;
+        $container = $this->getContainer();
+        foreach ($listeners as $listener) {
+            $object = new $listener;
+            if ($object instanceof ContainerAwareInterface) {
+                $object->setContainer($container);
+            }
+            $object->attach($events);
+        }
+    }
+
+    /**
+     * Start
+     * 
+     * @param  array  $listeners event listeners
+     * @return void
+     */
+    public function start(array $listeners = [])
+    {
+        $container = $this->getContainer();
+        $events    = $this->events;
+
+        $events->trigger('session.start');
+
+        $router = $this->createRouter($events);
+        
+        $this->dispatcher = new Dispatcher($router);
+        $this->dispatcher->setContainer($container);
+        $this->dispatcher->dispatch();
+    }
+
+    /**
+     * Create event manager
+     * 
+     * @param EventManagerInterface $events events
+     * 
+     * @return router object
+     */
+    protected function createRouter(EventManagerInterface $events)
+    {
+        $container = $this->getContainer();
+        $events    = $this->events;
+
+        $context = new RequestContext;
+        $context->fromRequest($container->get('request'));
+
+        $result = $events->trigger('route.types', $this);
+
+        $collection = new RouteCollection(array(
+            'types' => $result->last()
+        ));
+        $collection->setContext($context);
+        $builder = new Builder($collection);
+
+        $routes = $container->get('loader')
+            ->loadConfigFile('routes.yaml');
+        
+        $args = ['builder' => $builder, 'routes' => $routes];
+        $result = $events->trigger('route.builder', $this, $args);
+
+        $router = new Router($collection);
+        if ($route = $router->matchRequest()) {
+            $events->trigger('route.match', $this, $route);
+        }
+        $container->setService('router', $router);
+        return $this->router = $router;
+    }
+
+    /**
+     * Returns to router
      * 
      * @return object
      */
-    public function getModule()
+    public function getRouter() : Router
     {
-        return $this->module;
+        return $this->router;
     }
 
     /**
-     * Returns to env
+     * Returns to app dispatcher
      * 
-     * @return string
+     * @return object
      */
-    public function getEnv() : string
+    public function getDispatcher() : Dispatcher
     {
-        return $this->module->getEnv();
+        return $this->dispatcher;
     }
 
     /**
-     * Process request
-     *
+     * Merge application queue
+     * 
+     * @param array  $queue user queue
+     * 
+     * @return array
+     */
+    public function mergeQueue(array $queue) : array
+    {
+        $appQueue = $this->getQueue();
+        if (! empty($appQueue)) {
+            $queue = array_merge($queue, $appQueue);
+        }
+        return $queue;
+    }
+
+    /**
+     * Start application process
+     * 
+     * @param array $queue stack queue
      * @param Request $request request
      * 
      * @return void
      */
-    public function process(Request $request)
+    public function process(array $queue, Request $request) : Response
     {
-        $handler = $this->getMiddleware();
-        return $handler->process($request);
+        $stack = new Stack;
+        $queue[] = new SendResponse($this);
+        foreach ($queue as $value) {
+            if ($value instanceof ContainerAwareInterface) {
+                $value->setContainer($this->getContainer());
+            }
+            $stack = $stack->withMiddleware($value);
+        }
+        return $stack->process($request);
     }
-    
+
     /**
      * Build route middlewares with dependencies
      * 
      * @return handler
      */
-    public function build() : array
+    public function getQueue() : array
     {
         $container = $this->getContainer();
-        $appMiddlewares = array();
-        $controllerStack = array();
-        $routerStack = $container->get('router')->getStack();
+        $middlewares = array();
         if ($container->has('middleware')) {
-            $controllerStack = $container->get('middleware')
+            $middlewares = $container->get('middleware')
                 ->getStack();
         }
-        $appMiddlewares = array_merge($routerStack, $controllerStack);
-        return $this->resolveMiddlewares($appMiddlewares);
+        $middlewares = array_merge($this->router->getStack(), $middlewares);
+        return $this->resolveMiddlewares($middlewares);
     }
 
     /**
      * Resolve middlewares
      * 
-     * @param array $appMiddlewares middlewares
+     * @param array $middlewares middlewares
      * 
      * @return array
      */
-    protected function resolveMiddlewares(array $appMiddlewares)
+    protected function resolveMiddlewares(array $middlewares)
     {
-        $middlewares = array();
-        foreach ($appMiddlewares as $data) {
+        $resolvedMiddlewares = array();
+        foreach ($middlewares as $data) {
             $class = $data;
             $arguments = array();
             if (is_array($data)) {
                 $class = $data['class'];
                 $arguments = $data['arguments'];
+                $data = $class;
             }
             $reflection = new ReflectionClass($class);
             $resolver = new Resolver($reflection);
@@ -116,9 +231,10 @@ class Application implements ContainerAwareInterface
             if ($reflection->hasMethod('__construct')) {
                 $args = $resolver->resolve('__construct');
             }
-            $middlewares[] = $reflection->newInstanceArgs($args);
+            $object = $reflection->newInstanceArgs($args);
+            $resolvedMiddlewares[] = $object;
         }
-        return $middlewares;
+        return $resolvedMiddlewares;
     }
 
     /**
@@ -130,16 +246,14 @@ class Application implements ContainerAwareInterface
      */
     public function handle(Request $request)
     {
-        $container = $this->getContainer();
-        $container->setService('request', $request);
         $response = null;
-        if ($this->module->getClassIsCallable()) {
-            $class  = $this->module->getClassInstance();
-            $method = $this->module->getClassMethod();
+        if ($this->dispatcher->getClassIsCallable()) {
+            $class  = $this->dispatcher->getClassInstance();
+            $method = $this->dispatcher->getClassMethod();
             $reflection = new ReflectionClass($class);
             $resolver = new Resolver($reflection);
-            $resolver->setContainer($container);
-            $resolver->setArguments($this->module->getRouteArguments());
+            $resolver->setContainer($this->getContainer());
+            $resolver->setArguments($this->router->getMatchedRoute()->getArguments());
             $injectedParameters = $resolver->resolve($method);
             $response = call_user_func_array(
                 array(
@@ -157,7 +271,7 @@ class Application implements ContainerAwareInterface
      * 
      * @return void
      */
-    public function emit(Response $response)
+    public function sendResponse(Response $response)
     {
         if (headers_sent()) {
             throw new RuntimeException('Unable to emit response; headers already sent');
@@ -165,8 +279,11 @@ class Application implements ContainerAwareInterface
         if (ob_get_level() > 0 && ob_get_length() > 0) {
             throw new RuntimeException('Output has been emitted previously; cannot emit response');
         }
+        $this->events->trigger('before.headers', $this, $response);
         $this->emitHeaders($response);
+        $this->events->trigger('before.emit', $this, $response);
         $this->emitBody($response);
+        $this->events->trigger('after.emit', $this, $response);
     }
 
     /**
