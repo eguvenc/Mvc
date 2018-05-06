@@ -41,11 +41,7 @@ class ErrorHandler implements ContainerAwareInterface
 	 */
 	public function handle(Throwable $exception)
 	{
-		$config = $this->getContainer()
-			->get('loader')
-			->loadConfigFile('errors.yaml');
-
-		$response = $this->handleError($config, $exception);
+		$response = $this->handleError($exception);
 		
 		$this->emitErrorResponse($response);
 	}
@@ -57,26 +53,23 @@ class ErrorHandler implements ContainerAwareInterface
      *
      * @return object response
      */
-    protected function handleError(array $config, Throwable $exception)
+    protected function handleError(Throwable $exception)
     {        
         $this->getContainer()
         	->get('events')
             ->trigger('error.handler',null,$exception);
 
         return $this->renderErrorResponse(
-            $config['app_error']['title'],
-            $config['app_error']['message'],
+            'An error was encountered',
             500,
             array(),
             $exception
-        );
+        );           
     }
 
     /**
      * Emit response
-     * 
-     * @param  ResponseInterface $response psr7 response
-     * 
+     *     
      * @return void
      */
     public function emitErrorResponse(ResponseInterface $response)
@@ -124,18 +117,17 @@ class ErrorHandler implements ContainerAwareInterface
     /**
      * Render error response
      * 
-     * @param  string $title   title
      * @param  string $message body
      * @param  int    $status  http status code
      * @param  array  $headers http headers
      * 
      * @return object
      */
-    public function renderErrorResponse(string $title, $message = null, $status, $headers = array(), Throwable $exception = null) : ResponseInterface
+    public function renderErrorResponse($message = null, $status, $headers = array(), Throwable $exception = null) : ResponseInterface
     {
         $this->strategy->setStatusCode($status);
 
-        $message  = $this->strategy->renderErrorMessage($title, $message, $exception);
+        $message  = $this->strategy->renderErrorMessage($message, $exception);
         $response = $this->strategy->getResponseClass();
 
         $errorResponse = new $response($message, $status, $headers);

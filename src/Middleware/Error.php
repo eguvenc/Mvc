@@ -51,25 +51,16 @@ class Error implements MiddlewareInterface,ContainerAwareInterface
     {
         $container = $this->getContainer();
 
-        $config = $container
-            ->get('loader')
-            ->loadConfigFile('errors.yaml');
-
         if ($this->err != '') {
-            $status = $this->err;
-            if (isset($config[$this->err.'_error'])) {
-                $error = $config[$this->err.'_error'];
-            } else {
-                $status = 500;
-                $error = [
-                    'title' => $config['app_error']['title'],
-                    'message' => $this->err
-                ];
+            $status = 500;
+            if (is_numeric($this->err)) {
+                $status = $this->err;
             }
-            $error['message'] = empty($this->msg) ? $error['message'] : $this->msg;
+            $message = $this->err;
+            $message = empty($this->msg) ? $message : $this->msg;
 
             $response = $container->get('error')
-                ->renderErrorResponse($error['title'], $error['message'], $status, $this->headers);
+                ->renderErrorResponse($message, $status, $this->headers);
 
             $result = $this->getContainer()
                 ->get('events')

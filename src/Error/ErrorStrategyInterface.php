@@ -29,13 +29,12 @@ interface ErrorStrategyInterface
     /**
      * Render error message
      * 
-     * @param  string    $title     title
      * @param  string    $message   message
      * @param  Throwable $exception exception
      * 
      * @return string
      */
-    public function renderErrorMessage(string $title, string $message, Throwable $exception = null);
+    public function renderErrorMessage(string $message, Throwable $exception = null);
 
     /**
      * Returns to response class

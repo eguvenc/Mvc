@@ -3,15 +3,20 @@
 namespace Obullo\Mvc\Error;
 
 use Throwable;
-
+use Zend\I18n\Translator\{
+    TranslatorAwareInterface,
+    TranslatorAwareTrait
+};
 /**
  * Json Strategy
  *
  * @copyright Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class JsonStrategy implements ErrorStrategyInterface
+class JsonStrategy implements ErrorStrategyInterface, TranslatorAwareInterface
 {
+    use TranslatorAwareTrait;
+
     protected $status = 500;
     protected $enableExceptions = false;
 
@@ -58,18 +63,21 @@ class JsonStrategy implements ErrorStrategyInterface
 
     /**
      * Render error message
-     * 
-     * @param  string    $title     title
+     *
      * @param  string    $message   message
      * @param  Throwable $exception exception
      * 
      * @return array
      */
-    public function renderErrorMessage(string $title, string $message, Throwable $exception = null) : array
+    public function renderErrorMessage(string $message, Throwable $exception = null) : array
     {
+        $translator = $this->getTranslator();
+        $translator->addTranslationFilePattern('PhpArray', ROOT, '/var/messages/%s/messages.php');
+        
         $data = array();
-        $data['error']['title'] = $title;
-        $data['error']['message'] = is_null($exception) ? $message : $exception->getMessage();
+        $message = is_null($exception) ? $message : $exception->getMessage();
+
+        $data['error']['message'] = $translator->translate($message);
 
         if (is_object($exception) && $this->isExceptionsEnabled()) {
             $data['exception'] = [

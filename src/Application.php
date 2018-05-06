@@ -87,7 +87,7 @@ class Application implements ContainerAwareInterface
 
         $events->trigger('session.start');
 
-        $router = $this->createRouter($events);
+        $router = $this->createRouter();
         
         $this->dispatcher = new Dispatcher($router);
         $this->dispatcher->setContainer($container);
@@ -101,13 +101,15 @@ class Application implements ContainerAwareInterface
      * 
      * @return router object
      */
-    protected function createRouter(EventManagerInterface $events)
+    protected function createRouter()
     {
         $container = $this->getContainer();
         $events    = $this->events;
 
+        $request = $container->get('request');
+
         $context = new RequestContext;
-        $context->fromRequest($container->get('request'));
+        $context->fromRequest($request);
 
         $result = $events->trigger('route.types', $this);
 

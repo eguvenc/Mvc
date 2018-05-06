@@ -4,15 +4,20 @@ namespace Obullo\Mvc\Error;
 
 use Throwable;
 use Obullo\Mvc\View\ViewInterface;
-
+use Zend\I18n\Translator\{
+    TranslatorAwareInterface,
+    TranslatorAwareTrait
+};
 /**
  * Html Strategy
  *
  * @copyright Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class HtmlStrategy implements ErrorStrategyInterface
+class HtmlStrategy implements ErrorStrategyInterface, TranslatorAwareInterface
 {
+    use TranslatorAwareTrait;
+
     protected $view;
     protected $status;
 
@@ -49,22 +54,24 @@ class HtmlStrategy implements ErrorStrategyInterface
     /**
      * Render error message
      * 
-     * @param  string    $title     title
      * @param  string    $message   message
      * @param  Throwable $exception exception
      * 
      * @return string
      */
-    public function renderErrorMessage(string $title, string $message, Throwable $exception = null) : string
+    public function renderErrorMessage(string $message, Throwable $exception = null) : string
     {
+        $translator = $this->getTranslator();
+        $translator->addTranslationFilePattern('PhpArray', ROOT, '/var/messages/%s/messages.php');
+    
         $data = array();
-        $data['title'] = $title;
         $data['message'] = $message;
+        $data['translator'] = $translator;
         $data['e'] = $exception;
         if ($this->getStatusCode() == '404') {
-            return $this->view->renderView('templates::error/404', $data);
+            return $this->view->render('error/404', $data);
         }
-        return $this->view->renderView('templates::error/error', $data);
+        return $this->view->render('error/error', $data);
     }
 
     /**

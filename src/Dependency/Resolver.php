@@ -7,6 +7,7 @@ use Obullo\Mvc\Container\{
     ContainerAwareInterface
 };
 use ReflectionClass;
+use Obullo\Mvc\Http\RequestWrapperInterface;
 use Psr\Container\ContainerInterface as Container;
 use Obullo\Mvc\Exception\UndefinedServiceException;
 
@@ -62,6 +63,9 @@ class Resolver implements ContainerAwareInterface
                     $interfaceClass = $interface->getName();
                     if ($classInstance instanceof $interfaceClass) {
                         $injectedParameters[] = $classInstance;
+                    }
+                    if ($classInstance instanceof RequestWrapperInterface) {
+                        $injectedParameters[] = $classInstance->getRequest();
                     }
                 } else {
                     throw new UndefinedServiceException(

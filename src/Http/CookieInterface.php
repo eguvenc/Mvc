@@ -5,7 +5,7 @@ namespace Obullo\Mvc\Http;
 /**
  * Cookie Interface
  *
- * @copyright 2009-2016 Obullo
+ * @copyright Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
 interface CookieInterface
