@@ -9,6 +9,10 @@ ini_set('session.use_cookies', 0);
 // Enable Composer autoloader
 $autoloader = require ROOT . '/vendor/autoload.php';
 
+// Remove test caches
+
+unlink(ROOT.'/tests/var/cache/config/config:dev:framework');
+
 define('APP', 'App');
 putenv("APP_ENV=dev");
 

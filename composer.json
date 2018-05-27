@@ -45,6 +45,7 @@
         "zendframework/zend-escaper": "^2.6",
         "monolog/monolog": "^1.23",
         "doctrine/dbal": "2.5.13",
-        "phpunit/phpunit": "^4.8"
+        "phpunit/phpunit": "^4.8",
+        "symfony/dotenv": "^4.0"
     }
 }
