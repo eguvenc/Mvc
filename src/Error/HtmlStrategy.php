@@ -69,9 +69,9 @@ class HtmlStrategy implements ErrorStrategyInterface, TranslatorAwareInterface
         $data['translator'] = $translator;
         $data['e'] = $exception;
         if ($this->getStatusCode() == '404') {
-            return $this->view->render('templates::error/404', $data);
+            return $this->view->render('templates::404', $data);
         }
-        return $this->view->render('templates::error/error', $data);
+        return $this->view->render('templates::error', $data);
     }
 
     /**

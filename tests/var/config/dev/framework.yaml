@@ -3,6 +3,7 @@
 #    
 
 framework:
+    
     cookie:
         domain:
         path: /
@@ -12,3 +13,6 @@ framework:
 
     session:
         name: sessions
+        
+    translator:
+        default_locale: 'en'
