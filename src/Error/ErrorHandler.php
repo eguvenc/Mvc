@@ -18,33 +18,33 @@ use Obullo\Mvc\Container\{
  */
 class ErrorHandler implements ContainerAwareInterface
 {
-	use ContainerAwareTrait;
+    use ContainerAwareTrait;
 
-	protected $strategy;
+    protected $strategy;
 
-	/**
-	 * Set response strategy
-	 * 
-	 * @param ErrorStrategyInterface $strategy strategy
-	 */
-	public function setResponseStrategy(ErrorStrategyInterface $strategy)
-	{
-		$this->strategy = $strategy;
-	}
+    /**
+     * Set response strategy
+     * 
+     * @param ErrorStrategyInterface $strategy strategy
+     */
+    public function setResponseStrategy(ErrorStrategyInterface $strategy)
+    {
+        $this->strategy = $strategy;
+    }
 
-	/**
-	 * Handle
-	 * 
-	 * @param  Throwable $exception error
-	 * 
-	 * @return object
-	 */
-	public function handle(Throwable $exception)
-	{
-		$response = $this->handleError($exception);
-		
-		$this->emitErrorResponse($response);
-	}
+    /**
+     * Handle
+     * 
+     * @param  Throwable $exception error
+     * 
+     * @return object
+     */
+    public function handle(Throwable $exception)
+    {
+        $response = $this->handleError($exception);
+        
+        $this->emitErrorResponse($response);
+    }
 
     /**
      * Handle application errors
@@ -56,7 +56,7 @@ class ErrorHandler implements ContainerAwareInterface
     protected function handleError(Throwable $exception)
     {        
         $this->getContainer()
-        	->get('events')
+            ->get('events')
             ->trigger('error.handler',null,$exception);
 
         return $this->renderErrorResponse(

@@ -19,9 +19,10 @@ class LoaderFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $cacheHandler = new FileHandler('/var/cache/config/');
+        $cacheHandler = new FileHandler('/tests/var/cache/config/');
 
         // To change default cache handler uncomment doc blocks and set your own.
+        
         // use Obullo\Mvc\Config\Cache\RedisHandler;
         // $cacheHandler = new RedisHandler($container->get('redis'));
 
@@ -33,7 +34,7 @@ class LoaderFactory implements FactoryInterface
 
         \Zend\Config\Factory::fromFiles(
             [
-                ROOT.'/config/'.$env.'/framework.yaml',
+                ROOT.'/tests/var/config/'.$env.'/framework.yaml',
             ]
         );
 
