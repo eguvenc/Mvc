@@ -22,7 +22,7 @@ class TranslatorFactory implements FactoryInterface
         $container->setAlias('MvcTranslator', $requestedName); // Zend framework support
 
         $config = $container->get('loader')
-            ->loadEnvConfigFile('framework.yaml', true)
+            ->load('/tests/var/config/%s/framework.yaml', true)
             ->framework
             ->translator;
             
