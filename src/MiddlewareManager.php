@@ -2,15 +2,15 @@
 
 namespace Obullo\Mvc;
 
-use Obullo\Mvc\Dispatcher;
+use Obullo\Mvc\RouteDispatcher;
 
 /**
- * Middleware
+ * Middleware manager
  *
  * @copyright Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class Middleware
+class MiddlewareManager
 {
     protected $count = 0;
     protected $dispatcher;
@@ -20,9 +20,9 @@ class Middleware
     /**
      * Constructor
      * 
-     * @param Dispatcher $dispatcher dispatcher
+     * @param RouteDispatcher $dispatcher dispatcher
      */
-    public function __construct(Dispatcher $dispatcher)
+    public function __construct(RouteDispatcher $dispatcher)
     {
         $this->dispatcher = $dispatcher;
     }
@@ -92,7 +92,8 @@ class Middleware
      */
     protected function getClassMethods()
     {
-        $methods = $this->dispatcher->getClassMethods();
+        $classInstance = $this->dispatcher->getClassInstance();
+        $methods = get_class_methods($classInstance);
         if ($methods[0] == '__construct') {
             unset($methods[0]);
             unset($this->middleware[$this->count]['method'][0]);

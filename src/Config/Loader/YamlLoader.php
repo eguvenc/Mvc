@@ -28,7 +28,7 @@ class YamlLoader implements LoaderInterface
     }
 
     /**
-     * Load files
+     * Load configuration files
      * 
      * @param  string  $filename filename
      * @param  boolean $object   returns to zend config object
@@ -37,9 +37,9 @@ class YamlLoader implements LoaderInterface
      */
     public function load(string $filename, $object = false)
     {
-        $path = str_replace('%s', getenv('APP_ENV'), $filename);
+        $file = str_replace('%s', getenv('APP_ENV'), $filename);
 
-        return Factory::fromFile(ROOT.'/'.ltrim($path, '/'), $object);
+        return Factory::fromFile(ROOT.'/'.ltrim($file, '/'), $object);
     }
 
     /**
@@ -52,7 +52,7 @@ class YamlLoader implements LoaderInterface
      */
     public function loadConfigFile(string $filename, $object = false)
     {
-        return Factory::fromFile(ROOT.'/config/'.ltrim($filename, '/'), $object);
+        return $this->load('/config/'.$filename, $object);
     }
 
     /**
@@ -65,6 +65,6 @@ class YamlLoader implements LoaderInterface
      */
     public function loadEnvConfigFile(string $filename, $object = false)
     {
-        return Factory::fromFile(ROOT.'/config/'.getenv('APP_ENV').'/'.ltrim($filename, '/'), $object);
+        return $this->load('/config/%s/'.$filename, $object);
     }
 }

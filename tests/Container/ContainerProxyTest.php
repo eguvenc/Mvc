@@ -1,31 +1,27 @@
 <?php
 
 use Obullo\Mvc\Exception;
-use League\Container\{
-    Container,
-    ReflectionContainer
-};
+use Zend\ServiceManager\ServiceManager;
 use Obullo\Mvc\Config\Cache\FileHandler;
+use Obullo\Mvc\Container\ContainerAwareTrait;
 use Obullo\Mvc\Container\ContainerProxyTrait;
 
 class ContainerProxyTest extends PHPUnit_Framework_TestCase
 {
+	use ContainerAwareTrait;
 	use ContainerProxyTrait;
 
 	public function setUp()
 	{
-		$this->container = new Container;
-		$this->container->delegate(
-		    new ReflectionContainer
-		);
-		$this->container->share('cache', new FileHandler('/tests/var/cache/config/'));
+		$this->container = new ServiceManager;
+		$this->container->setService('cache', new FileHandler('/tests/var/cache/config/'));
 	}
 
 	public function testContainer()
 	{
 		$this->setContainer($this->container);
 		$container = $this->getContainer();
-		$this->assertInstanceOf('League\Container\Container', $container);
+		$this->assertInstanceOf('Zend\ServiceManager\ServiceManager', $container);
 	}
 
 	public function testGetterMethod()

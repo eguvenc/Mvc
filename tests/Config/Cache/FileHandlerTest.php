@@ -6,7 +6,7 @@ class FileHandlerTest extends PHPUnit_Framework_TestCase
 {
     public function setup()
     {
-        $this->filename = ROOT.'/tests/var/config/app.yaml';
+        $this->filename = ROOT.'/tests/var/config/framework.yaml';
         $this->cache = new FileHandler('/tests/var/cache/config');
     }
 
@@ -32,7 +32,7 @@ class FileHandlerTest extends PHPUnit_Framework_TestCase
         $this->cache->write(
             $this->filename,
             [
-                'app' => [
+                'framework' => [
                     'session' => [
                         'name' => 'sessions'
                     ]
@@ -40,7 +40,7 @@ class FileHandlerTest extends PHPUnit_Framework_TestCase
             ]
         );
         $data = $this->cache->read($this->filename);
-        $this->assertEquals($data['app']['session']['name'], 'sessions');
+        $this->assertEquals($data['framework']['session']['name'], 'sessions');
     }
 
     public function testDelete()

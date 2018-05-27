@@ -19,6 +19,7 @@ class JsonStrategy implements ErrorStrategyInterface, TranslatorAwareInterface
 
     protected $status = 500;
     protected $enableExceptions = false;
+    protected $enableExceptionTrace = false;
 
     /**
      * Enable exceptions
@@ -39,6 +40,27 @@ class JsonStrategy implements ErrorStrategyInterface, TranslatorAwareInterface
     public function isExceptionsEnabled() : bool
     {
         return $this->enableExceptions;
+    }
+
+    /**
+     * Enable exception trace
+     * 
+     * @param  bool|boolean $bool bool
+     * @return void
+     */
+    public function enableExceptionTrace(bool $bool = true)
+    {
+        $this->enableExceptionTrace = $bool;
+    }
+
+    /**
+     * Check exception trace
+     * 
+     * @return boolean
+     */
+    public function isExceptionTraceEnabled() : bool
+    {
+        return $this->enableExceptionTrace;
     }
 
     /**
@@ -85,9 +107,11 @@ class JsonStrategy implements ErrorStrategyInterface, TranslatorAwareInterface
                 'code' => $exception->getCode(),
                 'message' => $exception->getMessage(),
                 'file' => $exception->getFile(),
-                'line' => $exception->getLine(),
-                'trace' => explode("\n", $exception->getTraceAsString()),
+                'line' => $exception->getLine()
             ];
+            if ($this->isExceptionTraceEnabled()) {
+                $data['exception']['trace'] = explode("\n", $exception->getTraceAsString());
+            }
         }
         return $data;
     }

@@ -1,11 +1,8 @@
 <?php
 
-use League\Container\{
-    Container,
-    ReflectionContainer
-};
 use Obullo\Mvc\Dependency\Resolver;
 use Obullo\Mvc\Config\Cache\FileHandler;
+use Zend\ServiceManager\ServiceManager;
 use Zend\Config\Reader\ReaderInterface as Reader;
 
 class ResolverTest extends PHPUnit_Framework_TestCase
@@ -18,11 +15,8 @@ class ResolverTest extends PHPUnit_Framework_TestCase
 
 			}
 		};
-		$container = new Container;
-		$container->delegate(
-		    new ReflectionContainer
-		);
-		$container->share('reader', new Obullo\Mvc\Config\Reader\YamlReader(new FileHandler('/tests/var/cache/config/')));
+		$container = new ServiceManager;
+		$container->setService('reader', new Obullo\Mvc\Config\Reader\YamlReader(new FileHandler('/tests/var/cache/config/')));
 		$reflection = new ReflectionClass($class);
 		$this->resolver = new Resolver($reflection);
 		$this->resolver->setContainer($container);

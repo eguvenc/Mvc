@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Mvc\Logger\SQLLogger;
+namespace Obullo\Mvc\Logger;
 
 use Psr\Log\LoggerInterface as Logger;
 use Doctrine\DBAL\Logging\SQLLogger as SQLLoggerInterface;
@@ -11,7 +11,7 @@ use Doctrine\DBAL\Logging\SQLLogger as SQLLoggerInterface;
  * @copyright 2018 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class DoctrineDBAL implements SQLLoggerInterface
+class SQLLogger implements SQLLoggerInterface
 {
     /**
      * Sql

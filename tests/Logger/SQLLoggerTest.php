@@ -1,45 +1,39 @@
 <?php
 
-use Psr\Log\LoggerTrait;
-use Psr\Log\LoggerInterface;
-use Obullo\Mvc\Logger\SQLLogger\DoctrineDBAL;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Obullo\Mvc\Logger\SQLLogger;
 
-class Logger implements LoggerInterface
-{   
-    use LoggerTrait;
-    protected $messages = array();
-    public function log($level, $message, array $context = array())
-    {
-        $this->messages[$level]['message'] = $message;
-        $this->messages[$level]['context'] = $context;
-    }
-    public function getMessages()
-    {
-        return $this->messages;
-    }
-}
 class SQLLoggerTest extends PHPUnit_Framework_TestCase
 {
 	public function setUp()
 	{
-        $this->log = new Logger;
-        $this->logger = new DoctrineDBAL($this->log);
+        if (file_exists(ROOT .'/tests/var/log/debug.log')) {
+            unlink(ROOT .'/tests/var/log/debug.log');
+        }
+        $logger = new Logger('tests');
+        $logger->pushHandler(new StreamHandler(ROOT .'/tests/var/log/debug.log', Logger::DEBUG, true, 0666));
+        
+        $this->logger = $logger;
+        $this->sqlLogger = new SQLLogger($this->logger);
 	}
 
     public function testStartQuery()
     {
-        $this->logger->startQuery("SELECT * FROM users WHERE id = ? AND name = ?", array(5,'test'));
-        $this->logger->stopQuery();
-        $debug = $this->log->getMessages()['debug'];
+        // SQL-1
+        $this->sqlLogger->startQuery("SELECT * FROM users WHERE id = ? AND name = ?", array(5,'test'));
+        $this->sqlLogger->stopQuery();
 
-        $this->assertEquals('SQL-1 ( Query ):', $debug['message']);
-        $this->assertEquals("SELECT * FROM users WHERE id = 5 AND name = 'test'", $debug['context']['output']);
+        // SQL-2
+        $this->sqlLogger->startQuery("SELECT * FROM users WHERE id = :id AND name = :name", array('name' => 'test', 'id' => 6));
+        $this->sqlLogger->stopQuery();
 
-        $this->logger->startQuery("SELECT * FROM users WHERE id = :id AND name = :name", array('name' => 'test', 'id' => 5));
-        $this->logger->stopQuery();
-        $debug = $this->log->getMessages()['debug'];
+        $debugLog = file_get_contents(ROOT .'/tests/var/log/debug.log');
 
-        $this->assertEquals('SQL-2 ( Query ):', $debug['message']);
-        $this->assertEquals("SELECT * FROM users WHERE id = 5 AND name = 'test'", $debug['context']['output']);
+        $sql1 = '] tests.DEBUG: SQL-1 ( Query ): {"time":"0.0000","output":"SELECT * FROM users WHERE id = 5 AND name = \'test\'"} []';
+        $sql2 = '] tests.DEBUG: SQL-2 ( Query ): {"time":"0.0000","output":"SELECT * FROM users WHERE id = 6 AND name = \'test\'"} []';
+
+        $this->assertContains($sql1, $debugLog);
+        $this->assertContains($sql2, $debugLog);
     }
 }

@@ -13,10 +13,7 @@ use Obullo\Mvc\Container\{
     ContainerAwareInterface
 };
 use Obullo\Stack\Builder as Stack;
-use Obullo\Mvc\Middleware\{
-    SendResponse,
-    ErrorMiddlewareInterface
-};
+use Obullo\Mvc\Middleware\SendResponse;
 use Obullo\Router\{
     RequestContext,
     RouteCollection,
@@ -25,7 +22,6 @@ use Obullo\Router\{
 };
 use ReflectionClass;
 use RuntimeException;
-use Zend\EventManager\EventManagerInterface;
 
 /**
  * Mvc application
@@ -51,65 +47,56 @@ class Application implements ContainerAwareInterface
     {
         $this->events = $container->get('events');
         $this->container = $container;
-        $this->createListeners($listeners);
-    }
 
-    /**
-     * Boot
-     * 
-     * @param array $listeners event listeners
-     * 
-     * @return void
-     */
-    protected function createListeners(array $listeners = [])
-    {
-        $events    = $this->events;
-        $container = $this->getContainer();
+        $container = $this->getContainer(); // Create listeners
         foreach ($listeners as $listener) {
             $object = new $listener;
             if ($object instanceof ContainerAwareInterface) {
                 $object->setContainer($container);
             }
-            $object->attach($events);
+            $object->attach($this->events);
         }
     }
 
     /**
      * Start
      * 
-     * @param  array  $listeners event listeners
+     * @param RequestContext $context optional
+     * 
      * @return void
      */
-    public function start(array $listeners = [])
+    public function start(RequestContext $context = null, RouteDispatcher $dispatcher = null)
     {
         $container = $this->getContainer();
         $events    = $this->events;
-
+        
         $events->trigger('session.start');
 
-        $router = $this->createRouter();
-        
-        $this->dispatcher = new Dispatcher($router);
+        if ($context != null) {
+            $this->dispatcher = $dispatcher;
+            $this->router = $dispatcher->getRouter();
+            return;
+        }
+        $context = new RequestContext;
+        $context->fromRequest($container->get('request'));
+
+        $router = $this->createRouter($context);
+        $this->dispatcher = new RouteDispatcher($router);
         $this->dispatcher->setContainer($container);
         $this->dispatcher->dispatch();
     }
 
     /**
-     * Create event manager
+     * Create router
      * 
-     * @param EventManagerInterface $events events
+     * @param RequestContext $context
      * 
      * @return router object
      */
-    protected function createRouter()
+    protected function createRouter(RequestContext $context)
     {
         $container = $this->getContainer();
         $events    = $this->events;
-
-        $request = $container->get('request');
-
-        $context = new RequestContext;
-        $context->fromRequest($request);
 
         $result = $events->trigger('route.types', $this);
 
@@ -148,7 +135,7 @@ class Application implements ContainerAwareInterface
      * 
      * @return object
      */
-    public function getDispatcher() : Dispatcher
+    public function getRouteDispatcher() : RouteDispatcher
     {
         return $this->dispatcher;
     }

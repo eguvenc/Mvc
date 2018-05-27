@@ -4,16 +4,17 @@ namespace Obullo\Mvc;
 
 use ReflectionClass;
 use Obullo\Router\Router;
+use Obullo\Mvc\MiddlewareManager;
 use Obullo\Mvc\Dependency\Resolver;
 use Obullo\Mvc\Container\ContainerAwareTrait;
 
 /**
- * Application dispatcher
+ * Route dispatcher
  *
  * @copyright Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class Dispatcher
+class RouteDispatcher
 {
     use ContainerAwareTrait;
 
@@ -21,7 +22,6 @@ class Dispatcher
     protected $class;
     protected $router;
     protected $method;
-    protected $methods = array();
     protected $classInstance;
     protected $isCallable = false;
 
@@ -70,10 +70,9 @@ class Dispatcher
         $this->name = (string)$explode[0];
         $reflection = new ReflectionClass($this->class);
         $this->classInstance = $reflection->newInstanceWithoutConstructor();
-        $this->methods = get_class_methods($this->classInstance);
         
         $container->setFactory('middleware', function(){
-            return new \Obullo\Mvc\Middleware($this);
+            return new MiddlewareManager($this);
         });
         $this->classInstance->setContainer($container);
         if ($reflection->hasMethod('__construct')) {
@@ -122,16 +121,6 @@ class Dispatcher
     }
 
     /**
-     * Returns to resolved class methods
-     * 
-     * @return string
-     */
-    public function getClassMethods() : array
-    {
-        return $this->methods;
-    }
-
-    /**
      * Returns to resolved controller instance
      * 
      * @return object
@@ -139,5 +128,15 @@ class Dispatcher
     public function getClassInstance()
     {
         return $this->classInstance;
+    }
+
+    /**
+     * Returns to router
+     * 
+     * @return object
+     */
+    public function getRouter() : Router
+    {
+        return $this->router;
     }
 }

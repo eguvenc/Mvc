@@ -7,14 +7,14 @@ class YamlReaderTest extends PHPUnit_Framework_TestCase
 {
     public function setup()
     {
-        $this->filename = ROOT.'/tests/var/config/app.yaml';
+        $this->filename = ROOT.'/tests/var/config/framework.yaml';
         $this->reader = new YamlReader(new FileHandler('/tests/var/cache/config'));
     }
 
     public function testFromFile()
     {
     	$data = $this->reader->fromFile($this->filename);
-        $this->assertEquals('sessions', $data['app']['session']['name']);
+        $this->assertEquals('sessions', $data['framework']['session']['name']);
     }
 
     public function testFromString()
@@ -23,7 +23,7 @@ class YamlReaderTest extends PHPUnit_Framework_TestCase
 # application
 #    
 
-app:
+framework:
     cookie:
         domain:
         path: /
@@ -33,7 +33,7 @@ app:
     session:
         name: sessions';
         $data = $this->reader->fromString($yaml);
-        $this->assertEquals('sessions', $data['app']['session']['name']);
+        $this->assertEquals('sessions', $data['framework']['session']['name']);
     }
 
     public function testEnvParseRecursive()

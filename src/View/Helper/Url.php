@@ -1,15 +1,12 @@
 <?php
 
-namespace Obullo\Mvc\View\Helpers;
+namespace Obullo\Mvc\View\Helper;
 
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 
 /**
- * Url
- *
- * @copyright Obullo
- * @license   http://opensource.org/licenses/MIT MIT license
+ * Url helper
  */
 class Url
 {

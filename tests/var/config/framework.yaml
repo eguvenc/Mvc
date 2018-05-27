@@ -2,7 +2,7 @@
 # application
 #    
 
-app:
+framework:
     cookie:
         domain:
         path: /

@@ -52,18 +52,4 @@ class Controller extends AbstractController
 		}
 		return new RedirectResponse($uriOrRouteName);
 	}
-
-	/**
-	 * Encode data using JsonResponse
-	 * 
-	 * @param  array|object $data array or object
-	 * @param  integer $status  status
-	 * @param  array   $headers headers
-	 * 
-	 * @return object
-	 */
-	public function encode($data, $status = 200, $headers = []) : ResponseInterface
-	{
-        return new JsonResponse($data, $status, $headers);
-	}
 }

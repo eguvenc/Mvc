@@ -23,7 +23,7 @@ abstract class AbstractController implements ContainerAwareInterface
 	/**
 	 * Render
 	 * 
-	 * @param  mixed  $nameOrModal name or zend view model
+	 * @param  mixed  $nameOrModal name or view model
 	 * @param  mixed  $data        optional array data
 	 * @param  integer $status     http status code
 	 * @param  array   $headers    http response headers
@@ -33,13 +33,13 @@ abstract class AbstractController implements ContainerAwareInterface
 	abstract public function render($nameOrModal, $data = null, $status = 200, $headers = []) : ResponseInterface;
 
 	/**
-	 * Encode data using JsonResponse
+	 * Redirect
 	 * 
-	 * @param  array|object $data array or object
-	 * @param  integer $status  status
+	 * @param  string  $uri     uri
+	 * @param  integer $status  http status code
 	 * @param  array   $headers headers
 	 * 
 	 * @return object
 	 */
-	abstract public function encode($data, $status = 200, $headers = []) : ResponseInterface;
+	abstract public function redirect($uriOrRouteName = null, $params = []) : ResponseInterface;
 }

@@ -2,10 +2,7 @@
 
 use Obullo\Mvc\Exception;
 
-use League\Container\{
-    Container,
-    ReflectionContainer
-};
+use Zend\ServiceManager\ServiceManager;
 use Obullo\Mvc\Container\ContainerAwareTrait;
 use Obullo\Mvc\Container\ContainerAwareInterface;
 
@@ -15,16 +12,13 @@ class ContainerAwareTest extends PHPUnit_Framework_TestCase implements Container
 
 	public function setUp()
 	{
-		$this->container = new Container;
-		$this->container->delegate(
-		    new ReflectionContainer
-		);
+		$this->container = new ServiceManager;
 	}
 
 	public function testContainer()
 	{
 		$this->setContainer($this->container);
 		$container = $this->getContainer();
-		$this->assertInstanceOf('League\Container\Container', $container);
+		$this->assertInstanceOf('Zend\ServiceManager\ServiceManager', $container);
 	}
 }

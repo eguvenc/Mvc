@@ -1,10 +1,6 @@
 <?php
 
-use League\Container\{
-    Container,
-    ReflectionContainer
-};
-use Obullo\Mvc\HttpModule;
+use Obullo\Mvc\RouteDispatcher;
 use Obullo\Mvc\Config\Loader\YamlLoader;
 use Obullo\Mvc\Config\Cache\FileHandler;
 use Obullo\Router\{
@@ -18,8 +14,9 @@ use Obullo\Router\Types\{
     IntType,
     TranslationType
 };
+use Zend\ServiceManager\ServiceManager;
 
-class HttpModuleTest extends PHPUnit_Framework_TestCase
+class RouteDispatcherTest extends PHPUnit_Framework_TestCase
 {
 	public function setUp()
 	{
@@ -47,15 +44,39 @@ class HttpModuleTest extends PHPUnit_Framework_TestCase
         $router = new Router($collection);
         $router->match('/','example.com');
 
-		$container = new Container;
-		$this->module = new HttpModule($router);
-		$this->module->setContainer($container);
-		$this->module->build();
+		$container = new ServiceManager;
+		$this->dispatcher = new RouteDispatcher($router);
+		$this->dispatcher->setContainer($container);
+		$this->dispatcher->dispatch();
 	}
 
-	public function testGetName()
+	public function testGetFirstNamespace()
 	{
-		$this->assertEquals('Tests', $this->module->getName());
+		$this->assertEquals('Tests', $this->dispatcher->getFirstNamespace());
 	}
 
+    public function testGetClassIsCallable()
+    {
+        $this->assertTrue($this->dispatcher->getClassIsCallable());
+    }
+
+    public function testGetClassName()
+    {
+        $this->assertEquals('Tests\App\Controller\DefaultController', $this->dispatcher->getClassName());
+    }
+
+    public function testGetClassMethod()
+    {
+        $this->assertEquals('index', $this->dispatcher->getClassMethod());
+    }
+
+    public function testGetClassInstance()
+    {
+        $this->assertInstanceOf('Tests\App\Controller\DefaultController', $this->dispatcher->getClassInstance());
+    }
+
+    public function testGetRouter()
+    {
+        $this->assertInstanceOf('Obullo\Router\Router', $this->dispatcher->getRouter());
+    }
 }

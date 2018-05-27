@@ -10,22 +10,36 @@ class YamlLoaderTest extends PHPUnit_Framework_TestCase
 {
     public function setup()
     {
-        $this->filename = ROOT.'/tests/var/config/app.yaml';
+        $this->filename = ROOT.'/tests/var/config/framework.yaml';
         $fileHandler = new FileHandler('/tests/var/cache/config/');
         $this->loader = new YamlLoader($fileHandler);
     }
 
     public function testLoad()
     {
-    	$data = $this->loader->load('/tests/var/config/app.yaml');
+    	$data = $this->loader->load('/tests/var/config/framework.yaml')['framework'];
 
-    	$this->assertArrayHasKey('cookie', $data['app']);
-    	$this->assertArrayHasKey('domain', $data['app']['cookie']);
-    	$this->assertArrayHasKey('path', $data['app']['cookie']);
-    	$this->assertArrayHasKey('secure', $data['app']['cookie']);
-    	$this->assertArrayHasKey('httpOnly', $data['app']['cookie']);
-    	$this->assertArrayHasKey('expire', $data['app']['cookie']);
-    	$this->assertArrayHasKey('name', $data['app']['session']);
-    	$this->assertEquals('sessions', $data['app']['session']['name']);
+    	$this->assertArrayHasKey('cookie', $data);
+    	$this->assertArrayHasKey('domain', $data['cookie']);
+    	$this->assertArrayHasKey('path', $data['cookie']);
+    	$this->assertArrayHasKey('secure', $data['cookie']);
+    	$this->assertArrayHasKey('httpOnly', $data['cookie']);
+    	$this->assertArrayHasKey('expire', $data['cookie']);
+    	$this->assertArrayHasKey('name', $data['session']);
+    	$this->assertEquals('sessions', $data['session']['name']);
+    }
+
+    public function testLoadEnvConfigFile()
+    {
+        $data = $this->loader->load('/tests/var/config/%s/framework.yaml')['framework'];
+
+        $this->assertArrayHasKey('cookie', $data);
+        $this->assertArrayHasKey('domain', $data['cookie']);
+        $this->assertArrayHasKey('path', $data['cookie']);
+        $this->assertArrayHasKey('secure', $data['cookie']);
+        $this->assertArrayHasKey('httpOnly', $data['cookie']);
+        $this->assertArrayHasKey('expire', $data['cookie']);
+        $this->assertArrayHasKey('name', $data['session']);
+        $this->assertEquals('sessions', $data['session']['name']);
     }
 }
