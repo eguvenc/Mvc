@@ -3,7 +3,8 @@ tests/var/cache/
 tests/var/log/
 /public/
 /config/
+/templates/
 vendor/
 /App/
-Services/
+/Services/
 composer.lock
