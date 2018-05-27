@@ -43,8 +43,7 @@ class JsonStrategyTest extends PHPUnit_Framework_TestCase
 			[],
 			new ErrorException('Handle exception error test !')
 		);
-
-		$output = '{"error":{"message":"Handle exception error test !"},"exception":{"type":"ErrorException","code":0,"message":"Handle exception error test !","file":"/var/www/Mvc/tests/Error/JsonStrategyTest.php",';
+		$output = '{"error":{"message":"Handle exception error test !"},"exception":{"type":"ErrorException","code":0,"message":"Handle exception error test !"';
 
 		$this->assertEquals(500, $response->getStatusCode());
 		$this->assertContains($output, (string)$response->getBody());
