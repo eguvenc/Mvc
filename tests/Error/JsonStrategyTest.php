@@ -48,5 +48,4 @@ class JsonStrategyTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals(500, $response->getStatusCode());
 		$this->assertContains($output, (string)$response->getBody());
 	}
-
 }
