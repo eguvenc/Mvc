@@ -62,7 +62,6 @@ class HtmlStrategy implements ErrorStrategyInterface, TranslatorAwareInterface
     public function renderErrorMessage(string $message, Throwable $exception = null) : string
     {
         $translator = $this->getTranslator();
-        $translator->addTranslationFilePattern('PhpArray', ROOT, '/var/messages/%s/messages.php');
     
         $data = array();
         $data['message'] = $message;

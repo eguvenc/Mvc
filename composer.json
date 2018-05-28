@@ -15,8 +15,7 @@
         {
             "name": "Ersin Guvenc",
             "email": "eguvenc@gmail.com",
-            "homepage": "http://obullo.com",
-            "role": "Developer"
+            "homepage": "http://obullo.com"
         }
     ],
     "autoload": {

@@ -19,7 +19,7 @@ class TranslatorFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $container->setAlias('MvcTranslator', $requestedName); // Zend framework support
+        $container->setAlias('MvcTranslator', $requestedName); // Zend components support
 
         $config = $container->get('loader')
             ->load('/tests/var/config/%s/framework.yaml', true)
@@ -28,6 +28,8 @@ class TranslatorFactory implements FactoryInterface
             
         $translator = new Translator;
         $translator->setLocale($config->default_locale);
+        $translator->addTranslationFilePattern('PhpArray', ROOT, '/tests/var/messages/%s/messages.php');
+
 		return $translator;
     }
 }
