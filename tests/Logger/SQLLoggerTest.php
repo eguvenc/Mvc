@@ -30,8 +30,8 @@ class SQLLoggerTest extends PHPUnit_Framework_TestCase
 
         $debugLog = file_get_contents(ROOT .'/tests/var/log/debug.log');
 
-        $sql1 = '] tests.DEBUG: SQL-1 ( Query ): {"time":"0.0000","output":"SELECT * FROM users WHERE id = 5 AND name = \'test\'"} []';
-        $sql2 = '] tests.DEBUG: SQL-2 ( Query ): {"time":"0.0000","output":"SELECT * FROM users WHERE id = 6 AND name = \'test\'"} []';
+        $sql1 = '] tests.DEBUG: SQL-1 ( Query ): {"sql":"SELECT * FROM users WHERE id = 5 AND name = \'test\'"';
+        $sql2 = '] tests.DEBUG: SQL-2 ( Query ): {"sql":"SELECT * FROM users WHERE id = 6 AND name = \'test\'"';
 
         $this->assertContains($sql1, $debugLog);
         $this->assertContains($sql2, $debugLog);
