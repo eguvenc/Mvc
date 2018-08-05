@@ -17,8 +17,6 @@ use Obullo\Router\Types\{
     TranslationType
 };
 use Obullo\Mvc\Container\ContainerAwareInterface;
-use Obullo\Mvc\Config\Loader\YamlLoader;
-use Obullo\Mvc\Config\Cache\FileHandler;
 use Obullo\Mvc\Http\ServerRequestFactory;
 use Obullo\Stack\Builder as Stack;
 
@@ -55,11 +53,10 @@ class HttpMethodTest extends PHPUnit_Framework_TestCase
         ));
         $collection->setContext($context);
         $builder = new Builder($collection);
-        
-        $fileHandler = new FileHandler('/tests/var/cache/config/');
-        $loader = new YamlLoader($fileHandler);
-        $routes = $loader->load('/tests/var/config/routes_with_method.yaml');
-        $collection = $builder->build($routes);
+
+        $routes = $container->get('loader')
+            ->load(ROOT, '/tests/var/config/routes_with_method.yaml');
+        $collection = $builder->build($routes->toArray());
 
         $router = new Router($collection);
         $router->matchRequest();

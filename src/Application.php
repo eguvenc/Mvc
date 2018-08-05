@@ -16,8 +16,6 @@ use Obullo\Stack\Builder as Stack;
 use Obullo\Mvc\Middleware\SendResponse;
 use Obullo\Router\{
     RequestContext,
-    RouteCollection,
-    Builder,
     Router
 };
 use ReflectionClass;
@@ -70,7 +68,7 @@ class Application implements ContainerAwareInterface
         $container = $this->getContainer();
         $events    = $this->events;
         
-        $events->trigger('session.start');
+        $events->trigger('session.start', $this);
 
         if ($context != null) {
             $this->dispatcher = $dispatcher;
@@ -98,21 +96,9 @@ class Application implements ContainerAwareInterface
         $container = $this->getContainer();
         $events    = $this->events;
 
-        $result = $events->trigger('route.types', $this);
+        $result = $events->trigger('route.builder', $this, ['context' => $context]);
 
-        $collection = new RouteCollection(array(
-            'types' => $result->last()
-        ));
-        $collection->setContext($context);
-        $builder = new Builder($collection);
-
-        $routes = $container->get('loader')
-            ->loadConfigFile('routes.yaml');
-        
-        $args = ['builder' => $builder, 'routes' => $routes];
-        $result = $events->trigger('route.builder', $this, $args);
-
-        $router = new Router($collection);
+        $router = new Router($result->last());
         if ($route = $router->matchRequest()) {
             $events->trigger('route.match', $this, $route);
         }
@@ -268,9 +254,11 @@ class Application implements ContainerAwareInterface
         if (ob_get_level() > 0 && ob_get_length() > 0) {
             throw new RuntimeException('Output has been emitted previously; cannot emit response');
         }
-        $this->events->trigger('before.headers', $this, $response);
+        $result = $this->events->trigger('before.headers', $this, $response);
+        $response = $result->last();
         $this->emitHeaders($response);
-        $this->events->trigger('before.emit', $this, $response);
+        $result = $this->events->trigger('before.emit', $this, $response);
+        $response = $result->last();
         $this->emitBody($response);
         $this->events->trigger('after.emit', $this, $response);
     }
@@ -311,18 +299,11 @@ class Application implements ContainerAwareInterface
 
     /**
      * Emit body
-     * 
+     *
      * @return void
      */
     protected function emitBody($response)
     {
         echo $response->getBody();
     }
-
-    /**
-     * Terminate application
-     * 
-     * @return void
-     */
-    public function terminate() {}
 }

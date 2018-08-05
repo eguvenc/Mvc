@@ -11,7 +11,10 @@ use Obullo\Mvc\Container\{
     ContainerAwareInterface,
     ContainerAwareTrait
 };
-use Obullo\Router\RouteCollection;
+use Obullo\Router\{
+    RouteCollection,
+    Builder
+};
 use Obullo\Router\Types\{
     StrType,
     IntType,
@@ -24,26 +27,29 @@ class RouteListener implements ListenerAggregateInterface,ContainerAwareInterfac
 
     public function attach(EventManagerInterface $events, $priority = null)
     {
-        $this->listeners[] = $events->attach('route.types', [$this, 'onRouteTypes']);
-        $this->listeners[] = $events->attach('route.builder', [$this, 'onRouteBuilder']);
+        $this->listeners[] = $events->attach('route.builder', [$this, 'onBuilder']);
         $this->listeners[] = $events->attach('route.match', [$this, 'onMatch']);
     }
 
-    public function onRouteTypes(EventInterface $e) : array
-    {
-        return [
+    public function onBuilder(EventInterface $e) : RouteCollection
+    {   
+        $context = $e->getParam('context');
+        $types = [
             new IntType('<int:id>'),
             new IntType('<int:page>'),
             new StrType('<str:name>'),
             new TranslationType('<locale:locale>'),
         ];
-    }
+        $collection = new RouteCollection(array(
+            'types' => $types
+        ));
+        $collection->setContext($context);
+        $builder = new Builder($collection);
 
-    public function onRouteBuilder(EventInterface $e) : RouteCollection
-    {
-        $builder = $e->getParam('builder');
-        $routes  = $e->getParam('routes');
-        
+        $routes = $this->getContainer()
+            ->get('loader')
+            ->load('/config/routes.yaml');
+
         return $builder->build($routes);        
     }
 

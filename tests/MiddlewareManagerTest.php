@@ -11,8 +11,6 @@ use Obullo\Router\Types\{
     IntType,
     TranslationType
 };
-use Obullo\Mvc\Config\Loader\YamlLoader;
-use Obullo\Mvc\Config\Cache\FileHandler;
 use Obullo\Mvc\Http\ServerRequestFactory;
 use Obullo\Mvc\RouteDispatcher;
 use Obullo\Mvc\MiddlewareManager;
@@ -23,6 +21,8 @@ class MiddlewareManagerTest extends PHPUnit_Framework_TestCase
 	public function setUp()
 	{
         $container = new ServiceManager;
+        $container->setFactory('loader', 'Tests\App\Services\LoaderFactory');
+        
         $context = new RequestContext;
         $context->setPath('/');
         $context->setMethod('GET');
@@ -39,10 +39,9 @@ class MiddlewareManagerTest extends PHPUnit_Framework_TestCase
         $collection->setContext($context);
         $builder = new Builder($collection);
         
-        $fileHandler = new FileHandler('/tests/var/cache/config/');
-        $loader = new YamlLoader($fileHandler);
-        $routes = $loader->load('/tests/var/config/routes_with_middleware.yaml');
-        $collection = $builder->build($routes);
+        $routes = $container->get('loader')
+        	->load(ROOT, '/tests/var/config/routes_with_middleware.yaml');
+        $collection = $builder->build($routes->toArray());
 
         $router = new Router($collection);
         $router->match('/','example.com');

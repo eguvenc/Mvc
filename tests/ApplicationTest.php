@@ -16,18 +16,23 @@ use Obullo\Router\Types\{
     IntType,
     TranslationType
 };
-use Obullo\Mvc\Config\Loader\YamlLoader;
-use Obullo\Mvc\Config\Cache\FileHandler;
 use Obullo\Mvc\Http\ServerRequestFactory;
 use Obullo\Stack\Builder as Stack;
 
 class ApplicationTest extends PHPUnit_Framework_TestCase
 {
-    public function testDispatch()
+    public function setUp()
     {
         $container = new ServiceManager;
         $container->setFactory('events', 'Tests\App\Services\EventManagerFactory');
         $container->setFactory('session', 'Tests\App\Services\SessionFactory');
+        $container->setFactory('loader', 'Tests\App\Services\LoaderFactory');
+        $this->container = $container;
+    }
+
+    public function testDispatch()
+    {
+        $container = $this->container;
         $listeners = [
             'Tests\App\Event\SessionListener',
             'Tests\App\Event\ErrorListener',
@@ -51,10 +56,9 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
         $collection->setContext($context);
         $builder = new Builder($collection);
         
-        $fileHandler = new FileHandler('/tests/var/cache/config/');
-        $loader = new YamlLoader($fileHandler);
-        $routes = $loader->load('/tests/var/config/routes_with_middleware.yaml');
-        $collection = $builder->build($routes);
+        $routes = $this->container->get('loader')
+            ->load(ROOT, '/tests/var/config/routes_with_middleware.yaml');
+        $collection = $builder->build($routes->toArray());
 
         $router = new Router($collection);
         $router->match('/','example.com');
@@ -88,8 +92,7 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
 
     public function testProcessWithLocalizedRoute()
     {
-        $container = new ServiceManager;
-        $container->setFactory('events', 'Tests\App\Services\EventManagerFactory');
+        $container = $this->container;
 
         $context = new RequestContext;
         $context->setPath('/en/test');
@@ -106,11 +109,10 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
         ));
         $collection->setContext($context);
         $builder = new Builder($collection);
-
-        $fileHandler = new FileHandler('/tests/var/cache/config/');
-        $loader = new YamlLoader($fileHandler);
-        $routes = $loader->load('/tests/var/config/routes.yaml');
-        $collection = $builder->build($routes);
+        
+        $routes = $this->container->get('loader')
+            ->load(ROOT, '/tests/var/config/routes.yaml');
+        $collection = $builder->build($routes->toArray());
 
         $router = new Router($collection);
         $router->match('/en/test','example.com');
@@ -135,7 +137,7 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
             $_COOKIE,
             $_FILES
         );
-        $route = $router->getMatchedRoute();
+        $route  = $router->getMatchedRoute();
         $locale = $route->getArgument('locale');
         $route->removeArgument('locale');
         $request = $request->withAttribute('locale', $locale);

@@ -1,7 +1,5 @@
 <?php
 
-use Obullo\Mvc\Config\Loader\YamlLoader;
-use Obullo\Mvc\Config\Cache\FileHandler;
 use Obullo\Router\{
     RequestContext,
     RouteCollection,
@@ -37,15 +35,18 @@ class ControllerTest extends PHPUnit_Framework_TestCase
         $collection->setContext($context);
         $builder = new Builder($collection);
 
-        $fileHandler = new FileHandler('/tests/var/cache/config/');
-        $loader = new YamlLoader($fileHandler);
-        $routes = $loader->load('/tests/var/config/routes.yaml');
-        $collection = $builder->build($routes);
+		$container = new ServiceManager;
+        $container->setFactory('loader', 'Tests\App\Services\LoaderFactory');
+
+        $routes = $container->get('loader')
+        	->load(ROOT, '/tests/var/config/routes.yaml');
+        $collection = $builder->build($routes->toArray());
+        
+		$this->container = $container;
 
         $router = new Router($collection);
         $router->match('/','example.com');
 
-		$container = new ServiceManager;
 		$this->controller = new Controller;
 
 		$container->setService('router', $router);
@@ -67,8 +68,8 @@ class ControllerTest extends PHPUnit_Framework_TestCase
 
 	public function testSetterMethod()
 	{
-		$this->cache = new FileHandler('/tests/var/cache/config/');
-		$this->assertInstanceOf('Obullo\Mvc\Config\Cache\FileHandler', $this->cache);
+		$this->yaml = $this->container->get('yaml');
+		$this->assertInstanceOf('Zend\Config\Reader\Yaml', $this->yaml);
 	}
 
 	public function testRender() 
@@ -80,9 +81,18 @@ class ControllerTest extends PHPUnit_Framework_TestCase
 	public function testRedirect() 
 	{
 		$response = $this->controller->redirect('/');
-		$headers = $response->getHeaders();
+		$headers  = $response->getHeaders();
 
 		$this->assertEquals('/', $headers['location'][0]);
 		$this->assertEquals('302', $response->getStatusCode());
+	}
+
+	public function testJson()
+	{
+		$response = $this->controller->json(array('test' => '123'));
+		$headers  = $response->getHeaders();
+
+		$this->assertEquals($headers['content-type'][0], 'application/json');
+		$this->assertEquals('{"test":"123"}', $response->getBody());
 	}
 }

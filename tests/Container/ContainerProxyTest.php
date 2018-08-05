@@ -2,7 +2,8 @@
 
 use Obullo\Mvc\Exception;
 use Zend\ServiceManager\ServiceManager;
-use Obullo\Mvc\Config\Cache\FileHandler;
+use Zend\Config\Reader\Yaml as YamlReader;
+use Symfony\Component\Yaml\Yaml as SymfonyYaml;
 use Obullo\Mvc\Container\ContainerAwareTrait;
 use Obullo\Mvc\Container\ContainerProxyTrait;
 
@@ -14,7 +15,7 @@ class ContainerProxyTest extends PHPUnit_Framework_TestCase
 	public function setUp()
 	{
 		$this->container = new ServiceManager;
-		$this->container->setService('cache', new FileHandler('/tests/var/cache/config/'));
+		$this->container->setService('yaml', new YamlReader([SymfonyYaml::class, 'parse']));
 	}
 
 	public function testContainer()
@@ -26,12 +27,12 @@ class ContainerProxyTest extends PHPUnit_Framework_TestCase
 
 	public function testGetterMethod()
 	{
-		$this->assertInstanceOf('Obullo\Mvc\Config\Cache\FileHandler', $this->cache);
+		$this->assertInstanceOf('Zend\Config\Reader\Yaml', $this->yaml);
 	}
 
 	public function testSetterMethod()
 	{
-		$this->test = new FileHandler('/tests/var/cache/config/');
-		$this->assertInstanceOf('Obullo\Mvc\Config\Cache\FileHandler', $this->cache);
+		$this->test = new YamlReader([SymfonyYaml::class, 'parse']);
+		$this->assertInstanceOf('Zend\Config\Reader\Yaml', $this->test);
 	}
 }

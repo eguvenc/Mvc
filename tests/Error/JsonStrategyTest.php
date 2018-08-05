@@ -7,7 +7,6 @@ use Obullo\Mvc\Container\{
 use Obullo\Mvc\Error\ErrorHandler;
 use Obullo\Mvc\Error\JsonStrategy;
 use Zend\ServiceManager\ServiceManager;
-use Obullo\Mvc\Config\Cache\FileHandler;
 
 class JsonStrategyTest extends PHPUnit_Framework_TestCase
 {

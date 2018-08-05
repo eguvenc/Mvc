@@ -18,8 +18,6 @@ use Obullo\Router\Types\{
     IntType,
     TranslationType
 };
-use Obullo\Mvc\Config\Cache\FileHandler;
-use Obullo\Mvc\Config\Loader\YamlLoader;
 
 class PhpTemplateTest extends PHPUnit_Framework_TestCase
 {
@@ -31,9 +29,7 @@ class PhpTemplateTest extends PHPUnit_Framework_TestCase
         $engine->loadExtension(new Asset('/var/assets/', true));
 
 		$container = new ServiceManager;
-        $fileHandler = new FileHandler('/tests/var/cache/config/');
-        $loader = new YamlLoader($fileHandler);
-        $container->setService('loader', $loader);
+        $container->setFactory('loader', 'Tests\App\Services\LoaderFactory');
 
         $context = new RequestContext;
         $context->setPath('/');
@@ -51,8 +47,9 @@ class PhpTemplateTest extends PHPUnit_Framework_TestCase
         $collection->setContext($context);
         $builder = new Builder($collection);
 
-        $routes = $loader->load('/tests/var/config/routes.yaml');
-        $collection = $builder->build($routes);
+        $routes = $container->get('loader')
+            ->load(ROOT, '/tests/var/config/routes.yaml');
+        $collection = $builder->build($routes->toArray());
 
         $router = new Router($collection);
         $container->setService('router',$router);

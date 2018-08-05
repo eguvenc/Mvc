@@ -2,8 +2,17 @@
 
 namespace Tests\App\Services;
 
-use Obullo\Mvc\Config\Cache\FileHandler;
-use Obullo\Mvc\Config\Loader\YamlLoader;
+use Zend\ServiceManager\ServiceManager;
+use Symfony\Component\Yaml\Yaml as SymfonyYaml;
+use Zend\Config\Config;
+use Zend\Config\Factory;
+use Zend\Config\Processor;
+use Zend\Config\Reader\Yaml as YamlReader;
+
+use Obullo\Config\ConfigLoader;
+use Obullo\Config\Processor\Env as EnvProcessor;
+use Zend\Config\Processor\Constant as ConstantProcessor;
+
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
@@ -19,25 +28,20 @@ class LoaderFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $cacheHandler = new FileHandler('/tests/var/cache/config/');
+        $container->setService('yaml', new YamlReader([SymfonyYaml::class, 'parse']));
 
-        // To change default cache handler uncomment doc blocks and set your own.
-        
-        // use Obullo\Mvc\Config\Cache\RedisHandler;
-        // $cacheHandler = new RedisHandler($container->get('redis'));
+        Factory::registerReader('yaml', $container->get('yaml'));
+        Factory::setReaderPluginManager($container);
 
-        $loader = new YamlLoader($cacheHandler);
-
-        $env = getenv('APP_ENV');
-
-        // Put all config files here you want to load at bootstrap.
-
-        \Zend\Config\Factory::fromFiles(
-            [
-                ROOT.'/tests/var/config/'.$env.'/framework.yaml',
-            ]
+        $loader = new ConfigLoader(
+            array('config_cache_enabled' => false),
+            ROOT.'/tests/var/cache/config.php'
         );
+        $loader->setEnv(getenv('APP_ENV'));
+        $loader->addProcessor(new EnvProcessor);
+        $loader->addProcessor(new ConstantProcessor);
 
+        $loader->load(ROOT, '/tests/var/config/%s/framework.yaml');
         return $loader;
     }
 }

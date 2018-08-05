@@ -16,7 +16,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase
 	public function testDefinedServiceException()
 	{
 		try {
-			throw new Exception\BadCookieException('Test defined service exception.');
+			throw new Exception\DefinedServiceException('Test defined service exception.');
 		} catch (\Exception $e) {
 			$this->assertEquals('Test defined service exception.', $e->getMessage());
 		}

@@ -7,7 +7,6 @@ use Obullo\Mvc\Container\{
 use Obullo\Mvc\Error\ErrorHandler;
 use Obullo\Mvc\Error\HtmlStrategy;
 use Zend\ServiceManager\ServiceManager;
-use Obullo\Mvc\Config\Cache\FileHandler;
 
 class HtmlStrategyTest extends PHPUnit_Framework_TestCase
 {
@@ -18,6 +17,7 @@ class HtmlStrategyTest extends PHPUnit_Framework_TestCase
 		$container->setFactory('translator', 'Tests\App\Services\TranslatorFactory');
 		$container->setFactory('events', 'Tests\App\Services\EventManagerFactory');
 		$container->setFactory('view', 'Tests\App\Services\ViewPlatesFactory');
+		
 		$this->errorHandler = new ErrorHandler;
 		$this->errorHandler->setContainer($container);
 

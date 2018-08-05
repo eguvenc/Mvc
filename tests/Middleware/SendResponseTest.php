@@ -17,8 +17,6 @@ use Obullo\Router\Types\{
     TranslationType
 };
 use Obullo\Mvc\Container\ContainerAwareInterface;
-use Obullo\Mvc\Config\Loader\YamlLoader;
-use Obullo\Mvc\Config\Cache\FileHandler;
 use Obullo\Mvc\Http\ServerRequestFactory;
 use Obullo\Stack\Builder as Stack;
 
@@ -29,6 +27,7 @@ class SendResponseTest extends PHPUnit_Framework_TestCase
         $container = new ServiceManager;
         $container->setFactory('events', 'Tests\App\Services\EventManagerFactory');
         $container->setFactory('session', 'Tests\App\Services\SessionFactory');
+        $container->setFactory('loader', 'Tests\App\Services\LoaderFactory');
         $listeners = [
             'Tests\App\Event\SessionListener',
             'Tests\App\Event\ErrorListener',
@@ -52,10 +51,9 @@ class SendResponseTest extends PHPUnit_Framework_TestCase
         $collection->setContext($context);
         $builder = new Builder($collection);
         
-        $fileHandler = new FileHandler('/tests/var/cache/config/');
-        $loader = new YamlLoader($fileHandler);
-        $routes = $loader->load('/tests/var/config/routes_with_middleware.yaml');
-        $collection = $builder->build($routes);
+        $routes = $container->get('loader')
+            ->load(ROOT, '/tests/var/config/routes_with_middleware.yaml');
+        $collection = $builder->build($routes->toArray());
 
         $router = new Router($collection);
         $router->match('/','example.com');
@@ -123,11 +121,10 @@ class SendResponseTest extends PHPUnit_Framework_TestCase
         ));
         $collection->setContext($context);
         $builder = new Builder($collection);
-        
-        $fileHandler = new FileHandler('/tests/var/cache/config/');
-        $loader = new YamlLoader($fileHandler);
-        $routes = $loader->load('/tests/var/config/routes_with_middleware.yaml');
-        $collection = $builder->build($routes);
+            
+        $routes = $container->get('loader')
+            ->load(ROOT, '/tests/var/config/routes_with_middleware.yaml');
+        $collection = $builder->build($routes->toArray());
 
         $router = new Router($collection);
         $router->match('/abc123','example.com');
