@@ -5,37 +5,37 @@
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 [![Total Downloads](https://img.shields.io/packagist/dt/obullo/mvc.svg)](https://packagist.org/packages/obullo/mvc)
 
-> Obullo ve Zend bileşenleri ile mvc çatınızı oluşturun.
+> Obullo ve Zend bileşenleri ile kendi mvc çatınızı oluşturun.
 
-## Create your project
+## Proje yaratmak
 
 ``` bash
 $ composer create project obullo/skeleton
 ```
 
-## Install
+## Kurulum
 
 ``` bash
 $ composer update
 ```
 
-## Requirements
+## Gereksinimler
 
-The following versions of PHP are supported by this version.
+Bu versiyon aşağıdaki PHP sürümlerini destekliyor.
 
 * 7.0
 * 7.1
 * 7.2
 
-## Testing
+## Testler
 
 ``` bash
 $ vendor/bin/phpunit
 ```
 
-## Quick start
+## Hızlı başlangıç
 
-Check your `public/app/index.php` file.
+Kök dizindeki `public/app/index.php` dosyasına göz atın.
 
 ```php
 require '../../vendor/autoload.php';
@@ -48,7 +48,7 @@ use Zend\ServiceManager\ServiceManager;
 use Dotenv\Dotenv;
 ```
 
-Environment Manager
+Ortam Yöneticisi
 
 ```php
 if (false == isset($_SERVER['APP_ENV'])) {
@@ -62,7 +62,7 @@ if ('prod' !== $env) {
 }
 ```
 
-Service Manager
+Servis Yöneticisi
 
 ```php
 $container = new ServiceManager;
@@ -79,13 +79,13 @@ $container->setFactory('error', 'Services\ErrorHandlerFactory');
 $container->setFactory('escaper', 'Services\EscaperFactory');
 ```
 
-Exception Handler
+İstisnai Hata Kontrolü
 
 ```php
 set_exception_handler(array($container->get('error'), 'handle'));
 ```
 
-Event Listeners
+Olay Dinleyiciler
 
 ```php
 $listeners = [
@@ -99,53 +99,53 @@ $application = new Application($container, $listeners);
 $application->start();
 ```
 
-Response Sender
+Yanıt Gönderici
 
 ```php
 $response = $application->process($queue = [], $container->get('request'));
 $application->sendResponse($response);
 ```
 
-## Container & Services
+## Konteyner & Servisler
 
-[Container.md](/en/container.md)
+[Container.md](/tr/container.md)
 
-## Routing
+## Yönlendirmeler
 
-[Router.md](/en/router.md)
+[Router.md](/tr/router.md)
 
-## Config
+## Konfigürasyon
 
-[Config.md](/en/config.md)
+[Config.md](/tr/config.md)
 
-## Controller & Depedencies
+## Kontrolör & Bağımlılıklar
 
-[Controller.md](/en/controller.md)
+[Controller.md](/tr/controller.md)
 
-## Error
+## Hatalar
 
-[Error.md](/en/error.md)
+[Error.md](/tr/error.md)
 
-## Cookie
+## Çerezler
 
-[Coookie.md](/en/cookie.md)
+[Coookie.md](/tr/cookie.md)
 
-## Logger
+## Loglama
 
-[Logger.md](/en/logger.md)
+[Logger.md](/tr/logger.md)
 
-## Middleware
+## Katmanlar
 
-[Middleware.md](/en/middleware.md)
+[Middleware.md](/tr/middleware.md)
 
-## Events
+## Olaylar
 
-[Events.md](/en/events.md)
+[Events.md](/tr/events.md)
 
-## Session
+## Oturumlar
 
-[session.md](/en/session.md)
+[session.md](/tr/session.md)
 
-## View
+## Görünümler
 
-[View.md](/en/view.md)
+[View.md](/tr/view.md)

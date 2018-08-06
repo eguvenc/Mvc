@@ -1,12 +1,11 @@
 
 ## Konteyner
 
-Obullo çatısı konteyner çözümü olarak Zend Servis Yöneticisini kullanır. <a href="https://docs.zendframework.com/zend-servicemanager/">Zend Service Manager dökümetasyonu</a> na buradan ulaşabilirisniz.
-
+Mvc konteyner paketi `Zend Servis Yöneticisini` kullanır. <a href="https://docs.zendframework.com/zend-servicemanager/">Zend Service Manager</a> a buradan ulaşabilirisniz.
 
 ### Servisler
 
-Tüm servisler index.php dosyası içerisinden konfigüre edilir. Servisler setFactory metodu ile uygulamaya tanımlanmış olur ve çağırıldıkları zaman uygulamaya dahil edilirler.
+Tüm servisler `index.php` dosyası içerisinden konfigüre edilir. Servisler `setFactory()` metodu ile uygulamaya tanımlanmış olur ve çağırıldıkları zaman uygulamaya dahil edilirler.
 
 ```php
 $container = new ServiceManager;
@@ -57,5 +56,5 @@ $container->get('session');  // Zend\Session\SessionManager
 Proxy yöntemi sayesinde servisler kontrolör dosyası içerisinden direkt çağırılabilirler.
 
 ```php
-$this->loader->method();
+$this->session;  // Zend\Session\SessionManager
 ```
