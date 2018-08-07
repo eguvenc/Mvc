@@ -108,7 +108,7 @@ $application->sendResponse($response);
 
 ## Konteyner & Servisler
 
-[Container.md](/tr/container.md)
+[Container.md](tr/container.md)
 
 ## Yönlendirmeler
 
