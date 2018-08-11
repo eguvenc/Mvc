@@ -1,7 +1,7 @@
 
 ## Yönlendirmeler
 
-Mvc router paketi `Obullo/Router` paketini kullanır. Bu paket <a href="https://docs.djangoproject.com/en/2.0/topics/http/urls/">Django Url Dispatcher</a> kütüphanesinden ilham alınarak geliştirilmiş bağımsız bir route paketidir.
+Yönlendirme sınıfı `Obullo/Router` paketini kullanır. Bu paket <a href="https://docs.djangoproject.com/en/2.0/topics/http/urls/">Django Url Dispatcher</a> kütüphanesinden ilham alınarak geliştirilmiş bağımsız bir paketdir.
 
 ### Uygulama yönlendirme
 
@@ -21,8 +21,8 @@ dummy:
 
 ```
 name:
-	method : GET
-	host: example.com
+    method : GET
+    host: example.com
     scheme: http
     middleware: 
       - App\Middleware\Auth

@@ -1,7 +1,7 @@
 
 ## Konteyner
 
-Mvc konteyner paketi `Zend Service Manager` paketini kullanır.
+Konteyner sınıfı `Zend Service Manager` paketini kullanır.
 
 ### Servisler
 

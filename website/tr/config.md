@@ -1,7 +1,7 @@
 
 ## Konfigürasyon
 
-Mvc config sınıfı `Obullo/Config` paketini kullanır. Bu paket `Zend/Config` paketi üzerinde çalışır.
+Konfigürasyon sınıfı `Obullo/Config` paketini kullanır. Bu paket `Zend/Config` paketi üzerinde çalışır.
 
 ### Dosyalar
 

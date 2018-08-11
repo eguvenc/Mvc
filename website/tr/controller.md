@@ -22,7 +22,7 @@ class DefaultController extends Controller
 > $this->render($nameOrModal, $data = null, $status = 200, $headers = []) : ResponseInterface
 
 
-Render metodu aşağıdaki metotu çağırarak Response nesnesine içerisine html çıktısını ekler.
+Render metodu aşağıdaki metotu çağırarak Response nesnesi içerisine html çıktısını ekler.
 
 ```php
 return new HtmlResponse($this->view->render('welcome'));
@@ -174,7 +174,7 @@ home:
 
 Kontrolör dosyası
 
-```
+```php
 namespace App\Controller;
 
 use Obullo\Mvc\Controller;
