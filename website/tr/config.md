@@ -1,7 +1,7 @@
 
 ## Konfigürasyon
 
-Mvc config paketi `Obullo/Config` paketini kullanır. Bu paket `Zend/Config` paketi üzerinde çalışır.
+Mvc config sınıfı `Obullo/Config` paketini kullanır. Bu paket `Zend/Config` paketi üzerinde çalışır.
 
 ### Dosyalar
 
@@ -37,6 +37,18 @@ Konfigürasyon dosyaları `cache` açıksa önbelleğe alınır. Bu dosyayı aş
 
 ```
 $ rm var/cache/config.php
+```
+
+`dev` ortamında cache parametresinin `false` değerinde olması gerekmektedir.
+
+```php
+$aggregator = new ConfigAggregator(
+    [
+        new ArrayProvider([ConfigAggregator::ENABLE_CACHE => (getenv('APP_ENV') == 'dev') ? false : true ]),
+        new ZendConfigProvider(ROOT.'/config/autoload/{,*.}{json,yaml,php}'),
+    ],
+    ROOT.'/var/cache/config.php'
+);
 ```
 
 Detaylı dökümentasyona <a href="http://config.obullo.com/tr/">http://config.obullo.com/tr/</a> bağlantısından ulaşabilirsiniz.

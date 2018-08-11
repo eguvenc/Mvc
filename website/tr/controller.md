@@ -1,7 +1,7 @@
 
 ## Kontrolör
 
-Mvc controller paketi http isteklerini kontrol ederek içerdiği metotlar ile istenen http yanıtlarına dönmenizi sağlar.
+Kontrolör sınıfı http isteklerini kontrol ederek içerdiği metotlar ile istenen http yanıtlarına dönmenizi sağlar.
 
 ```php
 namespace App\Controller;
@@ -19,13 +19,13 @@ class DefaultController extends Controller
 }
 ```
 
-> render($nameOrModal, $data = null, $status = 200, $headers = []) : ResponseInterface
+> $this->render($nameOrModal, $data = null, $status = 200, $headers = []) : ResponseInterface
 
 
-Render metodu aşağıdaki metot ile aynı işlevi görür.
+Render metodu aşağıdaki metotu çağırarak Response nesnesine içerisine html çıktısını ekler.
 
 ```php
-$this->view->render('welcome');
+return new HtmlResponse($this->view->render('welcome'));
 ```
 
 ### Parametreler
@@ -65,8 +65,9 @@ class DefaultController extends Controller
 }
 ```
 
-> renderHtml(string $html, $status = 200, $headers = []) : ResponseInterface
+> $this->renderHtml(string $html, $status = 200, $headers = []) : ResponseInterface
 
+RenderHtml metodu ise view nesnesi kullanmadan Response nesnesine içerisine html çıktısını direkt ekler.
 
 Yukarıdaki örneğin çıktısı:
 
@@ -77,7 +78,7 @@ test
 
 ### Http yönlendirme
 
-Http 302 durum kodu ile `Zend\Diactoros\Response\RedirectResponse` nesnesine geri döner.
+Redirect metodu http `302` durum kodu ile `Zend\Diactoros\Response\RedirectResponse` nesnesine geri döner.
 
 ```php
 class DefaultController extends Controller
@@ -88,6 +89,8 @@ class DefaultController extends Controller
     }
 }
 ```
+
+> $this->redirect($uriOrRouteName = null, $params = []) : ResponseInterface
 
 Route isimleri kullanmak uygulamanızın her zaman daha güvenli olmasını sağlayacaktır.
 
@@ -101,11 +104,9 @@ class DefaultController extends Controller
 }
 ```
 
-> redirect($uriOrRouteName = null, $params = []) : ResponseInterface
-
 ### Json
 
-Http json başlıkları `Zend\Diactoros\Response\JsonResponse` nesnesine geri döner.
+Json metodu http json başlıkları ile `Zend\Diactoros\Response\JsonResponse` nesnesine geri döner.
 
 ```php
 class DefaultController extends Controller
@@ -120,12 +121,44 @@ class DefaultController extends Controller
 }
 ```
 
-> json($data, $status = 200, array $headers = [], $encodingOptions = 79)
+> $this->json($data, $status = 200, array $headers = [], $encodingOptions = 79)
 
+Bir rest api için örnek;
+
+```php
+return $this->json(
+    ['name' => 'Örnek Veri'],
+    200,
+    ['cache-control' => 'max-age=3600'],
+    JSON_UNESCAPED_UNICODE
+);
+```
+
+Çıktı
+
+```php
+{
+  "name": "Örnek Veri"
+}
+```
+
+Çıktıya ait başlıklar
+
+```
+Cache-Control   max-age=3600
+Connection  Keep-Alive
+Content-Length  22
+Content-Type    application/json
+Date    Sat, 11 Aug 2018 09:32:45 GMT
+Expires Thu, 19 Nov 1981 08:52:00 GMT
+Keep-Alive  timeout=5, max=100
+Pragma  no-cache
+Server  Apache/2.4.29 (Ubuntu)
+```
 
 ### Bağımlılıklar 
 
-Eğer konteyner içerisinde kullandığınız parametre adı ile bir servis kayıtlı ise bu servis otomatik olarak enjekte edilir.
+Eğer kontrolör sınıfı metot parametreleri, konteyner içerisinde bir servis olarak kayıtlı ise otomatik olarak metot içerisine enjekte edilir.
 
 ```php
 http://example.com/test/1

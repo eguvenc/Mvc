@@ -31,6 +31,29 @@ name:
     handler: App\Controller\DefaultController::index
 ```
 
+### Önbellekteki dosyalar
+
+Konfigürasyon dosyaları `cache` açıksa önbelleğe alınır. Bu dosyayı aşağıdaki komutla silebilirsiniz.
+
+```
+$ rm var/cache/config.php
+```
+
+`dev` ortamında cache parametresinin `false` değerinde olması gerekmektedir.
+
+```php
+$aggregator = new ConfigAggregator(
+    [
+        new ArrayProvider([ConfigAggregator::ENABLE_CACHE => (getenv('APP_ENV') == 'dev') ? false : true ]),
+        new ZendConfigProvider(ROOT.'/config/autoload/{,*.}{json,yaml,php}'),
+    ],
+    ROOT.'/var/cache/config.php'
+);
+```
+
+Detaylı dökümentasyona <a href="http://config.obullo.com/tr/">http://config.obullo.com/tr/</a> bağlantısından ulaşabilirsiniz.
+
+
 ### Route olayları
 
 Uygulama routing ile ilgili işlemler için `App/Event/RouteListener` sınıfı dinler.
@@ -46,7 +69,7 @@ Uygulama routing ile ilgili işlemler için `App/Event/RouteListener` sınıfı 
     <tbody>
         <tr>
             <td>OnBuilder</td>
-            <td>RouteCollection sınıfının yaratıldığı olaydır. Bu metot içerisinden özelleştirmeler yapılabilir.</td>
+            <td>RouteCollection sınıfının yaratıldığı olaydır.</td>
         </tr>
         <tr>
             <td>OnMatch</td>
