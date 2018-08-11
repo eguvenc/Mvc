@@ -44,7 +44,11 @@ $ rm var/cache/config.php
 ```php
 $aggregator = new ConfigAggregator(
     [
-        new ArrayProvider([ConfigAggregator::ENABLE_CACHE => (getenv('APP_ENV') == 'dev') ? false : true ]),
+        new ArrayProvider(
+            [
+                ConfigAggregator::ENABLE_CACHE => (getenv('APP_ENV') == 'dev') ? false : true 
+            ]
+        ),
         new ZendConfigProvider(ROOT.'/config/autoload/{,*.}{json,yaml,php}'),
     ],
     ROOT.'/var/cache/config.php'
