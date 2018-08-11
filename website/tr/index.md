@@ -108,48 +108,48 @@ $application->sendResponse($response);
 
 ## Konteyner
 
-[Container.md](/tr/container.md)
+[Container.md](container.md)
 
 ## Yönlendirmeler
 
-[Router.md](/tr/router.md)
+[Router.md](router.md)
 
 ## Konfigürasyon
 
-[Config.md](/tr/config.md)
+[Config.md](config.md)
 
 ## Kontrolör
 
-[Controller.md](/tr/controller.md)
+[Controller.md](controller.md)
 
 ## Http
 
-[Http.md](/tr/http.md)
+[Http.md](http.md)
 
 ## Katmanlar
 
-[Middleware.md](/tr/middleware.md)
+[Middleware.md](middleware.md)
 
 ## Hatalar
 
-[Error.md](/tr/error.md)
+[Error.md](error.md)
 
 ## Çerezler
 
-[Coookie.md](/tr/cookie.md)
+[Coookie.md](cookie.md)
 
 ## Loglama
 
-[Logger.md](/tr/logger.md)
+[Logger.md](logger.md)
 
 ## Olaylar
 
-[Events.md](/tr/events.md)
+[Events.md](events.md)
 
 ## Oturumlar
 
-[session.md](/tr/session.md)
+[session.md](session.md)
 
 ## Görünümler
 
-[View.md](/tr/view.md)
+[View.md](view.md)
