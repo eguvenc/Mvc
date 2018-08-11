@@ -18,7 +18,7 @@ use Zend\Diactoros\Response\{
 class Controller extends AbstractController
 {
 	/**
-	 * Render
+	 * Render view
 	 * 
 	 * @param  mixed  $nameOrModal name or zend view model
 	 * @param  mixed  $data        optional array data
@@ -31,6 +31,20 @@ class Controller extends AbstractController
 	{
 		$html = $this->view->render($nameOrModal, $data);
 
+        return new HtmlResponse($html, $status, $headers);
+	}
+
+	/**
+	 * Remder html directly
+	 * 
+	 * @param  string  $html    html code
+	 * @param  integer $status  http status code
+	 * @param  array   $headers http response headers
+	 * 
+	 * @return object
+	 */
+	public function renderHtml(string $html, $status = 200, $headers = []) : ResponseInterface
+	{
         return new HtmlResponse($html, $status, $headers);
 	}
 

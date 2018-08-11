@@ -31,9 +31,6 @@ name:
     handler: App\Controller\DefaultController::index
 ```
 
-Güncel dökümentasyona <a href="http://router.obullo.com/tr/">Obullo/Router</a> bağlantısından ulaşabilirsiniz.
-
-
 ### Route olayları
 
 Uygulama routing ile ilgili işlemler için `App/Event/RouteListener` sınıfı dinler.
@@ -103,3 +100,5 @@ class RouteListener implements ListenerAggregateInterface,ContainerAwareInterfac
     }
 }
 ```
+
+Detaylı dökümentasyona <a href="http://router.obullo.com/tr/">http://router.obullo.com/tr/</a> bağlantısından ulaşabilirsiniz.

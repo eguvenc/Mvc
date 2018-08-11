@@ -1,7 +1,7 @@
 
 ## Konteyner
 
-Mvc konteyner paketi `Zend Servis Yöneticisini` kullanır. <a href="https://docs.zendframework.com/zend-servicemanager/">Zend Service Manager</a> a buradan ulaşabilirisniz.
+Mvc konteyner paketi `Zend Service Manager` paketini kullanır.
 
 ### Servisler
 
@@ -58,3 +58,5 @@ Proxy yöntemi sayesinde servisler kontrolör dosyası içerisinden direkt çağ
 ```php
 $this->session;  // Zend\Session\SessionManager
 ```
+
+Detaylı dökümentasyona  <a href="https://docs.zendframework.com/zend-servicemanager/">https://docs.zendframework.com/zend-servicemanager/</a> bağlantısından ulaşabilirsiniz.
