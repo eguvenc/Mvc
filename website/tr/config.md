@@ -5,7 +5,7 @@ Konfigürasyon sınıfı `Obullo/Config` paketini kullanır. Bu paket `Zend/Conf
 
 ### Dosyalar
 
-Loader servisi konfigürasyon dosyalarına her yerden erişimi sağlar.
+Yükleyici servisi konfigürasyon dosyalarına her yerden erişimi sağlar.
 
 ```php
 $amqp = $container->get('loader')
@@ -44,7 +44,9 @@ $ rm var/cache/config.php
 ```php
 $aggregator = new ConfigAggregator(
     [
-        new ArrayProvider([ConfigAggregator::ENABLE_CACHE => (getenv('APP_ENV') == 'dev') ? false : true ]),
+        new ArrayProvider(
+            [ConfigAggregator::ENABLE_CACHE => (getenv('APP_ENV') == 'dev') ? false : true ]
+        ),
         new ZendConfigProvider(ROOT.'/config/autoload/{,*.}{json,yaml,php}'),
     ],
     ROOT.'/var/cache/config.php'
