@@ -12,6 +12,8 @@ use Obullo\Mvc\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };
+use App\Middleware\Error;
+
 class HttpMethod implements MiddlewareInterface,ContainerAwareInterface
 {
     use ContainerAwareTrait;
@@ -37,7 +39,7 @@ class HttpMethod implements MiddlewareInterface,ContainerAwareInterface
             if (! in_array($request->getMethod(), $methods)) {
                 
                 $events->trigger('http.method.notAllowed', null, $methods);
-                $result = $events->trigger('http.method.notAllowed.message', null, $methods);
+                $result  = $events->trigger('http.method.notAllowed.message', null, $methods);
                 $message = $result->last();
 
                 $error = new Error(

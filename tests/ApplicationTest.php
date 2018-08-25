@@ -72,7 +72,6 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
         $application->start($context, $dispatcher);
 
         $queue = [
-            new \Obullo\Mvc\Middleware\Error,
             new \Obullo\Mvc\Middleware\HttpMethod,
         ];
         $request = ServerRequestFactory::fromGlobals();
@@ -86,8 +85,7 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
         $response = $application->process($queue, $request);
 
         $this->assertEquals('Hello World !', (string)$response->getBody());
-        $this->assertInstanceOf('Obullo\Mvc\Middleware\Error', $queue[0]);
-        $this->assertInstanceOf('Obullo\Mvc\Middleware\HttpMethod', $queue[1]);
+        $this->assertInstanceOf('Obullo\Mvc\Middleware\HttpMethod', $queue[0]);
     }
 
     public function testProcessWithLocalizedRoute()
@@ -126,7 +124,6 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
         $application->start($context, $dispatcher);
 
         $queue = [
-            new \Obullo\Mvc\Middleware\Error,
             new \Obullo\Mvc\Middleware\HttpMethod,
         ];
         $_SERVER['REQUEST_URI'] = '/en/test';

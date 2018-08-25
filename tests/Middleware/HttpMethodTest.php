@@ -70,7 +70,6 @@ class HttpMethodTest extends PHPUnit_Framework_TestCase
         $application->start($context, $dispatcher);
 
         $queue = [
-            new \Obullo\Mvc\Middleware\Error,
             new \Obullo\Mvc\Middleware\HttpMethod,
         ];
         $request = ServerRequestFactory::fromGlobals();
@@ -95,7 +94,6 @@ $body = '<body>
 <h1>Application Error</h1>
 <h3>Only Http GET Methods Allowed</h3>
 </body>';
-
         $this->assertEquals(405, $response->getStatusCode());
         $this->assertContains($body, (string)$response->getBody());
     }
