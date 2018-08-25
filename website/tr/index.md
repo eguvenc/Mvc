@@ -128,15 +128,15 @@ $application->sendResponse($response);
 
 ## Katmanlar
 
-[Middleware.md](middleware.md)
+[Middlewares.md](middlewares.md)
 
 ## Hatalar
 
-[Error.md](error.md)
+[Errors.md](errors.md)
 
 ## Çerezler
 
-[Coookie.md](cookie.md)
+[Cookies.md](cookies.md)
 
 ## Loglama
 
@@ -148,8 +148,16 @@ $application->sendResponse($response);
 
 ## Oturumlar
 
-[session.md](session.md)
+[Sessions.md](sessions.md)
 
 ## Görünümler
 
-[View.md](view.md)
+[Views.md](views.md)
+
+## Veritabanı
+
+[Database.md](database.md)
+
+## Konsol
+
+[Console.md](console.md)

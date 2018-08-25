@@ -36,10 +36,10 @@ $aggregator = new ConfigAggregator(
 Konfigürasyon dosyaları `cache` açıksa önbelleğe alınır. Bu dosyayı aşağıdaki komutla silebilirsiniz.
 
 ```
-$ rm var/cache/config.php
+$ php console cache:clear
 ```
 
-`dev` ortamında cache parametresinin `false` değerinde olması gerekmektedir.
+`dev` ortamında cache parametresinin `false` değerinde olması gerekmektedir. Aksi durumda yönlendirme yada konfigürasyon değişiklikleri çalışmayacaktır.
 
 ```php
 $aggregator = new ConfigAggregator(
@@ -52,5 +52,7 @@ $aggregator = new ConfigAggregator(
     ROOT.'/var/cache/config.php'
 );
 ```
+
+> Uygulamanızı `prod` ortamına taşıma işlemlerinde `var/config/cache.php` dosyasının yüklenmeden önce here defasında silinmesi için `rm var/config/cache.php`  veya `php console cache:clear` komutunu deploy yazılımınız içerisine taşıyın.
 
 Detaylı dökümentasyona <a href="http://config.obullo.com/tr/">http://config.obullo.com/tr/</a> bağlantısından ulaşabilirsiniz.

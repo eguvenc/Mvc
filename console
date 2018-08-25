@@ -1,0 +1,41 @@
+#!/usr/bin/env php
+<?php
+// console
+// 
+set_time_limit(0);
+define('ROOT', __DIR__);
+
+require 'vendor/autoload.php';
+
+use Zend\ServiceManager\ServiceManager;
+use Dotenv\Dotenv;
+use Symfony\Component\Console\Input\ArgvInput;
+
+// The check is to ensure we don't use .env in production
+
+if (false == isset($_SERVER['APP_ENV'])) {
+    (new Dotenv(ROOT))->load();
+}
+$input = new ArgvInput();
+
+$env = $input->getParameterOption(['--env', '-e'], $_SERVER['APP_ENV'] ?? 'dev', true);
+
+// -------------------------------------------------------------------
+// Service Manager
+// -------------------------------------------------------------------
+//
+$container = new ServiceManager;
+$container->setFactory('loader', 'Services\LoaderFactory');
+$container->setFactory('logger', 'Services\LoggerFactory');
+
+use Symfony\Component\Console\Application;
+use Command\{
+	LogClear,
+	LogDebug,
+	CacheClear
+};
+$application = new Application();
+$application->add(new LogClear);
+$application->add(new LogDebug);
+$application->add(new CacheClear);
+$application->run();

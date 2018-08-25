@@ -4,7 +4,6 @@ namespace Obullo\Mvc;
 
 use ReflectionClass;
 use Obullo\Router\Router;
-use Obullo\Mvc\MiddlewareManager;
 use Obullo\Mvc\Dependency\Resolver;
 use Obullo\Mvc\Container\ContainerAwareTrait;
 
@@ -72,7 +71,7 @@ class RouteDispatcher
         $this->classInstance = $reflection->newInstanceWithoutConstructor();
         
         $container->setFactory('middleware', function(){
-            return new MiddlewareManager($this);
+            return new Middleware($this);
         });
         $this->classInstance->setContainer($container);
         if ($reflection->hasMethod('__construct')) {

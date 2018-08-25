@@ -327,7 +327,9 @@ class Cookie implements CookieInterface
     */
     public function delete($name = null)
     {
-        $this->name($name);
+        if ($name != null) {
+            $this->name($name);
+        }
         $this->value(null)->expire(-1);
         return $this;
     }

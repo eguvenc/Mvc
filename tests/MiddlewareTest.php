@@ -13,10 +13,10 @@ use Obullo\Router\Types\{
 };
 use Obullo\Mvc\Http\ServerRequestFactory;
 use Obullo\Mvc\RouteDispatcher;
-use Obullo\Mvc\MiddlewareManager;
+use Obullo\Mvc\Middleware;
 use Zend\ServiceManager\ServiceManager;
 
-class MiddlewareManagerTest extends PHPUnit_Framework_TestCase
+class MiddlewareTest extends PHPUnit_Framework_TestCase
 {
 	public function setUp()
 	{
@@ -51,7 +51,7 @@ class MiddlewareManagerTest extends PHPUnit_Framework_TestCase
         $dispatcher->dispatch();
         $container->setService('router', $router);
 
-        $this->middleware = new MiddlewareManager($dispatcher);
+        $this->middleware = new Middleware($dispatcher);
 	}
 
 	public function testAdd()
@@ -86,11 +86,13 @@ class MiddlewareManagerTest extends PHPUnit_Framework_TestCase
 	{
 		$this->middleware->add('Dummy')
 			->addMethod('index')
+			->addMethod('second_method')
 			->addArgument('name', 'value');
 		$stack = $this->middleware->getStack();
 
 		$this->assertEquals('value', $stack[0]['arguments']['name']);
-		$this->assertEquals('index', $stack[0]['method'][0]);
+		$this->assertEquals('index', $stack[0]['method'][1]);
+		$this->assertEquals('second_method', $stack[0]['method'][2]);
 	}
 
 	public function testRemoveMethod()

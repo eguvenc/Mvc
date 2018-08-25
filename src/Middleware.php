@@ -10,7 +10,7 @@ use Obullo\Mvc\RouteDispatcher;
  * @copyright Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class MiddlewareManager
+class Middleware
 {
     protected $count = 0;
     protected $dispatcher;
@@ -59,26 +59,26 @@ class MiddlewareManager
     /**
      * Include methods
      * 
-     * @param string|array $names method
+     * @param string $name method
      * @return object
      */
-    public function addMethod($names)
+    public function addMethod(string $name)
     {
         unset($this->middleware[$this->count]['method'][0]);
-        $this->middleware[$this->count]['method'] = (array)$names;
+        $this->middleware[$this->count]['method'][] = $name;
         return $this;
     }
 
     /**
      * Exclude methods
      * 
-     * @param string|array $names method
+     * @param string $name method
      * @return object
      */
-    public function removeMethod($names)
+    public function removeMethod(string $name)
     {
         foreach ($this->getClassMethods() as $classMethod) {
-            if ($classMethod != '__construct' && ! in_array($classMethod, (array)$names))  {
+            if ($classMethod != '__construct' && $classMethod != $name)  {
                 $this->middleware[$this->count]['method'][] = $classMethod;
             }
         }

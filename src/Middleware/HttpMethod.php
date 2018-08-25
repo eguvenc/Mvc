@@ -40,14 +40,13 @@ class HttpMethod implements MiddlewareInterface,ContainerAwareInterface
                 $result = $events->trigger('http.method.notAllowed.message', null, $methods);
                 $message = $result->last();
 
-                $errorMiddleware = new Error(
+                $error = new Error(
                     '405',
                     $message,
                     ['Allow' => implode(', ', $methods)]
                 );
-                $errorMiddleware->setContainer($container);
+                return $handler->process($error);
                 
-                return $handler->process($errorMiddleware);
             } else {
                 $events->trigger('http.method.allowed', null, $methods);
             }

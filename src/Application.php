@@ -46,8 +46,7 @@ class Application implements ContainerAwareInterface
         $this->events = $container->get('events');
         $this->container = $container;
 
-        $container = $this->getContainer(); // Create listeners
-        foreach ($listeners as $listener) {
+        foreach ($listeners as $listener) { // Create listeners
             $object = new $listener;
             if ($object instanceof ContainerAwareInterface) {
                 $object->setContainer($container);
@@ -153,6 +152,7 @@ class Application implements ContainerAwareInterface
     public function process(array $queue, Request $request) : Response
     {
         $stack = new Stack;
+        $stack->setContainer($this->getContainer());
         $queue[] = new SendResponse($this);
         foreach ($queue as $value) {
             if ($value instanceof ContainerAwareInterface) {

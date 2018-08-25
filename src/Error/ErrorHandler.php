@@ -130,12 +130,6 @@ class ErrorHandler implements ContainerAwareInterface
         $message  = $this->strategy->renderErrorMessage($message, $exception);
         $response = $this->strategy->getResponseClass();
 
-        $errorResponse = new $response($message, $status, $headers);
-
-        $result = $this->getContainer()
-                ->get('events')
-                ->trigger('error.response',null,$errorResponse);
-
-        return $result->last();
+        return new $response($message, $status, $headers);
     }
 }

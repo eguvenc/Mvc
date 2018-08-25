@@ -14,6 +14,8 @@ use Obullo\Mvc\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };
+use App\Middleware\Error;
+
 class SendResponse implements MiddlewareInterface,ContainerAwareInterface
 {
     use ContainerAwareTrait;
@@ -50,10 +52,6 @@ class SendResponse implements MiddlewareInterface,ContainerAwareInterface
                 return $response;
             }
         }
-        $result = $events->trigger('error.404',null,['request' => $request, 'response' => $response]);
-        $errorMiddleware = $result->last();
-        $errorMiddleware->setContainer($container);
-        
-        return $handler->process($errorMiddleware);
+        return $handler->process(new Error('404'));
     }
 }

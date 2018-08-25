@@ -1,7 +1,7 @@
 
 ## Http
 
-Http sınıfı sunucuya gelen http istekleri yönetir ve Psr7 standartlarını zorunlu tutar. Bu paket `Zend/Diactoros` paketine genişler.
+Http sınıfı sunucuya gelen http isteklerini yönetir ve Psr7 standartlarını zorunlu tutar. Bu paket `Zend/Diactoros` paketine genişler.
 
 ### Konfigürasyon
 
