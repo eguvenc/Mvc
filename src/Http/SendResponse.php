@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Mvc\Middleware;
+namespace Obullo\Mvc\Http;
 
 use Psr\Http\{
     Server\MiddlewareInterface,
@@ -9,25 +9,33 @@ use Psr\Http\{
     Message\ServerRequestInterface as Request
 };
 use Interop\Container\ContainerInterface;
-use Obullo\Mvc\Application;
+use Obullo\Mvc\Http\Kernel;
 use Obullo\Mvc\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };
 use App\Middleware\Error;
 
+/**
+ * SendResponse middleware
+ *
+ * @copyright 2018 Obullo
+ * @license   http://opensource.org/licenses/MIT MIT license
+ */
 class SendResponse implements MiddlewareInterface,ContainerAwareInterface
 {
     use ContainerAwareTrait;
+
+    protected $kernel;
 
     /**
      * Constructor
      * 
      * @param Application $application application
      */
-    public function __construct(Application $application)
+    public function __construct(Kernel $kernel)
     {
-        $this->application = $application;
+        $this->kernel = $kernel;
     }
 
     /**
@@ -47,7 +55,7 @@ class SendResponse implements MiddlewareInterface,ContainerAwareInterface
 
         $response = null;
         if ($router->hasMatch()) {
-            $response = $this->application->handle($request);
+            $response = $this->kernel->dispatch($request);
             if ($response instanceof ResponseInterface) {
                 return $response;
             }

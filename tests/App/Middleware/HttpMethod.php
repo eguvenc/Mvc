@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Mvc\Middleware;
+namespace Tests\App\Middleware;
 
 use Psr\Http\{
     Message\ResponseInterface,
@@ -12,8 +12,6 @@ use Obullo\Mvc\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };
-use App\Middleware\Error;
-
 class HttpMethod implements MiddlewareInterface,ContainerAwareInterface
 {
     use ContainerAwareTrait;

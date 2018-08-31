@@ -1,23 +1,22 @@
 <?php
 
-namespace Obullo\Mvc\Dependency;
+namespace Obullo\Mvc\Http;
 
 use Obullo\Mvc\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };
 use ReflectionClass;
-use Obullo\Mvc\Http\RequestWrapperInterface;
 use Psr\Container\ContainerInterface as Container;
 use Obullo\Mvc\Exception\UndefinedServiceException;
 
 /**
- * Dependency resolver
+ * Argument resolver
  *
  * @copyright 2018 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class Resolver implements ContainerAwareInterface
+class ArgumentResolver implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
 
@@ -25,11 +24,22 @@ class Resolver implements ContainerAwareInterface
     protected $arguments = array();
 
     /**
-     * Constructor
+     * Clear variables
+     * 
+     * @return void
+     */
+    public function clear()
+    {
+        $this->arguments = array();
+        $this->reflection = null;
+    }
+
+    /**
+     * Set reflection class
      * 
      * @param ReflectionClass $reflection reflection
      */
-    public function __construct(ReflectionClass $reflection)
+    public function setReflectionClass(ReflectionClass $reflection)
     {
         $this->reflection = $reflection;
     }
@@ -54,6 +64,7 @@ class Resolver implements ContainerAwareInterface
     {
         $injectedParameters = array();
         $parameters = $this->reflection->getMethod($method)->getParameters();
+        
         foreach ($parameters as $param) {
             $name = $param->getName();
             $interface = $param->getClass();
@@ -63,9 +74,6 @@ class Resolver implements ContainerAwareInterface
                     $interfaceClass = $interface->getName();
                     if ($classInstance instanceof $interfaceClass) {
                         $injectedParameters[] = $classInstance;
-                    }
-                    if ($classInstance instanceof RequestWrapperInterface) {
-                        $injectedParameters[] = $classInstance->getRequest();
                     }
                 } else {
                     throw new UndefinedServiceException(

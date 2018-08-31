@@ -1,6 +1,7 @@
 <?php
 
 use Obullo\Mvc\RouteDispatcher;
+use Obullo\Mvc\Http\ControllerResolver;
 use Obullo\Router\{
     RequestContext,
     RouteCollection,
@@ -14,7 +15,7 @@ use Obullo\Router\Types\{
 };
 use Zend\ServiceManager\ServiceManager;
 
-class RouteDispatcherTest extends PHPUnit_Framework_TestCase
+class ControllerResolverTest extends PHPUnit_Framework_TestCase
 {
 	public function setUp()
 	{
@@ -44,38 +45,39 @@ class RouteDispatcherTest extends PHPUnit_Framework_TestCase
         $router = new Router($collection);
         $router->match('/','example.com');
 
-		$this->dispatcher = new RouteDispatcher($router);
-		$this->dispatcher->setContainer($container);
-		$this->dispatcher->dispatch();
+        $this->controllerResolver = new ControllerResolver;
+        $this->controllerResolver->setRouter($router);
+        $this->controllerResolver->setContainer($container);
+        $this->controllerResolver->dispatch();
 	}
 
 	public function testGetFirstNamespace()
 	{
-		$this->assertEquals('Tests', $this->dispatcher->getFirstNamespace());
+		$this->assertEquals('Tests', $this->controllerResolver->getFirstNamespace());
 	}
 
     public function testGetClassIsCallable()
     {
-        $this->assertTrue($this->dispatcher->getClassIsCallable());
+        $this->assertTrue($this->controllerResolver->getClassIsCallable());
     }
 
     public function testGetClassName()
     {
-        $this->assertEquals('Tests\App\Controller\DefaultController', $this->dispatcher->getClassName());
+        $this->assertEquals('Tests\App\Controller\DefaultController', $this->controllerResolver->getClassName());
     }
 
     public function testGetClassMethod()
     {
-        $this->assertEquals('index', $this->dispatcher->getClassMethod());
+        $this->assertEquals('index', $this->controllerResolver->getClassMethod());
     }
 
     public function testGetClassInstance()
     {
-        $this->assertInstanceOf('Tests\App\Controller\DefaultController', $this->dispatcher->getClassInstance());
+        $this->assertInstanceOf('Tests\App\Controller\DefaultController', $this->controllerResolver->getClassInstance());
     }
 
     public function testGetRouter()
     {
-        $this->assertInstanceOf('Obullo\Router\Router', $this->dispatcher->getRouter());
+        $this->assertInstanceOf('Obullo\Router\Router', $this->controllerResolver->getRouter());
     }
 }

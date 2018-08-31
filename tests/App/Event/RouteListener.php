@@ -48,7 +48,8 @@ class RouteListener implements ListenerAggregateInterface,ContainerAwareInterfac
 
         $routes = $this->getContainer()
             ->get('loader')
-            ->load('/config/routes.yaml');
+            ->load(ROOT, '/tests/var/config/routes.yaml')
+            ->toArray();
 
         return $builder->build($routes);        
     }

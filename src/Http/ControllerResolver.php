@@ -1,19 +1,21 @@
 <?php
 
-namespace Obullo\Mvc;
+namespace Obullo\Mvc\Http;
 
+use Obullo\Mvc\Container\{
+    ContainerAwareTrait,
+    ContainerAwareInterface
+};
 use ReflectionClass;
 use Obullo\Router\Router;
-use Obullo\Mvc\Dependency\Resolver;
-use Obullo\Mvc\Container\ContainerAwareTrait;
 
 /**
- * Route dispatcher
+ * Controller resolver
  *
  * @copyright Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class RouteDispatcher
+class ControllerResolver implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
 
@@ -29,7 +31,7 @@ class RouteDispatcher
      * 
      * @param Router $router router
      */
-    public function __construct(Router $router)
+    public function setRouter(Router $router)
     {
         $this->router = $router;
         $this->name = 'App';
@@ -47,6 +49,7 @@ class RouteDispatcher
         }
         $handler = $this->router->getMatchedRoute()
             ->getHandler();
+
         if (is_callable($handler)) {
             $this->isCallable = true;
             $this->resolveHandler($handler);

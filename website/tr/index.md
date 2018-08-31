@@ -5,7 +5,7 @@
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 [![Total Downloads](https://img.shields.io/packagist/dt/obullo/mvc.svg)](https://packagist.org/packages/obullo/mvc)
 
-> Obullo ve Zend bileşenleri ile kendi mvc çatınızı oluşturun.
+> Obullo ve Zend bileşenleri ile micro mvc çatınızı oluşturun.
 
 ## Proje yaratmak
 

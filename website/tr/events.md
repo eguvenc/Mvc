@@ -18,6 +18,10 @@ Trigger fonksiyonu olayları `başlatmayı` ve dinleyicilere `veri` göndermeyi 
 $result = $events->trigger('route.builder', $this, ['context' => $context]);
 ```
 
+
+
+
+
 if (! in_array($request->getMethod(), $methods)) {
     
     $events->trigger('http.method.notAllowed', null, $methods);
@@ -30,5 +34,4 @@ if (! in_array($request->getMethod(), $methods)) {
         ['Allow' => implode(', ', $methods)]
     );
     return $handler->process($error);
-    
 }

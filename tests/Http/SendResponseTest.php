@@ -16,23 +16,18 @@ use Obullo\Router\Types\{
     IntType,
     TranslationType
 };
+use Obullo\Mvc\Container\ContainerAwareInterface;
 use Obullo\Mvc\Http\ServerRequestFactory;
 use Obullo\Stack\Builder as Stack;
 
-class ApplicationTest extends PHPUnit_Framework_TestCase
+class SendResponseTest extends PHPUnit_Framework_TestCase
 {
-    public function setUp()
+    public function testHelloWorld()
     {
         $container = new ServiceManager;
         $container->setFactory('events', 'Tests\App\Services\EventManagerFactory');
         $container->setFactory('session', 'Tests\App\Services\SessionFactory');
         $container->setFactory('loader', 'Tests\App\Services\LoaderFactory');
-        $this->container = $container;
-    }
-
-    public function testDispatch()
-    {
-        $container = $this->container;
         $listeners = [
             'Tests\App\Event\SessionListener',
             'Tests\App\Event\ErrorListener',
@@ -56,7 +51,7 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
         $collection->setContext($context);
         $builder = new Builder($collection);
         
-        $routes = $this->container->get('loader')
+        $routes = $container->get('loader')
             ->load(ROOT, '/tests/var/config/routes_with_middleware.yaml');
         $collection = $builder->build($routes->toArray());
 
@@ -72,7 +67,7 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
         $application->start($context, $dispatcher);
 
         $queue = [
-            new \Obullo\Mvc\Middleware\HttpMethod,
+            new \Tests\App\Middleware\HttpMethod,
         ];
         $request = ServerRequestFactory::fromGlobals();
         $uri = $request->getUri()
@@ -80,20 +75,39 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
             ->withHost('example.com');
         $request = $request->withUri($uri);
         $container->setService('request', $request);
-
-        $queue = $application->mergeQueue($queue);
-        $response = $application->process($queue, $request);
+        
+        $stack = new Stack;
+        $stack->setContainer($container);
+        $queue[] = new \Obullo\Mvc\Middleware\SendResponse($application);
+        foreach ($queue as $value) {
+            if ($value instanceof ContainerAwareInterface) {
+                $value->setContainer($container);
+            }
+            $stack = $stack->withMiddleware($value);
+        }
+        $response = $stack->process($request);
 
         $this->assertEquals('Hello World !', (string)$response->getBody());
-        $this->assertInstanceOf('Obullo\Mvc\Middleware\HttpMethod', $queue[0]);
     }
 
-    public function testProcessWithLocalizedRoute()
+    public function test404Error()
     {
-        $container = $this->container;
-
+        $container = new ServiceManager;
+        $container->setFactory('error', 'Tests\App\Services\ErrorHandlerFactory');
+        $container->setFactory('translator', 'Tests\App\Services\TranslatorFactory');
+        $container->setFactory('loader', 'Tests\App\Services\LoaderFactory');
+        $container->setFactory('view', 'Tests\App\Services\ViewPlatesFactory');
+        $container->setFactory('events', 'Tests\App\Services\EventManagerFactory');
+        $container->setFactory('session', 'Tests\App\Services\SessionFactory');
+        $listeners = [
+            'Tests\App\Event\SessionListener',
+            'Tests\App\Event\ErrorListener',
+            'Tests\App\Event\RouteListener',
+            // 'Tests\App\Event\HttpMethodListener',
+            'Tests\App\Event\SendResponseListener',
+        ];
         $context = new RequestContext;
-        $context->setPath('/en/test');
+        $context->setPath('/');
         $context->setMethod('GET');
         $context->setHost('example.com');
 
@@ -107,41 +121,50 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
         ));
         $collection->setContext($context);
         $builder = new Builder($collection);
-        
-        $routes = $this->container->get('loader')
-            ->load(ROOT, '/tests/var/config/routes.yaml');
+            
+        $routes = $container->get('loader')
+            ->load(ROOT, '/tests/var/config/routes_with_middleware.yaml');
         $collection = $builder->build($routes->toArray());
 
         $router = new Router($collection);
-        $router->match('/en/test','example.com');
+        $router->match('/abc123','example.com');
 
         $dispatcher = new RouteDispatcher($router);
         $dispatcher->setContainer($container);
         $dispatcher->dispatch();
         $container->setService('router', $router);
 
-        $application = new Application($container, []);
+        $application = new Application($container, $listeners);
         $application->start($context, $dispatcher);
 
         $queue = [
-            new \Obullo\Mvc\Middleware\HttpMethod,
+            new \Tests\App\Middleware\HttpMethod,
         ];
-        $_SERVER['REQUEST_URI'] = '/en/test';
-        $request = ServerRequestFactory::fromGlobals(
-            $_SERVER,
-            $_GET,
-            $_POST,
-            $_COOKIE,
-            $_FILES
-        );
-        $route  = $router->getMatchedRoute();
-        $locale = $route->getArgument('locale');
-        $route->removeArgument('locale');
-        $request = $request->withAttribute('locale', $locale);
+        $request = ServerRequestFactory::fromGlobals();
+        $uri = $request->getUri()
+            ->withPath('/abc123')
+            ->withHost('example.com');
+        $request = $request->withUri($uri);
 
         $container->setService('request', $request);
-        $response = $application->process($queue, $request);
+        
+        $stack = new Stack;
+        $stack->setContainer($container);
+        $queue[] = new \Obullo\Mvc\Middleware\SendResponse($application);
+        foreach ($queue as $value) {
+            if ($value instanceof ContainerAwareInterface) {
+                $value->setContainer($container);
+            }
+            $stack = $stack->withMiddleware($value);
+        }
+        $response = $stack->process($request);
 
-        $this->assertEquals('en', (string)$response->getBody());
+        $body = '<body>
+<h1>Not Found</h1>
+<h3>The page you are looking for could not be found</h3>
+</body>';
+
+        $this->assertEquals(404, $response->getStatusCode());
+        $this->assertContains($body, (string)$response->getBody());
     }
 }

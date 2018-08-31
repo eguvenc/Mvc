@@ -1,8 +1,6 @@
 <?php
 
-namespace Obullo\Mvc;
-
-use Obullo\Mvc\RouteDispatcher;
+namespace Obullo\Mvc\Http;
 
 /**
  * Middleware manager
@@ -13,18 +11,18 @@ use Obullo\Mvc\RouteDispatcher;
 class Middleware
 {
     protected $count = 0;
-    protected $dispatcher;
+    protected $resolver;
     protected $stack = array();
     protected $middleware = array();
 
     /**
      * Constructor
      * 
-     * @param RouteDispatcher $dispatcher dispatcher
+     * @param ControllerResolver $resolver resolver
      */
-    public function __construct(RouteDispatcher $dispatcher)
+    public function __construct(ControllerResolver $resolver)
     {
-        $this->dispatcher = $dispatcher;
+        $this->resolver = $resolver;
     }
 
     /**
@@ -37,7 +35,7 @@ class Middleware
         ++$this->count;
         $this->middleware[$this->count] = array(
             'method' => array('__construct'),
-            'class' => $this->dispatcher->getFirstNamespace().'\Middleware\\'.$name,
+            'class' => $this->resolver->getFirstNamespace().'\Middleware\\'.$name,
             'arguments' => array(),
         );
         return $this;
@@ -92,7 +90,7 @@ class Middleware
      */
     protected function getClassMethods()
     {
-        $classInstance = $this->dispatcher->getClassInstance();
+        $classInstance = $this->resolver->getClassInstance();
         $methods = get_class_methods($classInstance);
         if ($methods[0] == '__construct') {
             unset($methods[0]);
@@ -109,7 +107,7 @@ class Middleware
     public function getStack() : array
     {
         foreach ($this->middleware as $data) {
-            if ((isset($data['method'][0]) && $data['method'][0] == '__construct') || in_array($this->dispatcher->getClassMethod(), $data['method'])) {
+            if ((isset($data['method'][0]) && $data['method'][0] == '__construct') || in_array($this->resolver->getClassMethod(), $data['method'])) {
                 $this->stack[] = $data;
             }
         }
