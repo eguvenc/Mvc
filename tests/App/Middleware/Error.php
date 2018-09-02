@@ -51,7 +51,7 @@ class Error implements MiddlewareInterface, ContainerAwareInterface
         $container = $this->getContainer();
 
         $response = $container->get('error')
-            ->renderErrorResponse($this->message, $this->code, $this->headers);
+            ->render($this->message, $this->code, $this->headers);
 
         return $response;
     }

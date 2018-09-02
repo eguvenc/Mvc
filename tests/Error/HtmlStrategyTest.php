@@ -31,9 +31,9 @@ class HtmlStrategyTest extends PHPUnit_Framework_TestCase
 		$this->errorHandler->setResponseStrategy($strategy);
 	}
 
-	public function testRenderErrorResponse()
+	public function testRenderError()
 	{
-		$response = $this->errorHandler->renderErrorResponse(
+		$response = $this->errorHandler->render(
 			'Exception Error',
 			'500',
 			[],

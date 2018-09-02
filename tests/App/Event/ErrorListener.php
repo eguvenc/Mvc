@@ -12,8 +12,6 @@ use Obullo\Mvc\Container\{
     ContainerAwareInterface,
     ContainerAwareTrait
 };
-use Obullo\Mvc\Middleware\Error;
-
 class ErrorListener implements ListenerAggregateInterface,ContainerAwareInterface
 {
     use ContainerAwareTrait;
@@ -21,17 +19,7 @@ class ErrorListener implements ListenerAggregateInterface,ContainerAwareInterfac
 
     public function attach(EventManagerInterface $events, $priority = null)
     {
-        $this->listeners[] = $events->attach('error.404', [$this, 'on404Error']);
         $this->listeners[] = $events->attach('error.handler', [$this, 'onErrorHandler']);
-        $this->listeners[] = $events->attach('error.response', [$this, 'onErrorResponse']);
-    }
-
-    public function on404Error(EventInterface $e) : Error
-    {
-        // $e->getParam('request');
-        // $e->getParam('repsonse');
-
-        return new Error('404');
     }
 
     public function onErrorHandler(EventInterface $e)
@@ -46,11 +34,5 @@ class ErrorListener implements ListenerAggregateInterface,ContainerAwareInterfac
                     break;
             }
         }
-    }
-
-    public function onErrorResponse(EventInterface $e)
-    {
-        $response = $e->getParams();
-        return $response;
     }
 }

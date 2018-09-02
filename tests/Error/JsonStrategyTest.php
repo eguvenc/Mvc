@@ -36,7 +36,7 @@ class JsonStrategyTest extends PHPUnit_Framework_TestCase
 
 		$this->errorHandler->setResponseStrategy($strategy);
 
-		$response = $this->errorHandler->renderErrorResponse(
+		$response = $this->errorHandler->render(
 			'Exception Error',
 			'500',
 			[],

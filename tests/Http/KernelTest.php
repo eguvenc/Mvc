@@ -36,7 +36,6 @@ class KernelTest extends PHPUnit_Framework_TestCase
     {
         $container = $this->container;
         $listeners = [
-            'Tests\App\Event\SessionListener',
             'Tests\App\Event\ErrorListener',
             'Tests\App\Event\RouteListener',
             // 'Tests\App\Event\HttpMethodListener',
@@ -92,7 +91,7 @@ class KernelTest extends PHPUnit_Framework_TestCase
         foreach ($queue as $value) {
             $stack = $stack->withMiddleware($value);
         }
-        $kernel = new Kernel($container->get('events'), new ControllerResolver, $stack, new ArgumentResolver);
+        $kernel = new Kernel($container->get('events'), $router, new ControllerResolver, $stack, new ArgumentResolver);
         $kernel->setContainer($container);
 
         $response = $kernel->handle($request);
@@ -156,10 +155,10 @@ class KernelTest extends PHPUnit_Framework_TestCase
         foreach ($queue as $value) {
             $stack = $stack->withMiddleware($value);
         }
-        $kernel = new Kernel($container->get('events'), new ControllerResolver, $stack, new ArgumentResolver);
+        $kernel = new Kernel($container->get('events'), $router, new ControllerResolver, $stack, new ArgumentResolver);
         $kernel->setContainer($container);
 
-        $response = $kernel->handle($request, $router);
+        $response = $kernel->handle($request);
 
         $this->assertEquals('en', (string)$response->getBody());
     }

@@ -79,6 +79,14 @@ $container->setFactory('error', 'Services\ErrorHandlerFactory');
 $container->setFactory('escaper', 'Services\EscaperFactory');
 ```
 
+Hata Kontrolü
+
+```php
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+});
+```
+
 İstisnai Hata Kontrolü
 
 ```php
@@ -89,21 +97,47 @@ Olay Dinleyiciler
 
 ```php
 $listeners = [
-    'App\Event\SessionListener',
     'App\Event\ErrorListener',
     'App\Event\RouteListener',
-    // 'App\Event\HttpMethodListener',
+    'App\Event\HttpMethodListener',
     'App\Event\SendResponseListener',
 ];
-$application = new Application($container, $listeners);
-$application->start();
+foreach ($listeners as $listener) { // Create listeners
+    $object = new $listener;
+    if ($object instanceof ContainerAwareInterface) {
+        $object->setContainer($container);
+    }
+    $object->attach($events);
+}
+```
+
+Katmanlar
+
+```php
+$queue = [
+    new App\Middleware\Session,
+    new App\Middleware\HttpMethod,
+    new App\Middleware\Translation
+];
+$stack = new Stack;
+$stack->setContainer($container);
+foreach ($queue as $value) {
+    $stack = $stack->withMiddleware($value);
+}
+```
+
+Çekirdek
+
+```php
+$kernel = new Kernel($events, new Router($collection), new ControllerResolver, $stack, new ArgumentResolver);
+$kernel->setContainer($container);
 ```
 
 Yanıt Gönderici
 
 ```php
-$response = $application->process($queue = [], $container->get('request'));
-$application->sendResponse($response);
+$response = $kernel->handle($request);
+$kernel->send($response);
 ```
 
 ## Konteyner

@@ -8,6 +8,12 @@ class FlashMessengerTest extends PHPUnit_Framework_TestCase
 {
 	public function setUp()
 	{
+        $container = new ServiceManager;
+        $container->setFactory('session', 'Tests\App\Services\SessionFactory');
+
+        $manager = $container->get('session');
+        $manager->start();
+
         $params = [
             'view' => array(
                 'message_open_format'      => '<div%s><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><ul><li>',

@@ -43,7 +43,7 @@ class ErrorHandler implements ContainerAwareInterface
     {
         $response = $this->handleError($exception);
         
-        $this->emitErrorResponse($response);
+        $this->send($response);
     }
 
     /**
@@ -57,9 +57,9 @@ class ErrorHandler implements ContainerAwareInterface
     {        
         $this->getContainer()
             ->get('events')
-            ->trigger('error.handler',null,$exception);
+            ->trigger('error.handler',$this,$exception);
 
-        return $this->renderErrorResponse(
+        return $this->render(
             'An error was encountered',
             500,
             array(),
@@ -68,11 +68,30 @@ class ErrorHandler implements ContainerAwareInterface
     }
 
     /**
+     * Render error response
+     * 
+     * @param  string $message body
+     * @param  int    $status  http status code
+     * @param  array  $headers http headers
+     * 
+     * @return object
+     */
+    public function render($message = null, $status, $headers = array(), Throwable $exception = null) : ResponseInterface
+    {
+        $this->strategy->setStatusCode($status);
+
+        $message  = $this->strategy->renderErrorMessage($message, $exception);
+        $response = $this->strategy->getResponseClass();
+
+        return new $response($message, $status, $headers);
+    }
+
+    /**
      * Emit response
      *     
      * @return void
      */
-    public function emitErrorResponse(ResponseInterface $response)
+    public function send(ResponseInterface $response)
     {
         if (headers_sent()) {
             throw new RuntimeException('Unable to emit response; headers already sent');
@@ -112,24 +131,5 @@ class ErrorHandler implements ContainerAwareInterface
     protected function emitBody($response)
     {
         echo $response->getBody();
-    }
-
-    /**
-     * Render error response
-     * 
-     * @param  string $message body
-     * @param  int    $status  http status code
-     * @param  array  $headers http headers
-     * 
-     * @return object
-     */
-    public function renderErrorResponse($message = null, $status, $headers = array(), Throwable $exception = null) : ResponseInterface
-    {
-        $this->strategy->setStatusCode($status);
-
-        $message  = $this->strategy->renderErrorMessage($message, $exception);
-        $response = $this->strategy->getResponseClass();
-
-        return new $response($message, $status, $headers);
     }
 }

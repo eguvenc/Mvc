@@ -79,3 +79,6 @@ Gelen http metodu `OPTIONS` ise `true` aksi durumda `false` değerine geri döne
 #### $request->isPropFind();
 
 Gelen http metodu `PROPFIND` ise `true` aksi durumda `false` değerine geri döner.
+
+
+Detaylı dökümentasyona <a href="https://docs.zendframework.com/zend-diactoros">https://docs.zendframework.com/zend-diactoros</a> bağlantısından ulaşabilirsiniz.

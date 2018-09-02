@@ -24,7 +24,7 @@ class SessionFactory implements FactoryInterface
         $manager = new SessionManager();
         $manager->setStorage(new SessionArrayStorage());
         // $manager->setName('test');  // No need to set name in test environment may occurs exception.
-        $manager->start();
+        // $manager->start();
 
         return $manager;
     }

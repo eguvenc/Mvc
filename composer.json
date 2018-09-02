@@ -1,7 +1,7 @@
 {
     "name": "obullo/mvc",
     "type": "library",
-    "description": "Create your micro mvc using composer packages.",
+    "description": "Micro mvc framework built with Obullo and Zend components.",
     "keywords": [
         "obullo",
         "mvc",

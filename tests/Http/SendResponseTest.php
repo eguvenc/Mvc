@@ -1,9 +1,10 @@
 <?php
 
 use Zend\ServiceManager\ServiceManager;
-use Obullo\Mvc\{
-    Application,
-    RouteDispatcher
+use Obullo\Mvc\Http\{
+    ControllerResolver,
+    ArgumentResolver,
+    Kernel
 };
 use Obullo\Router\{
     RequestContext,
@@ -28,13 +29,20 @@ class SendResponseTest extends PHPUnit_Framework_TestCase
         $container->setFactory('events', 'Tests\App\Services\EventManagerFactory');
         $container->setFactory('session', 'Tests\App\Services\SessionFactory');
         $container->setFactory('loader', 'Tests\App\Services\LoaderFactory');
+        $events = $container->get('events');
         $listeners = [
-            'Tests\App\Event\SessionListener',
             'Tests\App\Event\ErrorListener',
             'Tests\App\Event\RouteListener',
             // 'Tests\App\Event\HttpMethodListener',
             'Tests\App\Event\SendResponseListener',
         ];
+        foreach ($listeners as $listener) { // Create listeners
+            $object = new $listener;
+            if ($object instanceof ContainerAwareInterface) {
+                $object->setContainer($container);
+            }
+            $object->attach($events);
+        }
         $context = new RequestContext;
         $context->setPath('/');
         $context->setMethod('GET');
@@ -58,13 +66,10 @@ class SendResponseTest extends PHPUnit_Framework_TestCase
         $router = new Router($collection);
         $router->match('/','example.com');
 
-        $dispatcher = new RouteDispatcher($router);
-        $dispatcher->setContainer($container);
-        $dispatcher->dispatch();
-        $container->setService('router', $router);
-
-        $application = new Application($container, $listeners);
-        $application->start($context, $dispatcher);
+        $controllerResolver = new ControllerResolver;
+        $controllerResolver->setRouter($router);
+        $controllerResolver->setContainer($container);
+        $controllerResolver->dispatch();
 
         $queue = [
             new \Tests\App\Middleware\HttpMethod,
@@ -78,14 +83,10 @@ class SendResponseTest extends PHPUnit_Framework_TestCase
         
         $stack = new Stack;
         $stack->setContainer($container);
-        $queue[] = new \Obullo\Mvc\Middleware\SendResponse($application);
-        foreach ($queue as $value) {
-            if ($value instanceof ContainerAwareInterface) {
-                $value->setContainer($container);
-            }
-            $stack = $stack->withMiddleware($value);
-        }
-        $response = $stack->process($request);
+
+        $kernel = new Kernel($events, $router, new ControllerResolver, $stack, new ArgumentResolver);
+        $kernel->setContainer($container);
+        $response = $kernel->handle($request);
 
         $this->assertEquals('Hello World !', (string)$response->getBody());
     }
@@ -99,13 +100,20 @@ class SendResponseTest extends PHPUnit_Framework_TestCase
         $container->setFactory('view', 'Tests\App\Services\ViewPlatesFactory');
         $container->setFactory('events', 'Tests\App\Services\EventManagerFactory');
         $container->setFactory('session', 'Tests\App\Services\SessionFactory');
+        $events = $container->get('events');
         $listeners = [
-            'Tests\App\Event\SessionListener',
             'Tests\App\Event\ErrorListener',
             'Tests\App\Event\RouteListener',
             // 'Tests\App\Event\HttpMethodListener',
             'Tests\App\Event\SendResponseListener',
         ];
+        foreach ($listeners as $listener) { // Create listeners
+            $object = new $listener;
+            if ($object instanceof ContainerAwareInterface) {
+                $object->setContainer($container);
+            }
+            $object->attach($events);
+        }
         $context = new RequestContext;
         $context->setPath('/');
         $context->setMethod('GET');
@@ -129,13 +137,10 @@ class SendResponseTest extends PHPUnit_Framework_TestCase
         $router = new Router($collection);
         $router->match('/abc123','example.com');
 
-        $dispatcher = new RouteDispatcher($router);
-        $dispatcher->setContainer($container);
-        $dispatcher->dispatch();
-        $container->setService('router', $router);
-
-        $application = new Application($container, $listeners);
-        $application->start($context, $dispatcher);
+        $controllerResolver = new ControllerResolver;
+        $controllerResolver->setRouter($router);
+        $controllerResolver->setContainer($container);
+        $controllerResolver->dispatch();
 
         $queue = [
             new \Tests\App\Middleware\HttpMethod,
@@ -150,14 +155,9 @@ class SendResponseTest extends PHPUnit_Framework_TestCase
         
         $stack = new Stack;
         $stack->setContainer($container);
-        $queue[] = new \Obullo\Mvc\Middleware\SendResponse($application);
-        foreach ($queue as $value) {
-            if ($value instanceof ContainerAwareInterface) {
-                $value->setContainer($container);
-            }
-            $stack = $stack->withMiddleware($value);
-        }
-        $response = $stack->process($request);
+        $kernel = new Kernel($events, $router, new ControllerResolver, $stack, new ArgumentResolver);
+        $kernel->setContainer($container);
+        $response = $kernel->handle($request);
 
         $body = '<body>
 <h1>Not Found</h1>

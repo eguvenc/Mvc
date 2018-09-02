@@ -6,14 +6,17 @@ use Obullo\Router\{
     Router,
     Builder
 };
+use Obullo\Mvc\Http\{
+    Kernel,
+    ArgumentResolver,
+    ControllerResolver,
+    Middleware
+};
 use Obullo\Router\Types\{
     StrType,
     IntType,
     TranslationType
 };
-use Obullo\Mvc\Http\ServerRequestFactory;
-use Obullo\Mvc\RouteDispatcher;
-use Obullo\Mvc\Middleware;
 use Zend\ServiceManager\ServiceManager;
 
 class MiddlewareTest extends PHPUnit_Framework_TestCase
@@ -46,12 +49,12 @@ class MiddlewareTest extends PHPUnit_Framework_TestCase
         $router = new Router($collection);
         $router->match('/','example.com');
 
-        $dispatcher = new RouteDispatcher($router);
-        $dispatcher->setContainer($container);
-        $dispatcher->dispatch();
-        $container->setService('router', $router);
+        $controllerResolver = new ControllerResolver;
+        $controllerResolver->setRouter($router);
+        $controllerResolver->setContainer($container);
+        $controllerResolver->dispatch();
 
-        $this->middleware = new Middleware($dispatcher);
+        $this->middleware = new Middleware($controllerResolver);
 	}
 
 	public function testAdd()
