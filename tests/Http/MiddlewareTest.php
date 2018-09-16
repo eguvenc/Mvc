@@ -6,7 +6,7 @@ use Obullo\Router\{
     Router,
     Builder
 };
-use Obullo\Mvc\Http\{
+use Obullo\Http\{
     Kernel,
     ArgumentResolver,
     ControllerResolver,

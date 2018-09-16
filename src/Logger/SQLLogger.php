@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Mvc\Logger;
+namespace Obullo\Logger;
 
 use Psr\Log\LoggerInterface as Logger;
 use Doctrine\DBAL\Logging\SQLLogger as SQLLoggerInterface;

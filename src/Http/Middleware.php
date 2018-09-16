@@ -1,6 +1,8 @@
 <?php
 
-namespace Obullo\Mvc\Http;
+namespace Obullo\Http;
+
+use Obullo\Exception\MiddlewareArgumentException;
 
 /**
  * Middleware manager
@@ -48,9 +50,12 @@ class Middleware
      * @param  mixed $arg arguments
      * @return object
      */
-    public function addArgument(string $name, $arg)
+    public function addArguments(array $args)
     {
-        $this->middleware[$this->count]['arguments'][$name] = $arg;
+        if (false == $this->isAssocativeArray($args)) {
+            throw new MiddlewareArgumentException('Middleware add argument method parameter must be associative array.');
+        }
+        $this->middleware[$this->count]['arguments'] = $args;
         return $this;
     }
 
@@ -112,5 +117,17 @@ class Middleware
             }
         }
         return $this->stack;
+    }
+
+    /**
+     * Simple test for an associative array
+     *
+     * @link http://stackoverflow.com/questions/173400/how-to-check-if-php-array-is-associative-or-sequential
+     * @param array $array
+     * @return bool
+     */
+    private function isAssocativeArray(array $array)
+    {
+        return array_keys($array) !== range(0, count($array) - 1);
     }
 }

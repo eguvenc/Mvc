@@ -1,13 +1,13 @@
 <?php
 
-namespace Obullo\Mvc\Http;
+namespace Obullo\Http;
 
 use Psr\{
     Container\ContainerInterface as Container,
     Http\Message\ServerRequestInterface as Request,
     Http\Message\ResponseInterface as Response
 };
-use Obullo\Mvc\Container\{
+use Obullo\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };
@@ -68,6 +68,7 @@ class Kernel
         $container->setService('router', $this->router);
 
         $this->controllerResolver->setRouter($this->router);
+        $this->controllerResolver->setArgumentResolver($this->argumentResolver);
         $this->controllerResolver->setContainer($container);
         $this->controllerResolver->dispatch();
 

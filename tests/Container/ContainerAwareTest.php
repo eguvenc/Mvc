@@ -1,11 +1,11 @@
 <?php
 
-use Obullo\Mvc\Exception;
-
+use Obullo\Exception;
 use Zend\ServiceManager\ServiceManager;
-use Obullo\Mvc\Container\ContainerAwareTrait;
-use Obullo\Mvc\Container\ContainerAwareInterface;
-
+use Obullo\Container\{
+	ContainerAwareTrait,
+	ContainerAwareInterface
+};
 class ContainerAwareTest extends PHPUnit_Framework_TestCase implements ContainerAwareInterface 
 {
 	use ContainerAwareTrait;

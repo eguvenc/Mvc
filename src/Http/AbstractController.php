@@ -1,8 +1,8 @@
 <?php
 
-namespace Obullo\Mvc\Controller;
+namespace Obullo\Http;
 
-use Obullo\Mvc\Container\{
+use Obullo\Container\{
     ContainerAwareTrait,
     ContainerProxyTrait,
     ContainerAwareInterface

@@ -1,11 +1,10 @@
 <?php
 
-use Obullo\Mvc\View;
 use Zend\ServiceManager\ServiceManager;
 use League\Plates\Engine;
-use Obullo\Mvc\View\PlatesPhp;
-use Obullo\Mvc\View\Plates\Template;
-use Obullo\Mvc\View\Helper;
+use Obullo\View\PlatesPhp;
+use Obullo\View\Plates\Template;
+use Obullo\View\Helper;
 use League\Plates\Extension\Asset;
 use Obullo\Router\{
     RequestContext,

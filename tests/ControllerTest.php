@@ -11,8 +11,8 @@ use Obullo\Router\Types\{
     IntType,
     TranslationType
 };
-use Obullo\Mvc\Exception;
-use Obullo\Mvc\Controller;
+use Obullo\Exception;
+use Obullo\Http\Controller;
 use Zend\ServiceManager\ServiceManager;
 
 class ControllerTest extends PHPUnit_Framework_TestCase

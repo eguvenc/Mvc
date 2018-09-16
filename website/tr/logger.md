@@ -1,9 +1,11 @@
 
 ## Loglama
 
-Log servisi loglama işlemleri için `Monolog/Logger` composer paketini kullanır. 
+Log servisi loglama işlemleri için `logger` servisi konfigüre edilmelidir. Çerçeve içerisinde logger paketi harici olarak kullanılır ve bunun için `Monolog/Logger`tercih edilmiştir.
 
 ### Loglama servisi
+
+Logger nesnesi diğer servisler gibi `index.php` dosyası içerisinde konfigüre edilir. 
 
 ```php
 $container->setFactory('logger', 'Services\LoggerFactory');
@@ -12,6 +14,12 @@ $container->setFactory('logger', 'Services\LoggerFactory');
 Log servisi `dev` ortamında log mesajlarını varsayılan olarak `/var/log/debug.log` doyasına işler.
 
 ```php
+namespace Services;
+
+use Monolog\Logger;
+use Monolog\Handler\NullHandler;
+use Monolog\Handler\StreamHandler;
+
 class LoggerFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)

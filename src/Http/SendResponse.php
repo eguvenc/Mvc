@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Mvc\Http;
+namespace Obullo\Http;
 
 use Psr\Http\{
     Server\MiddlewareInterface,
@@ -9,8 +9,8 @@ use Psr\Http\{
     Message\ServerRequestInterface as Request
 };
 use Interop\Container\ContainerInterface;
-use Obullo\Mvc\Http\Kernel;
-use Obullo\Mvc\Container\{
+use Obullo\Http\Kernel;
+use Obullo\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };

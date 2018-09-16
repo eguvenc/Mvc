@@ -1,5 +1,5 @@
 {
-    "name": "obullo/mvc",
+    "name": "obullo/framework",
     "type": "library",
     "description": "Micro mvc framework built with Obullo and Zend components.",
     "keywords": [
@@ -8,7 +8,7 @@
         "psr-7",
         "psr-15"
     ],
-    "homepage": "http://mvc.obullo.com",
+    "homepage": "http://framework.obullo.com",
     "license": "MIT",
     "authors": [
         {
@@ -19,7 +19,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "Obullo\\Mvc\\": "src/"
+            "Obullo\\": "src/"
         }
     },
     "autoload-dev": {

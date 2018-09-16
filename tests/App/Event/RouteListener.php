@@ -7,7 +7,7 @@ use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateTrait;
 use Zend\EventManager\ListenerAggregateInterface;
 
-use Obullo\Mvc\Container\{
+use Obullo\Container\{
     ContainerAwareInterface,
     ContainerAwareTrait
 };
@@ -23,7 +23,7 @@ class RouteListener implements ListenerAggregateInterface,ContainerAwareInterfac
 
     public function onMatch(EventInterface $e)
     {
-        // $route = $e->getParams('route');
+        // $route = $e->getParam('route');
         // $route->getName();
     }
 }

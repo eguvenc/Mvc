@@ -1,7 +1,7 @@
 
 ## Katmanlar
 
-Katman sınıfı Psr15 standartlarını zorunlu tutar ve `Obullo/Stack` paketini kullanır.
+Katman sınıfı <a href="https://www.php-fig.org/psr/psr-15/">Psr15</a> standartlarına göre tasarlanmıştır ve <a href="http://stack.obullo.com/">Obullo/Stack</a> paketini kullanır.
 
 > Http katmanları http çözümlemesinden önce `$request` yada `$response` nesnelerini etkilemek için kullanılırlar. Her bir katman uygulamayı sarar ve merkeze doğru ilerledikçe uygulamaya ulaşılır. Merkeze ulaşıldığında route eşleşmesi var ise eşleşme çıktısı, yok ise `Error` katmanı ile `$response` nesnesine dönülerek çıktı ekrana yazdırılır.
 
@@ -14,16 +14,14 @@ Uygulamanıza bir katmanı küresel olarak eklemek için `index.php` yığın ku
 // Stack Queue
 // -------------------------------------------------------------------
 //
-use Obullo\Mvc\Middleware\{
-	HttpMethod
-};
-use App\Middleware\Translation;
-
 $queue = [
-    new Translation,
-    new HttpMethod
+    new App\Middleware\HttpMethod
 ];
-$queue = $application->mergeQueue($queue);
+$stack = new Stack;
+$stack->setContainer($container);
+foreach ($queue as $value) {
+    $stack = $stack->withMiddleware($value);
+}
 ```
 
 > En yukarıda ilan edilen bir http katmanı ilk önce, en son ilan edilen ise en son çalışır.
@@ -31,7 +29,7 @@ $queue = $application->mergeQueue($queue);
 
 ### Dil katmanı
 
-Eğer uygulamanıza çoklu dil desteği eklemek istiyorsanız bunu `Translation` katmanı ile yapabilirsiniz. Aşağıdaki örnek http adreslerine dil desteği ekleyelim.
+Eğer uygulamanıza çoklu dil desteği eklemek istiyorsanız bunu `Translation` katmanı ile yapabilirsiniz.
 
 ```
 http://example.com/en
@@ -57,19 +55,16 @@ dummy:
 // Stack Queue
 // -------------------------------------------------------------------
 //
-use Obullo\Mvc\Middleware\{
-	HttpMethod
-};
-use App\Middleware\Translation;
-
 $queue = [
-    new Translation,
-    new HttpMethod
+    new App\Middleware\HttpMethod,
+    new App\Middleware\Translation,
 ];
-$queue = $application->mergeQueue($queue);
+$stack = new Stack;
+$stack->setContainer($container);
+foreach ($queue as $value) {
+    $stack = $stack->withMiddleware($value);
+}
 ```
-
-Artık dil değişkeni kontrolör dosyanızdan erişilmeye hazır.
 
 Http isteği
 
@@ -82,17 +77,18 @@ Kontrolör dosyası
 ```php
 namespace App\Controller;
 
-use Zend\Diactoros\Response\HtmlResponse;
+use Obullo\Http\Controller;
 use Psr\Http\Message\RequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
 
-class DefaultController
+class DefaultController extends Controller
 {
-    public function dummy(Request $request)
+    public function dummy(Request $request) : Response
     {
         $locale = $this->translator->getLocale();
 
-        return new HtmlResponse(
-        	'locale:'.sprintf('%02s', $locale)
+        return $this->renderHtml(
+            'locale:'.sprintf('%02s', $locale)
         );
     }
 }
@@ -137,7 +133,7 @@ use Psr\Http\{
     Server\MiddlewareInterface,
     Server\RequestHandlerInterface as RequestHandler
 };
-use Obullo\Mvc\Container\{
+use Obullo\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };
@@ -164,16 +160,16 @@ class Guest implements MiddlewareInterface,ContainerAwareInterface
 }
 ```
 
-### Kontrolör katmanları
+### Yerel katmanlar (Middleware sınıfı)
 
-Aşağıdaki örnekte `save` ve `delete` metotlarına yetkisiz kullanıcıların erişmesi engelleniyor.
+Katman yönetimi global olabileceği gibi kontrolör içerisinden yerel olarak da kontrol edilebilir. Aşağıdaki örnekte `save` ve `delete` metotlarına yetkisiz kullanıcıların erişmesi engelleniyor.
 
 ```php
 namespace App\Controller;
 
 use Zend\Db\TableGateway\TableGateway;
 
-use Obullo\Mvc\Controller;
+use Obullo\Http\Controller;
 use Psr\Http\Message\RequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
@@ -208,6 +204,50 @@ class UserController extends Controller
 }
 ```
 
+> Middleware sınıfı `__construct()` metodu içerisinde çalıştırılmak için tasarlanmıştır. Bu tasarımda hedeflenen en tepede sınıf içerisindeki tüm metotları kontrol etmektir.
+
+
+### Argümanlar
+
+Bir katman kontrolör içerisinden eklenirken varsa argümanları `addArguments()` metodu ile eklenebilir.
+
+
+```php
+namespace App\Controller;
+
+use Obullo\Http\Controller;
+use Psr\Http\Message\RequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
+
+class DefaultController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware->add('Error')
+            ->addArguments(array('code' => 404, 'message' => '404 - Sayfa bulunamadı'));
+    }
+}
+```
+
+Argümanların gönderilebilmesi için eklenen argüman dizisi `associative` biçiminde olmalıdır ve yukarıdaki örnekte olduğu gibi argüman isimleri ile `__construct()` metodu içerisindeki parametre isimleri eşleşmelidir.
+
+```php
+namespace App\Middleware;
+
+class Error implements MiddlewareInterface, ContainerAwareInterface
+{    
+    /**
+     * Constructor
+     * 
+     * @param integer $status
+     * @param string  $message optional
+     * @param array   $headers optional
+     */
+    public function __construct($code, $message = null, $headers = array()){}
+}
+```
+
+> Yukarıdaki örneği çalıştırdığınızda `404 - Sayfa bulunamadı` hatası alıyor olmalısınız.
 
 ### Kontrolör katman yönetimi
 
@@ -215,9 +255,9 @@ class UserController extends Controller
 
 Bir kontrolör sınıfına katman ekler.
 
-#### $this->middleware->addArgument(string $name, mixed $arg);
+#### $this->middleware->addArguments(array $args);
 
-Bir kontrolör sınıfına eklenen katmana ait `__construct` metoduna argümanlar ekler. Zincirleme metot yöntemini destekler.
+Bir kontrolör sınıfına eklenen katmana ait `__construct` metoduna argümanlar ekler. Yalnızca `associative` biçimindeki diziler desteklenir. Argüman isimleri ile `__construct()` metodu içerisindeki parametre isimleri eşleşmelidir.
 
 #### $this->middleware->addMethod(string $name);
 
@@ -227,7 +267,6 @@ Bir kontrolör sınıfına eklenen katmanın eklenen metotlar için çalışmas�
 
 Bir kontrolör sınıfına eklenen katmanın silinen metotlar dışındaki metotlar için çalışmasını sağlar. Zincirleme metot yöntemini destekler.
 
-#### $this->middleware->getStack();
+#### $this->middleware->getStack() : array;
 
 Middleware yığınına geri döner.
-

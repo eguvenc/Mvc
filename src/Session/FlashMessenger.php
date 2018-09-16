@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Mvc\Session;
+namespace Obullo\Session;
 
 /**
  * Flash messenger
@@ -145,7 +145,7 @@ class FlashMessenger
         $stringClasses = '';
         $messages = array();
         foreach (array('success', 'error', 'info', 'warning') as $key) {
-            if ($message = $this->get('notice:'.$key)) {
+            if ($message = $this->get($key)) {
                 $stringClasses = array_merge(array($key), $classes);
                 if ($autoEscape) {
                     $message = $this->getEscaper()->escapeHtml($message);
@@ -163,9 +163,9 @@ class FlashMessenger
      *
      * @return object
      */
-    public function success($message, array $classes = [])
+    public function success($message)
     {
-        $this->set(array('notice:success' => $message, 'notice:status' => static::NOTICE_SUCCESS));
+        $this->set(array('success' => $message, 'status' => static::NOTICE_SUCCESS));
         return $this;
     }
 
@@ -178,7 +178,7 @@ class FlashMessenger
      */
     public function error($message)
     {
-        $this->set(array('notice:error' => $message, 'notice:status' => static::NOTICE_ERROR));
+        $this->set(array('error' => $message, 'status' => static::NOTICE_ERROR));
         return $this;
     }
 
@@ -191,7 +191,7 @@ class FlashMessenger
      */
     public function info($message)
     {
-        $this->set(array('notice:info' => $message, 'notice:status' => static::NOTICE_INFO));
+        $this->set(array('info' => $message, 'status' => static::NOTICE_INFO));
         return $this;
     }
 
@@ -204,7 +204,7 @@ class FlashMessenger
      */
     public function warning($message)
     {
-        $this->set(array('notice:warning' => $message, 'notice:status' => static::NOTICE_WARNING));
+        $this->set(array('warning' => $message, 'status' => static::NOTICE_WARNING));
         return $this;
     }
 

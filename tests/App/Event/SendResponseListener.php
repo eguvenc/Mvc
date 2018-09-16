@@ -7,7 +7,7 @@ use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateTrait;
 use Zend\EventManager\ListenerAggregateInterface;
 
-use Obullo\Mvc\Container\{
+use Obullo\Container\{
     ContainerAwareInterface,
     ContainerAwareTrait
 };

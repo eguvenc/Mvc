@@ -1,6 +1,6 @@
 <?php
 
-use Obullo\Mvc\Http\Cookie;
+use Obullo\Http\Cookie;
 
 class CookieTest extends PHPUnit_Framework_TestCase
 {

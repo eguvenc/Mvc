@@ -1,8 +1,8 @@
 <?php
 
-namespace Obullo\Mvc\View\Plates;
+namespace Obullo\View\Plates;
 
-use Obullo\Mvc\Container\{
+use Obullo\Container\{
     ContainerAwareTrait,
     ContainerProxyTrait,
     ContainerAwareInterface

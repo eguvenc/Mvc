@@ -1,7 +1,7 @@
 
 ## Konfigürasyon
 
-Konfigürasyon sınıfı `Obullo/Config` paketini kullanır. Bu paket `Zend/Config` paketi üzerinde çalışır.
+Konfigürasyon sınıfı <a href="http://config.obullo.com/">Obullo/Config</a> paketini kullanır. Bu paket `Zend/Config` paketi üzerinde çalışır.
 
 ### Dosyalar
 
@@ -15,7 +15,69 @@ $amqp = $container->get('loader')
 echo $amqp->host; // 127.0.0.1
 ```
 
-Bu servise ait konfigürasyona `App/Services/LoaderFactory.php` dosyasından erişebilirsiniz.
+### Loader servisi
+
+Konfigürasyon nesnesi diğer servisler gibi `index.php` dosyası içerisinde konfigüre edilir. 
+
+```php
+$container->setFactory('loader', 'Services\LoaderFactory');
+```
+
+Loader servisi `Obullo\Config\ConfigLoader` nesnesine geri döner.
+
+```php
+namespace Services;
+
+use Obullo\Config\ConfigLoader;
+use Obullo\Config\Processor\Env as EnvProcessor;
+use Zend\Config\Processor\Constant as ConstantProcessor;
+
+class LoaderFactory implements FactoryInterface
+{
+    /**
+     * Create an object
+     *
+     * @link http://config.obullo.com/ documentation of config package.
+     * 
+     * @param  ContainerInterface $container
+     * @param  string             $requestedName
+     * @param  null|array         $options
+     * @return object
+     */
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    {
+        $container->setService('yaml', new YamlReader([SymfonyYaml::class, 'parse']));
+
+        Factory::registerReader('yaml', $container->get('yaml'));
+        Factory::setReaderPluginManager($container);
+
+        $env = getenv('APP_ENV');
+
+        $aggregator = new ConfigAggregator(
+            [
+                new ArrayProvider([ConfigAggregator::ENABLE_CACHE => ($env == 'dev') ? false : true ]),
+                new ZendConfigProvider(ROOT.'/config/autoload/{,*.}{json,yaml,php}'),
+            ],
+            ROOT.'/var/cache/config.php'
+        );
+        $config = $aggregator->getMergedConfig();
+        $container->setService('config', new Config($config, true));  // Create global config object
+
+        $loader = new ConfigLoader(
+            $config,
+            ROOT.'/var/cache/config.php'
+        );
+        $loader->setEnv($env);
+        $loader->addProcessor(new EnvProcessor);
+        $loader->addProcessor(new ConstantProcessor);
+
+        $loader->load(ROOT, '/config/%s/framework.yaml');
+        
+        return $loader;
+    }
+}
+```
+
 
 ### Autoload
 

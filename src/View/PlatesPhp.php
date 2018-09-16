@@ -1,13 +1,13 @@
 <?php
 
-namespace Obullo\Mvc\View;
+namespace Obullo\View;
 
-use Obullo\Mvc\Container\{
+use Obullo\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };
 use League\Plates\Engine;
-use Obullo\Mvc\View\Plates\Template;
+use Obullo\View\Plates\Template;
 
 /**
  * Plates template engine - http://platesphp.com/

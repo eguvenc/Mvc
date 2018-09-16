@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Mvc\Http;
+namespace Obullo\Http;
 
 use Zend\Diactoros\ServerRequest as ZendServerRequest;
 

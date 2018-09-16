@@ -1,7 +1,7 @@
 <?php
 
 use Obullo\Config\ConfigLoader;
-use Obullo\Mvc\Http\ArgumentResolver;
+use Obullo\Http\ArgumentResolver;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Config\Reader\ReaderInterface as Reader;
 

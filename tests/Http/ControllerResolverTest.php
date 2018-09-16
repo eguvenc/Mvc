@@ -1,7 +1,6 @@
 <?php
 
-use Obullo\Mvc\RouteDispatcher;
-use Obullo\Mvc\Http\ControllerResolver;
+use Obullo\Http\ControllerResolver;
 use Obullo\Router\{
     RequestContext,
     RouteCollection,

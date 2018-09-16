@@ -1,13 +1,26 @@
-<?php
 
-namespace Tests\App\Services;
+## Görünümler
+
+Görünüm sınıfı uygulama içerisindeki html arayüzünü kontrol eden metotları içerir. Çerçeve içerisinde view paketi harici olarak kullanılır ve bunun için <a href="http://platesphp.com/v3/templates/">League\Plates</a> paketi tercih edilmiştir.
+
+### View servisi
+
+View nesnesi diğer servisler gibi `index.php` dosyası içerisinde konfigüre edilir. 
+
+```php
+$container = new ServiceManager;
+$container->setFactory('view', 'Services\ViewPlatesFactory');
+```
+
+View servisi `Obullo\View\PlatesPhp` nesnesine geri döner ve bu nesne içerisindeki `render` metodu `League\Plates\Template\Template` sınıfı render metodunu çağırır.
+
+```php
+namespace Services;
 
 use Obullo\View\Helper;
 use Obullo\View\PlatesPhp;
 use League\Plates\Engine;
 use League\Plates\Extension\Asset;
-use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
 
 class ViewPlatesFactory implements FactoryInterface
 {
@@ -21,10 +34,10 @@ class ViewPlatesFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $engine = new Engine(ROOT.'/tests/App/View');
+        $engine = new Engine(ROOT.'/'.APP.'/View');
         $engine->setFileExtension('phtml');
-        $engine->addFolder('templates', ROOT.'/tests/var/templates');
-        // $engine->loadExtension(new Asset(ROOT.'/public/'.strtolower(APP).'/', false));
+        $engine->addFolder('templates', ROOT.'/templates');
+        $engine->loadExtension(new Asset(ROOT.'/public/'.strtolower(APP).'/', false));
 
         /**
          * View helpers
@@ -42,3 +55,4 @@ class ViewPlatesFactory implements FactoryInterface
         return $template;
     }
 }
+```

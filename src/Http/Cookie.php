@@ -1,8 +1,8 @@
 <?php
 
-namespace Obullo\Mvc\Http;
+namespace Obullo\Http;
 
-use Obullo\Mvc\Exception\BadCookieException;
+use Obullo\Http\Exception\BadCookieException;
 
 /**
  * Cookie

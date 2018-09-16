@@ -1,11 +1,13 @@
 <?php
 
-use Obullo\Mvc\Exception;
+use Obullo\Exception;
+use Obullo\Container\{
+	ContainerAwareTrait,
+	ContainerProxyTrait
+};
 use Zend\ServiceManager\ServiceManager;
 use Zend\Config\Reader\Yaml as YamlReader;
 use Symfony\Component\Yaml\Yaml as SymfonyYaml;
-use Obullo\Mvc\Container\ContainerAwareTrait;
-use Obullo\Mvc\Container\ContainerProxyTrait;
 
 class ContainerProxyTest extends PHPUnit_Framework_TestCase
 {

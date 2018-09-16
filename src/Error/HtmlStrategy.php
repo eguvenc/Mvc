@@ -1,9 +1,9 @@
 <?php
 
-namespace Obullo\Mvc\Error;
+namespace Obullo\Error;
 
 use Throwable;
-use Obullo\Mvc\View\ViewInterface;
+use Obullo\View\ViewInterface;
 use Zend\I18n\Translator\{
     TranslatorAwareInterface,
     TranslatorAwareTrait

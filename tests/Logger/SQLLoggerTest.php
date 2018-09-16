@@ -2,7 +2,7 @@
 
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
-use Obullo\Mvc\Logger\SQLLogger;
+use Obullo\Logger\SQLLogger;
 
 class SQLLoggerTest extends PHPUnit_Framework_TestCase
 {

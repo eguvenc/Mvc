@@ -1,11 +1,13 @@
 <?php
 
-use Obullo\Mvc\Container\{
+use Obullo\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };
-use Obullo\Mvc\Error\ErrorHandler;
-use Obullo\Mvc\Error\HtmlStrategy;
+use Obullo\Error\{
+	ErrorHandler,
+	HtmlStrategy
+};
 use Zend\ServiceManager\ServiceManager;
 
 class HtmlStrategyTest extends PHPUnit_Framework_TestCase

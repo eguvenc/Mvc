@@ -2,7 +2,7 @@
 
 namespace Tests\App\Controller;
 
-use Obullo\Mvc\Controller;
+use Obullo\Http\Controller;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Response\HtmlResponse;
 use Psr\Http\Message\RequestInterface as Request;

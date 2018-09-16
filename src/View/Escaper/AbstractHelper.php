@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Mvc\View\Escaper;
+namespace Obullo\View\Escaper;
 
 use Zend\Escaper;
 use Zend\View\Exception;

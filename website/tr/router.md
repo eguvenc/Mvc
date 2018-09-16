@@ -70,10 +70,6 @@ Uygulama routing ile ilgili işlemler için `App/Event/RouteListener` sınıfı 
     </thead>
     <tbody>
         <tr>
-            <td>OnBuilder</td>
-            <td>RouteCollection sınıfının yaratıldığı olaydır.</td>
-        </tr>
-        <tr>
             <td>OnMatch</td>
             <td>Route eşleşmesinin gerçekleştiği olaydır.Metot eşleşmenin olduğu `Route` nesnesine geri döner böylece bu metot içerisinden özelleştirmeler yapılabilir.</td>
         </tr>
@@ -89,31 +85,7 @@ class RouteListener implements ListenerAggregateInterface,ContainerAwareInterfac
 
     public function attach(EventManagerInterface $events, $priority = null)
     {
-        $this->listeners[] = $events->attach('route.builder', [$this, 'onBuilder']);
         $this->listeners[] = $events->attach('route.match', [$this, 'onMatch']);
-    }
-
-    public function onBuilder(EventInterface $e) : RouteCollection
-    {   
-        $context = $e->getParam('context');
-        $types = [
-            new IntType('<int:id>'),
-            new IntType('<int:page>'),
-            new StrType('<str:name>'),
-            new TranslationType('<locale:locale>'),
-        ];
-        $collection = new RouteCollection(array(
-            'types' => $types
-        ));
-        $collection->setContext($context);
-        $builder = new Builder($collection);
-
-        $routes = $this->getContainer()
-            ->get('loader')
-            ->load(ROOT, '/config/routes.yaml')
-            ->toArray();
-
-        return $builder->build($routes);        
     }
 
     public function onMatch(EventInterface $e)

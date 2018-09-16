@@ -1,9 +1,8 @@
 <?php
 
-namespace Obullo\Mvc\View\Helper;
+namespace Obullo\View\Helper;
 
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseInterface as Response;
 
 /**
  * Url helper

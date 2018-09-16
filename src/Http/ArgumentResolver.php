@@ -1,14 +1,13 @@
 <?php
 
-namespace Obullo\Mvc\Http;
+namespace Obullo\Http;
 
-use Obullo\Mvc\Container\{
+use Obullo\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };
 use ReflectionClass;
-use Psr\Container\ContainerInterface as Container;
-use Obullo\Mvc\Exception\UndefinedServiceException;
+use Obullo\Exception\UndefinedServiceException;
 
 /**
  * Argument resolver

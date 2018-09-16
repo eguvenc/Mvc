@@ -6,7 +6,7 @@ Kontrolör sınıfı http isteklerini kontrol ederek içerdiği metotlar ile ist
 ```php
 namespace App\Controller;
 
-use Obullo\Mvc\Controller;
+use Obullo\Http\Controller;
 use Psr\Http\Message\RequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
@@ -49,7 +49,7 @@ Kontrolör dosyası
 ```php
 namespace App\Controller;
 
-use Obullo\Mvc\Controller;
+use Obullo\Http\Controller;
 use Psr\Http\Message\RequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
@@ -177,7 +177,7 @@ Kontrolör dosyası
 ```php
 namespace App\Controller;
 
-use Obullo\Mvc\Controller;
+use Obullo\Http\Controller;
 use Obullo\Router\Router;
 use Psr\Http\Message\RequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -208,7 +208,7 @@ Eğer parametre alanları işgal edilmek istenmiyorsa bağımlı olunan nesneler
 ```php
 namespace App\Controller;
 
-use Obullo\Mvc\Controller;
+use Obullo\Http\Controller;
 use Psr\Http\Message\RequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 

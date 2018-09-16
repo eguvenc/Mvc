@@ -1,5 +1,5 @@
 
-# Obullo / Mvc
+# Obullo / Framework
 
 [![Build Status](https://travis-ci.org/obullo/Mvc.svg?branch=master)](https://travis-ci.org/obullo/Mvc)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
@@ -9,7 +9,7 @@
 ## Install
 
 ``` bash
-$ composer require obullo/mvc
+$ composer require obullo/framework
 ```
 
 ## Requirements
@@ -28,4 +28,4 @@ $ vendor/bin/phpunit
 
 ## Documentation
 
-Documents are available at <a href="http://mvc.obullo.com/">http://mvc.obullo.com/</a>
+Documents are available at <a href="http://framework.obullo.com/">http://framework.obullo.com/</a>

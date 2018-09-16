@@ -1,8 +1,8 @@
 <?php
 
-namespace Obullo\Mvc\Container;
+namespace Obullo\Container;
 
-use Obullo\Mvc\Exception\DefinedServiceException;
+use Obullo\Exception\DefinedServiceException;
 
 trait ContainerProxyTrait
 {
@@ -35,7 +35,7 @@ trait ContainerProxyTrait
         if ($this->container->has($key)) {
             throw new DefinedServiceException(
                 sprintf(
-                    'You can\'t set "%s" key as a variable. It\'s already defined in the container.',
+                    'The key "%s" is already defined in the container.',
                     $key
                 )
             );

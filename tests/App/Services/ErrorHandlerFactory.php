@@ -2,7 +2,7 @@
 
 namespace Tests\App\Services;
 
-use Obullo\Mvc\Error\{
+use Obullo\Error\{
     ErrorHandler,
     HtmlStrategy
 };

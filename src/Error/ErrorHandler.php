@@ -1,15 +1,16 @@
 <?php
 
-namespace Obullo\Mvc\Error;
+namespace Obullo\Error;
 
 use Throwable;
 use RuntimeException;
 use Psr\Http\Message\ResponseInterface;
-use Obullo\Mvc\Error\ErrorStrategyInterface;
-use Obullo\Mvc\Container\{
+use Obullo\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };
+use Zend\EventManager\Event;
+
 /**
  * Error handler
  *
@@ -55,9 +56,15 @@ class ErrorHandler implements ContainerAwareInterface
      */
     protected function handleError(Throwable $exception)
     {        
-        $this->getContainer()
-            ->get('events')
-            ->trigger('error.handler',$this,$exception);
+        $container = $this->getContainer();
+
+        $event = new Event;
+        $event->setName('error.handler');
+        $event->setParam('exception', $exception);
+        $event->setTarget($this);
+
+        $container->get('events')
+            ->triggerEvent($event);
 
         return $this->render(
             'An error was encountered',

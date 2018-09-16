@@ -1,12 +1,40 @@
 
 ## Olaylar
 
-Olay sınıfı uygulama içerisinde olaylar ilan edip ve bu olayları bağımsız olarak belirlediğiniz dinleyici sınıflar içerisinden yönetmenizi sağlar. Çerçeve içerisinde olay paketi harici olarak kullanılır ve bunun için `Zend/EventManager` tercih edilmiştir.
+Olay sınıfı uygulama içerisinde olaylar ilan edip ve bu olayları önceden belirlediğimiz dinleyici sınıflar içerisinden yönetmemizi sağlar. Çerçeve içerisinde olay paketi harici olarak kullanılır ve bunun için `Zend/EventManager` tercih edilmiştir.
 
 ### Olay servisi
 
+Olay nesnesi diğer servisler gibi `index.php` dosyası içerisinde konfigüre edilir. 
+
 ```php
 $container->setFactory('events', 'Services\EventManagerFactory');
+```
+
+Olay servisi `Zend\EventManager\EventManager` nesnesine geri döner.
+
+```php
+namespace Services;
+
+use Zend\EventManager\EventManager;
+
+class EventManagerFactory implements FactoryInterface
+{
+    /**
+     * Create an object
+     *
+     * @param  ContainerInterface $container
+     * @param  string             $requestedName
+     * @param  null|array         $options
+     * @return object
+     */
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    {
+        $container->setAlias('EventManager', $requestedName);
+
+        return new EventManager;
+    }
+}
 ```
 
 ### Tetikleyiciler
@@ -44,7 +72,7 @@ use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateTrait;
 use Zend\EventManager\ListenerAggregateInterface;
 
-use Obullo\Mvc\Container\{
+use Obullo\Container\{
     ContainerAwareInterface,
     ContainerAwareTrait
 };
@@ -60,28 +88,32 @@ class ErrorListener implements ListenerAggregateInterface,ContainerAwareInterfac
 
     public function onErrorHandler(EventInterface $e)
     {
-        $error = $e->getParams();
+        $error = $e->getParam('exception');
 
-        if (is_object($error)) {
-            switch ($error) {
-                case ($error instanceof Throwable):
-                case ($error instanceof RuntimeException):
-                    // error log
-                    break;
-            }
+        switch ($error) {
+            case ($error instanceof Throwable):
+            case ($error instanceof RuntimeException):
+                // error log
+                break;
         }
     }
 }
 ```
 
-`Obullo\Mvc\Error\ErrorHandler` sınıfı içerisinde `ErrorListener` sınıfına ait `error.handler` olayı aşağıdaki gibi tetikleniyor.
+`Obullo\Http\Error\ErrorHandler` sınıfı içerisinde `ErrorListener` sınıfına ait `error.handler` olayı aşağıdaki gibi tetikleniyor.
 
 ```php
 protected function handleError(Throwable $exception)
 {        
-    $this->getContainer()
-        ->get('events')
-        ->trigger('error.handler',$this,$exception);
+    $container = $this->getContainer();
+
+    $event = new Event;
+    $event->setName('error.handler');
+    $event->setParam('exception', $exception);
+    $event->setTarget($this);
+
+    $container->get('events')
+        ->triggerEvent($event);
 
     return $this->render(
         'An error was encountered',

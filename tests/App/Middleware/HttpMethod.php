@@ -8,10 +8,12 @@ use Psr\Http\{
     Server\MiddlewareInterface,
     Server\RequestHandlerInterface as RequestHandler
 };
-use Obullo\Mvc\Container\{
+use Obullo\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };
+use Zend\EventManager\Event;
+
 class HttpMethod implements MiddlewareInterface,ContainerAwareInterface
 {
     use ContainerAwareTrait;
@@ -32,24 +34,25 @@ class HttpMethod implements MiddlewareInterface,ContainerAwareInterface
         $router = $container->get('router');
 
         if ($router->hasMatch()) {
+
             $methods = $router->getMatchedRoute()
                 ->getMethods();
+
             if (! in_array($request->getMethod(), $methods)) {
                 
-                $events->trigger('http.method.notAllowed', null, $methods);
-                $result  = $events->trigger('http.method.notAllowed.message', null, $methods);
-                $message = $result->last();
+                $event = new Event;
+                $event->setName('method.notAllowed');
+                $event->setParam('methods', $methods);
+                $message = $events->triggerEvent($event)->last();
 
-                $error = new Error(
-                    '405',
-                    $message,
-                    ['Allow' => implode(', ', $methods)]
+                return $handler->process(
+                    new Error('405',$message,['Allow' => implode(', ', $methods)])
                 );
-                return $handler->process($error);
-                
-            } else {
-                $events->trigger('http.method.allowed', null, $methods);
             }
+            $event = new Event;
+            $event->setName('method.allowed');
+            $event->setParam('methods', $methods);
+            $events->triggerEvent($event);
         }
         return $handler->handle($request);
     }

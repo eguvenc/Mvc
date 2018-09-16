@@ -1,7 +1,7 @@
 <?php
 
 use Zend\Escaper\Escaper;
-use Obullo\Mvc\Session\FlashMessenger;
+use Obullo\Session\FlashMessenger;
 use Zend\ServiceManager\ServiceManager;
 
 class FlashMessengerTest extends PHPUnit_Framework_TestCase
@@ -55,53 +55,53 @@ class FlashMessengerTest extends PHPUnit_Framework_TestCase
 	{
 		$this->flash->success('Success message !');
 		$this->refreshPage();
-		$this->assertEquals(FlashMessenger::NOTICE_SUCCESS, $this->flash->get('notice:status'));
-		$this->assertEquals('Success message !', $this->flash->get('notice:success'));
+		$this->assertEquals(FlashMessenger::NOTICE_SUCCESS, $this->flash->get('status'));
+		$this->assertEquals('Success message !', $this->flash->get('success'));
 		
 		$flash = new FlashMessenger;
-		$this->assertFalse($this->flash->get('notice:success'));
+		$this->assertFalse($this->flash->get('success'));
 	}
 
 	public function testError()
 	{
 		$this->flash->error('Error message !');
 		$this->refreshPage();
-		$this->assertEquals(FlashMessenger::NOTICE_ERROR, $this->flash->get('notice:status'));
-		$this->assertEquals('Error message !', $this->flash->get('notice:error'));
+		$this->assertEquals(FlashMessenger::NOTICE_ERROR, $this->flash->get('status'));
+		$this->assertEquals('Error message !', $this->flash->get('error'));
 		
 		$flash = new FlashMessenger;
-		$this->assertFalse($this->flash->get('notice:error'));
+		$this->assertFalse($this->flash->get('error'));
 	}
 
 	public function testInfo()
 	{
 		$this->flash->info('Info message !');
 		$this->refreshPage();
-		$this->assertEquals(FlashMessenger::NOTICE_INFO, $this->flash->get('notice:status'));
-		$this->assertEquals('Info message !', $this->flash->get('notice:info'));
+		$this->assertEquals(FlashMessenger::NOTICE_INFO, $this->flash->get('status'));
+		$this->assertEquals('Info message !', $this->flash->get('info'));
 		
 		$flash = new FlashMessenger;
-		$this->assertFalse($this->flash->get('notice:info'));
+		$this->assertFalse($this->flash->get('info'));
 	}
 
 	public function testWarning()
 	{
 		$this->flash->warning('Warning message !');
 		$this->refreshPage();
-		$this->assertEquals(FlashMessenger::NOTICE_WARNING, $this->flash->get('notice:status'));
-		$this->assertEquals('Warning message !', $this->flash->get('notice:warning'));
+		$this->assertEquals(FlashMessenger::NOTICE_WARNING, $this->flash->get('status'));
+		$this->assertEquals('Warning message !', $this->flash->get('warning'));
 		
 		$flash = new FlashMessenger;
-		$this->assertFalse($this->flash->get('notice:warning'));
+		$this->assertFalse($this->flash->get('warning'));
 	}
 
 	public function testKeep()
 	{
 		$this->flash->warning('Warning message !');
 		$this->refreshPage();
-		$this->flash->keep('notice:warning');
+		$this->flash->keep('warning');
 
-		$this->assertArrayHasKey(FlashMessenger::NOTICE_PREFIX.':new:notice:warning', $_SESSION);
+		$this->assertArrayHasKey(FlashMessenger::NOTICE_PREFIX.':new:warning', $_SESSION);
 	}
 
 	public function testFlushMessages()

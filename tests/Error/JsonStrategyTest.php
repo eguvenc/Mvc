@@ -1,11 +1,13 @@
 <?php
 
-use Obullo\Mvc\Container\{
+use Obullo\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };
-use Obullo\Mvc\Error\ErrorHandler;
-use Obullo\Mvc\Error\JsonStrategy;
+use Obullo\Error\{
+	ErrorHandler,
+	JsonStrategy
+};
 use Zend\ServiceManager\ServiceManager;
 
 class JsonStrategyTest extends PHPUnit_Framework_TestCase

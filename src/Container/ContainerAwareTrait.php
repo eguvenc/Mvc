@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Mvc\Container;
+namespace Obullo\Container;
 
 use Psr\Container\ContainerInterface;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Mvc\Error;
+namespace Obullo\Error;
 
 use Throwable;
 use Zend\I18n\Translator\{

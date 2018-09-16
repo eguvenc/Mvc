@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Mvc\Exception;
+namespace Obullo\Exception;
 
 use InvalidArgumentException;
 

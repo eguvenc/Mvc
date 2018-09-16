@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Mvc\View;
+namespace Obullo\View;
 
 use Psr\Http\Message\ResponseInterface as Response;
 

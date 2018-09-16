@@ -1,8 +1,8 @@
 <?php
 
-namespace Obullo\Mvc\View\Helper;
+namespace Obullo\View\Helper;
 
-use Obullo\Mvc\View\Escaper\AbstractHelper;
+use Obullo\View\Escaper\AbstractHelper;
 
 /**
  * Helper for escaping values

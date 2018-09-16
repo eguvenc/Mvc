@@ -1,8 +1,7 @@
 <?php
 
-namespace Obullo\Mvc;
+namespace Obullo\Http;
 
-use Obullo\Mvc\Controller\AbstractController;
 use Psr\Http\Message\ResponseInterface;
 use Zend\Diactoros\Response\{
 	HtmlResponse,

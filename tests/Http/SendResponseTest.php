@@ -1,7 +1,8 @@
 <?php
 
 use Zend\ServiceManager\ServiceManager;
-use Obullo\Mvc\Http\{
+use Zend\Diactoros\ServerRequestFactory;
+use Obullo\Http\{
     ControllerResolver,
     ArgumentResolver,
     Kernel
@@ -17,8 +18,7 @@ use Obullo\Router\Types\{
     IntType,
     TranslationType
 };
-use Obullo\Mvc\Container\ContainerAwareInterface;
-use Obullo\Mvc\Http\ServerRequestFactory;
+use Obullo\Container\ContainerAwareInterface;
 use Obullo\Stack\Builder as Stack;
 
 class SendResponseTest extends PHPUnit_Framework_TestCase

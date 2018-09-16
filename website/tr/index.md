@@ -1,5 +1,5 @@
 
-# Obullo / Mvc
+# Obullo / Http
 
 [![Build Status](https://travis-ci.org/obullo/Mvc.svg?branch=master)](https://travis-ci.org/obullo/Mvc)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
@@ -43,7 +43,7 @@ require '../../vendor/autoload.php';
 define('ROOT', dirname(dirname(__DIR__)));
 define('APP', 'App');
 
-use Obullo\Mvc\Application;
+use Obullo\Http\Application;
 use Zend\ServiceManager\ServiceManager;
 use Dotenv\Dotenv;
 ```

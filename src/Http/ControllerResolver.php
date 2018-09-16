@@ -1,8 +1,8 @@
 <?php
 
-namespace Obullo\Mvc\Http;
+namespace Obullo\Http;
 
-use Obullo\Mvc\Container\{
+use Obullo\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };
@@ -24,6 +24,7 @@ class ControllerResolver implements ContainerAwareInterface
     protected $router;
     protected $method;
     protected $classInstance;
+    protected $argumentResolver;
     protected $isCallable = false;
 
     /**
@@ -35,6 +36,16 @@ class ControllerResolver implements ContainerAwareInterface
     {
         $this->router = $router;
         $this->name = 'App';
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param ArgumentResolver $argumentResolver 
+     */
+    public function setArgumentResolver($argumentResolver)
+    {
+        $this->argumentResolver = $argumentResolver;
     }
 
     /**
@@ -71,14 +82,29 @@ class ControllerResolver implements ContainerAwareInterface
         $explode  = explode('\\', $this->class);
         $this->name = (string)$explode[0];
         $reflection = new ReflectionClass($this->class);
-        $this->classInstance = $reflection->newInstanceWithoutConstructor();
-        
+
         $container->setFactory('middleware', function(){
             return new Middleware($this);
         });
-        $this->classInstance->setContainer($container);
         if ($reflection->hasMethod('__construct')) {
-            $this->classInstance->__construct();
+            $this->argumentResolver->clear();
+            $this->argumentResolver->setReflectionClass($reflection);
+            $this->argumentResolver->setContainer($this->getContainer());
+
+            $injectedParameters = $this->argumentResolver->resolve('__construct');
+            $this->classInstance = $reflection->newInstanceWithoutConstructor();
+            $this->classInstance->setContainer($container);
+            
+            call_user_func_array(
+                array(
+                    $this->classInstance,
+                    '__construct'
+                ),
+                $injectedParameters
+            );
+        } else {
+            $this->classInstance = $reflection->newInstanceWithoutConstructor();
+            $this->classInstance->setContainer($container);
         }
     }
 

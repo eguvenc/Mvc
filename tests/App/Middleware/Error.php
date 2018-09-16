@@ -11,8 +11,8 @@ use Psr\Http\{
     Server\MiddlewareInterface,
     Server\RequestHandlerInterface as RequestHandler
 };
-use Obullo\Mvc\Error\ErrorStrategyInterface;
-use Obullo\Mvc\Container\{
+use Obullo\Http\Error\ErrorStrategyInterface;
+use Obullo\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };

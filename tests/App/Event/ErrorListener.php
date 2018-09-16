@@ -8,7 +8,7 @@ use Zend\EventManager\ListenerAggregateTrait;
 use Zend\EventManager\ListenerAggregateInterface;
 
 use Psr\Http\Message\ResponseInterface;
-use Obullo\Mvc\Container\{
+use Obullo\Container\{
     ContainerAwareInterface,
     ContainerAwareTrait
 };
@@ -24,15 +24,13 @@ class ErrorListener implements ListenerAggregateInterface,ContainerAwareInterfac
 
     public function onErrorHandler(EventInterface $e)
     {
-        $error = $e->getParams();
+        $error = $e->getParams('exception');
 
-        if (is_object($error)) {
-            switch ($error) {
-                case ($error instanceof Throwable):
-                case ($error instanceof RuntimeException):
-                    // error log
-                    break;
-            }
+        switch ($error) {
+            case ($error instanceof Throwable):
+            case ($error instanceof RuntimeException):
+                // error log
+                break;
         }
     }
 }

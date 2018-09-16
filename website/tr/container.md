@@ -1,7 +1,8 @@
 
 ## Konteyner
 
-Konteyner sınıfı `Zend Service Manager` paketini kullanır.
+Konteyner sınıfı uygulamanızda `instance` yönetimi üstlenir. Paylaşımlı nesneler bu sınıf içerisine servis olarak konfigüre edilir ve ihtiyaç olduğunda yeniden ilan edilmeye gerek kalmadan çağırılırlar.
+Çerçeve içerisinde konteyner paketi harici olarak kullanılır ve bunun için <a href="https://docs.zendframework.com/zend-servicemanager/">Zend/ServiceManager</a> paketi tercih edilmiştir.
 
 ### Servisler
 

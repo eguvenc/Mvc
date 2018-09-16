@@ -43,7 +43,7 @@ require '../../vendor/autoload.php';
 define('ROOT', dirname(dirname(__DIR__)));
 define('APP', 'App');
 
-use Obullo\Mvc\Application;
+use Obullo\Http\Application;
 use Zend\ServiceManager\ServiceManager;
 use Dotenv\Dotenv;
 ```

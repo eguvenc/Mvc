@@ -13,12 +13,12 @@ Hata servisi diğer servisler gibi `index.php` dosyasında tanımlıdır.
 
 ### Hata stratejileri
 
-`Html` ve `Json` olmak iki tür hata stratejisi vardır. Varsayılan strateji html türüdür. Uygulama bir hata ile karşılaştığında error servisi üzerinden `templates/error.phtml` görünümünü işleyerek `Obullo\Mvc\Error\ErrorHandler->handle()` fonksiyonu ile Psr7 `response` nesnesine geri döner.
+`Html` ve `Json` olmak iki tür hata stratejisi vardır. Varsayılan strateji html türüdür. Uygulama bir hata ile karşılaştığında error servisi üzerinden `templates/error.phtml` görünümünü işleyerek `Obullo\Http\Error\ErrorHandler->handle()` fonksiyonu ile Psr7 `response` nesnesine geri döner.
 
 ```php
 namespace Services;
 
-use Obullo\Mvc\Error\{
+use Obullo\Http\Error\{
     ErrorHandler,
     HtmlStrategy
 };
@@ -70,9 +70,13 @@ new Error('503', 'Bilinmeyen bir hata oluştu', $headers = array());
 Hata servisi içerisindeki `ErrorHandler->handle()` metodu içerisine gönderilen tüm hatalar `error.handler` olayına tayin edilir.
 
 ```php
-$this->getContainer()
-            ->get('events')
-            ->trigger('error.handler',null,$exception);
+$event = new Event;
+$event->setName('error.handler');
+$event->setParam('exception', $exception);
+$event->setTarget($this);
+
+$container->get('events')
+    ->triggerEvent($event);
 ```
 
 Bir olay olarak gerçekleşen bu hatalar `App\Event\ErrorListener` sınıfı tarafından dinlenerek hata yönetiminin özelleştirilebilmesini sağlar.
@@ -90,15 +94,13 @@ class ErrorListener implements ListenerAggregateInterface,ContainerAwareInterfac
 
     public function onErrorHandler(EventInterface $e)
     {
-        $error = $e->getParams();
+        $error = $e->getParam('exception');
 
-        if (is_object($error)) {
-            switch ($error) {
-                case ($error instanceof Throwable):
-                case ($error instanceof RuntimeException):
-                    // error log
-                    break;
-            }
+        switch ($error) {
+            case ($error instanceof Throwable):
+            case ($error instanceof RuntimeException):
+                // error log
+                break;
         }
     }
 }
