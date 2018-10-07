@@ -1,9 +1,9 @@
 
-# Obullo / Http
+# Obullo / Framework
 
-[![Build Status](https://travis-ci.org/obullo/Mvc.svg?branch=master)](https://travis-ci.org/obullo/Mvc)
+[![Build Status](https://travis-ci.org/obullo/Framework.svg?branch=master)](https://travis-ci.org/obullo/Framework)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
-[![Total Downloads](https://img.shields.io/packagist/dt/obullo/mvc.svg)](https://packagist.org/packages/obullo/mvc)
+[![Total Downloads](https://img.shields.io/packagist/dt/obullo/framework.svg)](https://packagist.org/packages/obullo/framework)
 
 > Obullo ve Zend bileşenleri ile micro mvc çatınızı oluşturun.
 
@@ -115,9 +115,7 @@ Katmanlar
 
 ```php
 $queue = [
-    new App\Middleware\Session,
     new App\Middleware\HttpMethod,
-    new App\Middleware\Translation
 ];
 $stack = new Stack;
 $stack->setContainer($container);

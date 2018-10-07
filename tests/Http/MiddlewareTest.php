@@ -65,11 +65,15 @@ class MiddlewareTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals('Tests\Middleware\Dummy', $stack[0]['class']);
 	}
 
-	public function testAddArgument()
+	public function testAddArguments()
 	{
 		$this->middleware->add('Dummy')
-			->addArgument('name1', 'value1')
-			->addArgument('name2', array('value2'));
+			->addArguments(
+				[
+					'name1' => 'value1',
+					'name2' => array('value2')
+				]
+			);
 		$stack = $this->middleware->getStack();
 
 		$this->assertEquals('Tests\Middleware\Dummy', $stack[0]['class']);
@@ -90,7 +94,7 @@ class MiddlewareTest extends PHPUnit_Framework_TestCase
 		$this->middleware->add('Dummy')
 			->addMethod('index')
 			->addMethod('second_method')
-			->addArgument('name', 'value');
+			->addArguments(['name' => 'value']);
 		$stack = $this->middleware->getStack();
 
 		$this->assertEquals('value', $stack[0]['arguments']['name']);

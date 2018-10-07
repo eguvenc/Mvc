@@ -1,7 +1,7 @@
 
 ## Loglama
 
-Log servisi loglama işlemleri için `logger` servisi konfigüre edilmelidir. Çerçeve içerisinde logger paketi harici olarak kullanılır ve bunun için `Monolog/Logger`tercih edilmiştir.
+Log servisi loglama işlemleri için `logger` servisi konfigüre edilmelidir. Çerçeve içerisinde logger paketi harici olarak kullanılır ve bunun için <a href="https://seldaek.github.io/monolog/">Monolog/Logger</a> tercih edilmiştir.
 
 ### Loglama servisi
 

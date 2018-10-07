@@ -1,7 +1,7 @@
 
 ## Yönlendirmeler
 
-Yönlendirme sınıfı `Obullo/Router` paketini kullanır. Bu paket <a href="https://docs.djangoproject.com/en/2.0/topics/http/urls/">Django Url Dispatcher</a> kütüphanesinden ilham alınarak geliştirilmiş bağımsız bir paketdir.
+Yönlendirme sınıfı <a href="http://router.obullo.com/">Obullo/Router</a> paketini kullanır. Bu paket <a href="https://docs.djangoproject.com/en/2.0/topics/http/urls/">Django Url Dispatcher</a> kütüphanesinden ilham alınarak geliştirilmiş bağımsız bir paketdir.
 
 ### Uygulama yönlendirme
 

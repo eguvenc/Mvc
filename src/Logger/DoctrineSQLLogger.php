@@ -11,7 +11,7 @@ use Doctrine\DBAL\Logging\SQLLogger as SQLLoggerInterface;
  * @copyright 2018 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class SQLLogger implements SQLLoggerInterface
+class DoctrineSQLLogger implements SQLLoggerInterface
 {
     /**
      * Sql
@@ -51,7 +51,7 @@ class SQLLogger implements SQLLoggerInterface
     /**
      * Create pdo statement object
      *
-     * @param \Obullo\Log\Logger $logger object
+     * @param \Psr\Log\Logger $logger object
      */
     public function __construct(Logger $logger)
     {
@@ -96,7 +96,7 @@ class SQLLogger implements SQLLoggerInterface
         $this->logger->debug(
             'SQL-'.$this->queryNumber.' ( Query ):',
             [
-                'sql' => $this->format($this->sql),
+                'sql' => $this->format($this->sql, $this->params),
                 'time'=> number_format(microtime(true) - $this->start, 4),
             ]
         );
@@ -110,12 +110,12 @@ class SQLLogger implements SQLLoggerInterface
      *
      * @return void
      */
-    public function format($sql)
+    public function format($sql, $params = array())
     {
         $sql = preg_replace('/\n\r\t/', ' ', trim($sql, "\n"));
         $newValues = array();
-        if (! empty($this->params)) {
-            $firstKey = key($this->params);
+        if (! empty($params)) {
+            $firstKey = key($params);
             if (is_string($firstKey)) { // named parameters
                 foreach ($this->params as $key => $value) {
                     $value = is_string($value) ? "'".addslashes($value)."'" : $value;
@@ -124,7 +124,7 @@ class SQLLogger implements SQLLoggerInterface
                 return $sql;
             }
             if (is_numeric($firstKey)) { // numeric parameters
-                foreach ($this->params as $key => $value) {
+                foreach ($params as $key => $value) {
                     if (is_string($value)) {
                         $newValues[$key] = "'".addslashes($value)."'";
                     } else {

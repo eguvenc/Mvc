@@ -1,7 +1,7 @@
 
 ### Oturumlar
 
-Session servisi uygulama içerisinde kullanıcı oturumlarını yönetmemizi sağlar. Çerçeve içerisinde session paketi harici olarak kullanılır ve bunun için `Zend/Session` tercih edilmiştir.
+Session servisi uygulama içerisinde kullanıcı oturumlarını yönetmemizi sağlar. Çerçeve içerisinde session paketi harici olarak kullanılır ve bunun için <a href="https://docs.zendframework.com/zend-session/">Zend/Session</a> tercih edilmiştir.
 
 ### Session servisi
 
@@ -22,30 +22,30 @@ use Zend\Session\Storage\SessionArrayStorage;
 
 class SessionFactory implements FactoryInterface
 {
-    /**
-     * Create an object
-     *
-     * @param  ContainerInterface $container
-     * @param  string             $requestedName
-     * @param  null|array         $options
-     * @return object
-     */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
-    {
-        $framework = $container->get('loader')
-            ->load(ROOT, '/config/%s/framework.yaml', true)
-            ->framework;
+	/**
+	 * Create an object
+	 *
+	 * @param  ContainerInterface $container
+	 * @param  string             $requestedName
+	 * @param  null|array         $options
+	 * @return object
+	 */
+	public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+	{
+		$framework = $container->get('loader')
+			->load(ROOT, '/config/%s/framework.yaml', true)
+			->framework;
 
-        $manager = new SessionManager();
-        $manager->setStorage(new SessionArrayStorage());
-        $manager->getValidatorChain()
-            ->attach('session.validate', [new HttpUserAgent(), 'isValid']);
-            
-        if (false == defined('STDIN')) {
-            $manager->setName($framework->session->name);
-        }
-        return $manager;
-    }
+		$manager = new SessionManager();
+		$manager->setStorage(new SessionArrayStorage());
+		$manager->getValidatorChain()
+			->attach('session.validate', [new HttpUserAgent(), 'isValid']);
+			
+		if (false == defined('STDIN')) {
+			$manager->setName($framework->session->name);
+		}
+		return $manager;
+	}
 }
 ```
 
@@ -89,7 +89,7 @@ class DefaultController extends Controller
 {
 	public function __construct()
 	{
-        $this->session->start();
+		$this->session->start();
 	}
 }
 ```
@@ -115,7 +115,7 @@ echo $_SESSION['test']; // foo;
 
 ### Flash messenger
 
-Flash messenger sınıfı uygulama işlemlerinden sonra kullanıcıya gösterilemesi amaçlanan bilgi mesajlarını `$_SESSION` içerisinde geçici hafıza tutarak bir sonraki http isteğinde bu mesajın kullanıcıya gösterilmesini sağlar.
+Flash messenger sınıfı uygulama işlemlerinden sonra kullanıcıya gösterilemesi amaçlanan bilgi mesajlarını `$_SESSION` içerisinde geçici olarak tutarak bir sonraki http isteğinde bu mesajın kullanıcıya gösterilmesini sağlar.
 
 ### Flash servisi
 
@@ -134,28 +134,28 @@ use Obullo\Session\FlashMessenger;
 
 class FlashMessengerFactory implements FactoryInterface
 {
-    /**
-     * Create an object
-     *
-     * @param  ContainerInterface $container
-     * @param  string             $requestedName
-     * @param  null|array         $options
-     * @return object
-     */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
-    {
-        $params = [
-            'view' => array(
-                'message_open_format'      => '<div%s><button type="button" class="close" 
-                data-dismiss="alert" aria-hidden="true">&times;</button><ul><li>',
-                'message_separator_string' => '</li><li>',
-                'message_close_string'     => '</li></ul></div>',
-            )
-        ];
-        $flash = new FlashMessenger($params);
-        $flash->setEscaper($container->get('escaper'));
-        return $flash;
-    }
+	/**
+	 * Create an object
+	 *
+	 * @param  ContainerInterface $container
+	 * @param  string             $requestedName
+	 * @param  null|array         $options
+	 * @return object
+	 */
+	public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+	{
+		$params = [
+			'view' => array(
+				'message_open_format'      => '<div%s><button type="button" class="close" 
+				data-dismiss="alert" aria-hidden="true">&times;</button><ul><li>',
+				'message_separator_string' => '</li><li>',
+				'message_close_string'     => '</li></ul></div>',
+			)
+		];
+		$flash = new FlashMessenger($params);
+		$flash->setEscaper($container->get('escaper'));
+		return $flash;
+	}
 }
 ```
 
@@ -210,7 +210,7 @@ Info mesaj şablonu ile mesaj yaratır.
 Warning mesaj şablonu ile mesaj yaratır.
 
 #### $flash->get($key) : string
-    
+	
 Tek bir mesajı almayı sağlar.
 
 ```php
@@ -226,30 +226,30 @@ Mesajın bir sonraki http isteğinde de gözükebilir olmasını sağlar.
 Bir flaş mesajı göstermek oldukça kolaydır bir durum metodu seçin ve içine mesajınızı girin.
 
 <table>
-    <thead>
-        <tr>
-            <th>Durum</th>
-            <th>Açıklama</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>success</td>
-            <td>Başarılı işlemlerde kullanılır.</td>
-        </tr>
-        <tr>
-            <td>error</td>
-            <td>İşlemlerde bir hata olduğunda kullanılır.</td>
-        </tr>
-        <tr>
-            <td>warning</td>
-            <td>Uyarı amaçlı mesajları göstermek amacıyla kullanılır.</td>
-        </tr>
-        <tr>
-            <td>info</td>
-            <td>Bilgi amaçlı mesajları göstermek amacıyla kullanılır.</td>
-        </tr>
-    </tbody>
+	<thead>
+		<tr>
+			<th>Durum</th>
+			<th>Açıklama</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>success</td>
+			<td>Başarılı işlemlerde kullanılır.</td>
+		</tr>
+		<tr>
+			<td>error</td>
+			<td>İşlemlerde bir hata olduğunda kullanılır.</td>
+		</tr>
+		<tr>
+			<td>warning</td>
+			<td>Uyarı amaçlı mesajları göstermek amacıyla kullanılır.</td>
+		</tr>
+		<tr>
+			<td>info</td>
+			<td>Bilgi amaçlı mesajları göstermek amacıyla kullanılır.</td>
+		</tr>
+	</tbody>
 </table>
 
 
@@ -265,13 +265,13 @@ print_r($this->flash->flushMessages());
 /*
 Array
 (
-    [0] => <div class="success">
-    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-    <ul>
-        <li>Form saved successfully</li>
-        <li></li>
-    </ul>
-    </div>
+	[0] => <div class="success">
+	<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+	<ul>
+		<li>Form saved successfully</li>
+		<li></li>
+	</ul>
+	</div>
 )
 */
 ```
@@ -290,7 +290,7 @@ Aşağıdaki kodu html sayfanıza yerleştirin.
 
 ```php
 foreach ($this->flash->flushMessages() as $message) {
-    echo $message;
+	echo $message;
 };
 ```
 

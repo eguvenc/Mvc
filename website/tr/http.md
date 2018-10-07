@@ -245,7 +245,7 @@ Nesnenin geçerli metodunu değiştirir.
 $request = $request->withMethod('PUT');
 ```
 
-<a href="https://www.php-fig.org/psr/psr-7/">Daha fazla örnek için Psr7 sayfasının ziyaret edebilirsiniz.</a>
+<a href="https://www.php-fig.org/psr/psr-7/">Daha fazla örnek için Psr7 sayfasını ziyaret edebilirsiniz.</a>
 
 ### Psr7 URI sınıfı metotları
 
@@ -402,14 +402,14 @@ Detaylı dökümentasyona <a href="https://docs.zendframework.com/zend-diactoros
 
 ### Ip Adresleri
 
-Sunucunuz önünde bazen proxy sunucular olabilir böyle bir durumda güvenilir ip adresleri elde etmek için `RemoteAddress` sınıfını kullanabilirsiniz.
+Sunucunuz önünde bazen proxy sunucular olabilir böyle bir durumda güvenilir ip adresleri elde etmek için `RemoteAddr` sınıfını kullanabilirsiniz.
 
 Güvenilir kullanıcı ip adresi elde etmek için bir örnek.
 
 ```php
-use Obullo\Http\RemoteAddress;
+use Obullo\Http\RemoteAddr;
 
-$remoteAddr = new RemoteAddress;
+$remoteAddr = new RemoteAddr;
 $remoteAddr->setUseProxy();
 $remoteAddr->setProxyHeader('HTTP_X_FORWARDED_FOR');
 $remoteAddr->setTrustedProxies(array('10.0.0.128','10.0.0.129')); // Reverse proxy ip white list

@@ -19,10 +19,17 @@ class DefaultController extends Controller
 }
 ```
 
-> $this->render($nameOrModal, $data = null, $status = 200, $headers = []) : ResponseInterface
+> $this->render($name, $data = null, $status = 200, $headers = []) : ResponseInterface
 
 
-Render metodu aşağıdaki metotu çağırarak Response nesnesi içerisine html çıktısını ekler.
+Response nesnesi içerisine view nesnesi render metodunu kullanarak html çıktısını ekler.
+
+
+```php
+return $this->render('welcome');
+```
+
+Render metodu aslında arka planda aşağıdaki işlevi çağırır.
 
 ```php
 return new HtmlResponse($this->view->render('welcome'));
@@ -75,6 +82,13 @@ Yukarıdaki örneğin çıktısı:
 test
 1
 ```
+
+Render html metodu aslında arka planda aşağıdaki işlevi çağırır.
+
+```php
+return new HtmlResponse('test 1');
+```
+
 
 ### Http yönlendirme
 

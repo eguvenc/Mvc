@@ -140,42 +140,42 @@ $this->cookie
 
 ### Cookie sınıfı referansı
 
-##### $this->cookie->name(string $name);
+#### $this->cookie->name(string $name);
 
 Kaydedilmek üzere olan bir çereze isim atar.
 
-##### $this->cookie->value(mixed $value);
+#### $this->cookie->value(mixed $value);
 
 Kaydedilmek üzere olan bir çerez ismine değer atar.
 
-##### $this->cookie->expire(int $expire = 0);
+#### $this->cookie->expire(int $expire = 0);
 
 Kaydedilmek üzere olan bir çerezin sona erme süresini belirler.
 
-##### $this->cookie->domain(string $domain = '');
+#### $this->cookie->domain(string $domain = '');
 
 Kaydedilmek üzere olan bir çereze ait alanadını belirler.
 
-##### $this->cookie->path(string $path = '/');
+#### $this->cookie->path(string $path = '/');
 
 Kaydedilmek üzere olan bir çereze ait path parametresini tanımlar.
 
-##### $this->cookie->secure(boolean $bool = false);
+#### $this->cookie->secure(boolean $bool = false);
 
 Kaydedilmek üzere olan bir çereze ait secure parametresini tanımlar.
 
-##### $this->cookie->httpOnly(boolean $bool = false);
+#### $this->cookie->httpOnly(boolean $bool = false);
 
 Kaydedilmek üzere olan bir çereze ait httpOnly parametresini tanımlar.
 
-##### $this->cookie->set(mixed $name, string $value);
+#### $this->cookie->set(mixed $name, string $value);
 
 Gönderilen parametrelere göre bir çereze veri kaydeder. En son çalıştırılmalıdır. Kayıt işleminden sonra daha önce kullanılan çereze ait veriler başa döndürülür.
 
-##### $this->cookie->get(string $name, mixed $return = null);
+#### $this->cookie->get(string $name, mixed $return = null);
 
 Kayıtlı bir çerezi okur eğer çerez mevcut değilse <kbd>null</kbd> değerine döner.
 
-##### $this->cookie->delete(string $name);
+#### $this->cookie->delete(string $name);
 
 Gönderilen parametrelere göre bir çerezi tarayıcıdan siler.

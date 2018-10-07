@@ -7,7 +7,7 @@ namespace Obullo\Http;
  * 
  * Functionality for determining client IP address.
  */
-class RemoteAddress
+class RemoteAddr
 {
     /**
      * Whether to use proxy addresses or not.

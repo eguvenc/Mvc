@@ -2,6 +2,11 @@
 
 namespace Obullo\Http;
 
+use Obullo\Container\{
+    ContainerAwareTrait,
+    ContainerProxyTrait,
+    ContainerAwareInterface
+};
 use Psr\Http\Message\ResponseInterface;
 use Zend\Diactoros\Response\{
 	HtmlResponse,
@@ -14,8 +19,11 @@ use Zend\Diactoros\Response\{
  * @copyright Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class Controller extends AbstractController
+class Controller implements ContainerAwareInterface
 {
+    use ContainerAwareTrait;
+    use ContainerProxyTrait;
+
 	/**
 	 * Render view
 	 * 
