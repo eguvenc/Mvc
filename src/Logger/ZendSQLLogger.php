@@ -86,53 +86,20 @@ class ZendSQLLogger implements ProfilerInterface
         $current['end'] = microtime(true);
         $current['elapse'] = $current['end'] - $current['start'];
 
+        $this->currentIndex++;
+        $parameters = $current['parameters']->getNamedArray();
+
         $this->logger->debug(
-            'SQL-'.$this->currentIndex.' ( Query ):',
+            'SQL-'.$this->currentIndex.': '.$current['sql'],
             [
-                'sql' => $this->format($current['sql'], $current['parameters']),
+                'params' => $parameters,
                 'time'=> number_format($current['elapse'], 4),
             ]
         );
-        $this->currentIndex++;
 
         return $this;
     }
-
-    /**
-     * Return to last sql query string
-     *
-     * @param string $sql sql
-     *
-     * @return void
-     */
-    public function format($sql, $params = array())
-    {
-        $sql = preg_replace('/\n\r\t/', ' ', trim($sql, "\n"));
-        $newValues = array();
-        if (! empty($params)) {
-            $firstKey = key($params);
-            if (is_string($firstKey)) { // named parameters
-                foreach ($this->params as $key => $value) {
-                    $value = is_string($value) ? "'".addslashes($value)."'" : $value;
-                    $sql = str_replace(':'.$key, $value, $sql);
-                }
-                return $sql;
-            }
-            if (is_numeric($firstKey)) { // numeric parameters
-                foreach ($params as $key => $value) {
-                    if (is_string($value)) {
-                        $newValues[$key] = "'".addslashes($value)."'";
-                    } else {
-                        $newValues[$key] = $value;
-                    }
-                }
-                $sql = preg_replace('/(?:[?])/', '%s', $sql);  // question mark binds
-                $sql = vsprintf($sql, $newValues);
-            }
-        }
-        return $sql;
-    }
-
+    
     /**
      * @return array|null
      */

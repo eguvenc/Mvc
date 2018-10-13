@@ -1,13 +1,6 @@
-website/.couscous/
 tests/var/cache/
 tests/var/log/
-/public/
-/config/
-/var/
-/templates/
+/var/log/
+/var/cache/
 vendor/
-/App/
-/Command/
-/Services/
-.env
 composer.lock

@@ -65,8 +65,6 @@ class Kernel
         if ($route = $this->router->matchRequest()) {
             $this->events->trigger('route.match', $this, ['route' => $route]);
         }
-        $container->setService('router', $this->router);
-
         $this->controllerResolver->setRouter($this->router);
         $this->controllerResolver->setArgumentResolver($this->argumentResolver);
         $this->controllerResolver->setContainer($container);
@@ -78,7 +76,7 @@ class Kernel
                 $this->stack = $this->stack->withMiddleware($value);
             }
         }
-        $this->stack = $this->stack->withMiddleware(new SendResponse($this));
+        $this->stack = $this->stack->withMiddleware(new SendResponse($this)); // Final response
 
         return $this->stack->process($request);
     }

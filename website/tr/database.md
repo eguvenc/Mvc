@@ -15,7 +15,7 @@ $container->setFactory('connection', 'DoctrineDBALFactory');
 $container->setFactory('adapter', 'Services\ZendDbFactory');
 ```
 
-> Uygulama içinde `Zend Db` index.php içerisinde tanımlı olarak gelir.
+> Uygulama içinde `Services\ZendDbFactory` index.php içerisinde tanımlı olarak gelir.
 
 
 Veritabanı servisi `Zend\Db\Adapter\Adapter` nesnesine geri döner.
@@ -159,7 +159,96 @@ $stmt   = $adapter->createStatement($sql, $optionalParameters);
 $result = $stmt->execute();
 ```
 
+### Zend\Db\ResultSet\ResultSet 
+
+Çoğu amaç için, bir `Zend\Db\ResultSet\ResultSet` örneği veya bir `Zend\Db\ResultSet\AbstractResultSet` türevi kullanılır. `AbstractResultSet` sınıfı aşağıdaki temel işlevleri sunar:
+
+```php
+namespace Zend\Db\ResultSet;
+
+use Iterator;
+
+abstract class AbstractResultSet implements Iterator, ResultSetInterface
+{
+    public function initialize(array|Iterator|IteratorAggregate|ResultInterface $dataSource) : self;
+    public function getDataSource() : Iterator|IteratorAggregate|ResultInterface;
+    public function getFieldCount() : int;
+
+    /** Iterator */
+    public function next() : mixed;
+    public function key() : string|int;
+    public function current() : mixed;
+    public function valid() : bool;
+    public function rewind() : void;
+
+    /** countable */
+    public function count() : int;
+
+    /** get rows as array */
+    public function toArray() : array;
+}
+```
+
 ### Zend\Db\ResultSet\HydratingResultSet
+
+Zend\Db\ResultSet\HydratingResultSet is a more flexible ResultSet object that allows the developer to choose an appropriate "hydration strategy" for getting row data into a target object. While iterating over results, HydratingResultSet will take a prototype of a target object and clone it once for each row. The HydratingResultSet will then hydrate that clone with the row data.
+
+The HydratingResultSet depends on zend-hydrator, which you will need to install:
+
+```
+$ composer require zendframework/zend-hydrator
+```
+
+In the example below, rows from the database will be iterated, and during iteration, HydratingResultSet will use the Reflection based hydrator to inject the row data directly into the protected members of the cloned UserEntity object:
+
+```php
+se Zend\Db\Adapter\Driver\ResultInterface;
+use Zend\Db\ResultSet\HydratingResultSet;
+use Zend\Hydrator\Reflection as ReflectionHydrator;
+
+class UserEntity
+{
+    protected $first_name;
+    protected $last_name;
+
+    public function getFirstName()
+    {
+        return $this->first_name;
+    }
+
+    public function getLastName()
+    {
+        return $this->last_name;
+    }
+
+    public function setFirstName($firstName)
+    {
+        $this->first_name = $firstName;
+    }
+
+    public function setLastName($lastName)
+    {
+        $this->last_name = $lastName;
+    }
+}
+
+$statement = $driver->createStatement($sql);
+$statement->prepare($parameters);
+$result = $statement->execute();
+
+if ($result instanceof ResultInterface && $result->isQueryResult()) {
+    $resultSet = new HydratingResultSet(new ReflectionHydrator, new UserEntity);
+    $resultSet->initialize($result);
+
+    foreach ($resultSet as $user) {
+        echo $user->getFirstName() . ' ' . $user->getLastName() . PHP_EOL;
+    }
+}
+```
+
+For more information, see the <a href="">zend-hydrator</a> documentation to get a better sense of the different strategies that can be employed in order to populate a target object.
+
+
 
 
 Daha fazla örnek için <a href="https://docs.zendframework.com/zend-db/adapter/">https://docs.zendframework.com/zend-db/adapter/</a> adresini ziyaret edebilirsiniz.

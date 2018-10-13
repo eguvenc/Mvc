@@ -1,0 +1,7 @@
+
+# monolog
+# 
+
+monolog:
+    enabled: true
+    default_channel: system

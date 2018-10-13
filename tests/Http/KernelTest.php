@@ -82,6 +82,7 @@ class KernelTest extends PHPUnit_Framework_TestCase
             ->withHost('example.com');
         $request = $request->withUri($uri);
         $container->setService('request', $request);
+        $container->setService('router', $router);
 
         $queue = [
             new \Tests\App\Middleware\HttpMethod,
@@ -146,6 +147,7 @@ class KernelTest extends PHPUnit_Framework_TestCase
         $request = $request->withAttribute('locale', $locale);
 
         $container->setService('request', $request);
+        $container->setService('router', $router);
 
         $queue = [
             new \Tests\App\Middleware\HttpMethod,

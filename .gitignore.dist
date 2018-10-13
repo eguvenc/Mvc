@@ -1,0 +1,13 @@
+website/.couscous/
+tests/var/cache/
+tests/var/log/
+/public/
+/config/
+/var/
+/templates/
+vendor/
+/App/
+/Command/
+/Services/
+.env
+composer.lock

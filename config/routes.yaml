@@ -1,0 +1,12 @@
+
+# name:
+#    path: /
+#    handler: App\Controller\DefaultController::index
+
+home: 
+    path: /
+    handler: App\Controller\DefaultController::index
+
+dummy:
+    path: /dummy
+    handler: App\Controller\DefaultController::dummy

@@ -80,6 +80,7 @@ class SendResponseTest extends PHPUnit_Framework_TestCase
             ->withHost('example.com');
         $request = $request->withUri($uri);
         $container->setService('request', $request);
+        $container->setService('router', $router);
         
         $stack = new Stack;
         $stack->setContainer($container);
@@ -152,7 +153,8 @@ class SendResponseTest extends PHPUnit_Framework_TestCase
         $request = $request->withUri($uri);
 
         $container->setService('request', $request);
-        
+        $container->setService('router', $router);
+
         $stack = new Stack;
         $stack->setContainer($container);
         $kernel = new Kernel($events, $router, new ControllerResolver, $stack, new ArgumentResolver);

@@ -46,7 +46,7 @@ class DoctrineSQLLogger implements SQLLoggerInterface
      *
      * @var integer
      */
-    protected $queryNumber = 0;
+    protected $currentIndex = 0;
 
     /**
      * Create pdo statement object
@@ -56,16 +56,6 @@ class DoctrineSQLLogger implements SQLLoggerInterface
     public function __construct(Logger $logger)
     {
         $this->logger = $logger;
-    }
-
-    /**
-     * Begin sql query timer
-     *
-     * @return void
-     */
-    protected function beginTimer()
-    {
-        $this->start = microtime(true);
     }
 
     /**
@@ -79,9 +69,9 @@ class DoctrineSQLLogger implements SQLLoggerInterface
      */
     public function startQuery($sql, array $params = null, array $types = null)
     {
-        $this->beginTimer();
+        $this->start = microtime(true);
         $this->params = $params;
-        ++$this->queryNumber;
+        ++$this->currentIndex;
         $this->sql = $sql;
         $types = null;
     }
@@ -93,48 +83,15 @@ class DoctrineSQLLogger implements SQLLoggerInterface
      */
     public function stopQuery()
     {
+        $end = microtime(true);
+
         $this->logger->debug(
-            'SQL-'.$this->queryNumber.' ( Query ):',
+            'SQL-'.$this->currentIndex.': '.$this->sql,
             [
-                'sql' => $this->format($this->sql, $this->params),
-                'time'=> number_format(microtime(true) - $this->start, 4),
+                'params' => $this->params,
+                'time'=> number_format($end - $this->start, 4),
             ]
         );
-        // ($this->queryNumber * -1)  // priority
     }
 
-    /**
-     * Return to last sql query string
-     *
-     * @param string $sql sql
-     *
-     * @return void
-     */
-    public function format($sql, $params = array())
-    {
-        $sql = preg_replace('/\n\r\t/', ' ', trim($sql, "\n"));
-        $newValues = array();
-        if (! empty($params)) {
-            $firstKey = key($params);
-            if (is_string($firstKey)) { // named parameters
-                foreach ($this->params as $key => $value) {
-                    $value = is_string($value) ? "'".addslashes($value)."'" : $value;
-                    $sql = str_replace(':'.$key, $value, $sql);
-                }
-                return $sql;
-            }
-            if (is_numeric($firstKey)) { // numeric parameters
-                foreach ($params as $key => $value) {
-                    if (is_string($value)) {
-                        $newValues[$key] = "'".addslashes($value)."'";
-                    } else {
-                        $newValues[$key] = $value;
-                    }
-                }
-                $sql = preg_replace('/(?:[?])/', '%s', $sql);  // question mark binds
-                $sql = vsprintf($sql, $newValues);
-            }
-        }
-        return $sql;
-    }
 }
