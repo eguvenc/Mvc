@@ -4,8 +4,8 @@ namespace App\Controller;
 
 // use Zend\Db\Sql\Delete;
 // use Zend\Db\Sql\Where;
-use Zend\Db\Sql\Sql;
-use Zend\Db\TableGateway\TableGateway;
+// use Zend\Db\Sql\Sql;
+// use Zend\Db\TableGateway\TableGateway;
 // use Zend\Db\TableGateway\Feature\RowGatewayFeature;
 
 use Obullo\Http\Controller;
@@ -34,6 +34,7 @@ class DefaultController extends Controller
         //  print_r($stack);
 	}
 
+
     public function index(Request $request) : Response
     {
         // $sql = new Sql($this->adapter);
@@ -49,14 +50,14 @@ class DefaultController extends Controller
         // echo $this->adapter->driver->formatParameterName('id');
         // die;
 
-        $stmt    = $this->adapter->query('SELECT * FROM `users` WHERE `id` = ? AND `name` = ?');
-        $results = $stmt->execute(['name' => 'user_78', 'id' => 2]);
+        // $stmt    = $this->adapter->query('SELECT * FROM `users` WHERE `id` = ? AND `name` = ?');
+        // $results = $stmt->execute(['name' => 'user_78', 'id' => 2]);
 
-        // $results = $this->adapter->query('SELECT * FROM `users` WHERE `id` = :id', ['id' => 2]);
+        // // $results = $this->adapter->query('SELECT * FROM `users` WHERE `id` = :id', ['id' => 2]);
 
-        foreach ($results as $row) {
-            // echo $row->name;
-        }
+        // foreach ($results as $row) {
+        //     // echo $row->name;
+        // }
         // $profiler = $this->adapter->getProfiler()->getLastProfile();
 
         // var_dump($profiler);

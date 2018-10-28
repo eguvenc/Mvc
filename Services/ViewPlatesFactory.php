@@ -24,7 +24,7 @@ class ViewPlatesFactory implements FactoryInterface
         $engine = new Engine(ROOT.'/'.APP.'/View');
         $engine->setFileExtension('phtml');
         $engine->addFolder('templates', ROOT.'/templates');
-        $engine->loadExtension(new Asset(ROOT.'/public/'.strtolower(APP).'/', false));
+        $engine->loadExtension(new Asset(ROOT.'/public/', false));
 
         /**
          * View helpers

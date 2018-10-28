@@ -1,11 +1,11 @@
 
 ## Konfigürasyon
 
-Konfigürasyon sınıfı <a href="http://config.obullo.com/">Obullo/Config</a> paketini kullanır. Bu paket `Zend/Config` paketi üzerinde çalışır.
+Konfigürasyon paketi konfigürasyon dosyaları yönetimini üstlenir. Çerçeve içerisinde bu paket bir bileşen olarak kullanılır ve bunun için `Zend/Config` paketi üzerinde çalışan <a href="http://config.obullo.com/">Obullo Config</a> paketi tercih edilmiştir.
 
 ### Dosyalar
 
-Yükleyici servisi konfigürasyon dosyalarına her yerden erişimi sağlar.
+Konfigürasyon servisi konfigürasyon dosyalarına her yerden erişimi sağlar.
 
 ```php
 $amqp = $container->get('loader')
@@ -15,15 +15,15 @@ $amqp = $container->get('loader')
 echo $amqp->host; // 127.0.0.1
 ```
 
-### Loader servisi
+### Konfigürasyon yükleyici
 
-Konfigürasyon nesnesi diğer servisler gibi `index.php` dosyası içerisinde konfigüre edilir. 
+Yükleyici nesnesi diğer servisler gibi `index.php` dosyası içerisinde konfigüre edilir. 
 
 ```php
 $container->setFactory('loader', 'Services\LoaderFactory');
 ```
 
-Loader servisi `Obullo\Config\ConfigLoader` nesnesine geri döner.
+Yükleyici servisi `Obullo\Config\ConfigLoader` nesnesine geri döner.
 
 ```php
 namespace Services;
@@ -78,8 +78,7 @@ class LoaderFactory implements FactoryInterface
 }
 ```
 
-
-### Autoload
+### Otomatik yükleme
 
 Uygulama `config/autoload/` dizini içerisine konulan konfigürasyon dosyalarını otomatik olarak yükler. Bunun için `ZendConfigProvider` sınıfını kullanmanız gerekir.
 
@@ -95,13 +94,13 @@ $aggregator = new ConfigAggregator(
 
 ### Önbellekteki dosyalar
 
-Konfigürasyon dosyaları `cache` açıksa önbelleğe alınır. Bu dosyayı aşağıdaki komutla silebilirsiniz.
+Konfigürasyon dosyaları `cache` açıksa önbelleğe alınır. Bu dosyayı proje kök dizininde iken aşağıdaki komutla silebilirsiniz.
 
 ```
 $ php console cache:clear
 ```
 
-`dev` ortamında cache parametresinin `false` değerinde olması gerekmektedir. Aksi durumda yönlendirme yada konfigürasyon değişiklikleri çalışmayacaktır.
+Önbellek temizleme yani `cache:clear` komutu `/var/cache/` klasörü altındaki `config.php` dosyasını temizler. Yerel sunucuda yani `dev` ortamında cache parametresinin `false` değerinde olması gerekmektedir. Aksi durumda yönlendirme yada konfigürasyon değişiklikleri çalışmayacaktır.
 
 ```php
 $aggregator = new ConfigAggregator(
@@ -115,6 +114,7 @@ $aggregator = new ConfigAggregator(
 );
 ```
 
-> Uygulamanızı `prod` ortamına taşıma işlemlerinde `var/config/cache.php` dosyasının yüklenmeden önce here defasında silinmesi için `rm var/config/cache.php`  veya `php console cache:clear` komutunu deploy yazılımınız içerisine taşıyın.
+> Önbellekleme yerel sunucuda varsayılan olarak kapalıdır, fakat canlı sunucularda (prod ortamında) bu konfigürasyon aktif hale gelir. Konfigürasyon ve yönlendirme dosyalarındaki değişikliklerin geçerli olabilmesi için her `deploy` işleminde `rm var/cache/config.php`  veya `php console cache:clear` komutunu çalıştıran bir `bash script` yazmanız tavsiye edilir. 
+
 
 Detaylı dökümentasyona <a href="http://config.obullo.com/tr/">http://config.obullo.com/tr/</a> bağlantısından ulaşabilirsiniz.

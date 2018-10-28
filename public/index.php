@@ -1,8 +1,8 @@
 <?php
 
-require '../../vendor/autoload.php';
+require '../vendor/autoload.php';
 
-define('ROOT', dirname(dirname(__DIR__)));
+define('ROOT', dirname(__DIR__));
 define('APP', 'App');
 
 use Obullo\Http\{

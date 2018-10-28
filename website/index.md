@@ -35,7 +35,7 @@ $ vendor/bin/phpunit
 
 ## Quick start
 
-Check your `public/app/index.php` file.
+Check your `public/index.php` file.
 
 ```php
 require '../../vendor/autoload.php';

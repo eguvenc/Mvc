@@ -5,7 +5,7 @@
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 [![Total Downloads](https://img.shields.io/packagist/dt/obullo/framework.svg)](https://packagist.org/packages/obullo/framework)
 
-> Obullo ve Zend bileşenleri ile micro mvc çatınızı oluşturun.
+> Obullo ve Zend bileşenleri ile mvc çatınızı oluşturun.
 
 ## Proje yaratmak
 
@@ -35,7 +35,7 @@ $ vendor/bin/phpunit
 
 ## Hızlı başlangıç
 
-Kök dizindeki `public/app/index.php` dosyasına göz atın.
+Kök dizindeki `public/index.php` dosyasına göz atın.
 
 ```php
 require '../../vendor/autoload.php';
@@ -193,3 +193,7 @@ $kernel->send($response);
 ## Konsol
 
 [Console.md](console.md)
+
+## Çoklu Dil Desteği
+
+[Translation.md](translation.md)

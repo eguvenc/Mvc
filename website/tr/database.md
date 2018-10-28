@@ -3,16 +3,16 @@
 
 Veritabanı sınıfı uygulama içerisindeki veritabanı bağlantısı ve özelliklerini kontrol eden fonksiyonları içerir. Çerçeve içerisinde veritabanı paketi harici olarak kullanılır ve bunun için varsayılan olarak <a href="https://docs.zendframework.com/zend-db/adapter/">Zend Db</a> paketi tercih edilmiştir. Doctribe DBAL paketi de alternatif olarak desteklenmektedir.
 
+### Zend veritabanı servisi (Varsayılan)
+
+```php
+$container->setFactory('adapter', 'Services\ZendDbFactory');
+```
+
 ### Doctrine veritabanı servisi
 
 ```php
 $container->setFactory('connection', 'DoctrineDBALFactory');
-```
-
-### Zend veritabanı servisi
-
-```php
-$container->setFactory('adapter', 'Services\ZendDbFactory');
 ```
 
 > Uygulama içinde `Services\ZendDbFactory` index.php içerisinde tanımlı olarak gelir.
@@ -159,9 +159,135 @@ $stmt   = $adapter->createStatement($sql, $optionalParameters);
 $result = $stmt->execute();
 ```
 
-### Zend\Db\ResultSet\ResultSet 
+Bu kısım hakkında daha fazla örnek için <a href="https://docs.zendframework.com/zend-db/adapter/">https://docs.zendframework.com/zend-db/adapter/</a> adresini ziyaret edebilirsiniz.
 
-Çoğu amaç için, bir `Zend\Db\ResultSet\ResultSet` örneği veya bir `Zend\Db\ResultSet\AbstractResultSet` türevi kullanılır. `AbstractResultSet` sınıfı aşağıdaki temel işlevleri sunar:
+### Depo (Repository) Tasarım Deseni
+
+Depo tasarım deseni veri merkezli uygulamalarda veriye erişimin ve yönetimin tek noktaya indirgenmesini sağlayan bir tasarım desenidir. Bu tasarım deseninde `CRUD` metotları yani; `Create`, `Read`, `Update` ve `Delete` operasyonları tek bir sınıf içerisinden yürütülür. Uygulama varlıkları `Entity` sınıfı tarafından, uygulama veritabanı işlevleri ise `Repository` sınıfı tarafından kontrol edilir. Böylece uygulama katmanlara ayrılarak daha büyük uygulamalar geliştirebilmek için gerekli esneklik sağlanmış olur.
+
+
+### Varlıklar (Entities)
+
+Varlık nesneleri uygulama içerisinde veritabanı ile kullanılan değişkenlerin tutulduğu yerdir. Depo sınıfı ihtiyaç duyduğunda veritabanı okuma ve yazma işlemlerinde varlık sınfına ait değişken değerlerine başvurmalıdır. Veritabanına yazma ve okuma işlemlerinde bu değerler dışarıdan gelen veriler ile doldurulur.
+
+```php
+namespace App\Entity;
+
+class UserEntity
+{
+    protected $firstname;
+    protected $lastname;
+    protected $email;
+
+    public function getFirstname()
+    {
+        return $this->firstname;
+    }
+
+    public function getLastname()
+    {
+        return $this->lastname;
+    }
+
+    public function setFirstname($firstName)
+    {
+        $this->firstname = ucfirst(strtolower($firstName));
+    }
+
+    public function setLastname($lastName)
+    {
+        $this->lastname = ucfirst(strtolower($lastName));
+    }
+
+    public function getInsertVariables() : array
+    {
+        return get_object_vars($this);
+    }
+
+    public function getUpdateVariables() : array
+    {
+        $data = array();
+        foreach (get_object_vars($this) as $key => $val) {
+            if (false == is_null($val)) {
+                $data[$key] = $val;
+            }
+        }
+        return $data;
+    }
+}
+```
+
+### Repositories (Depolar)
+
+Depolar veritabanı işlemlerinin oluşturulduğu yerlerdir.
+
+```php
+namespace App\Repository;
+
+use App\Entity\UserEntity;
+use Zend\Db\TableGateway\Feature\RowGatewayFeature;
+use Zend\Db\TableGateway\TableGateway;
+use Zend\Db\Adapter\Adapter;
+
+class UserRepository
+{
+    protected $tableGateway;
+
+    public function __construct(Adapter $adapter)
+    {
+        $this->tableGateway = new TableGateway('users', $adapter, new RowGatewayFeature('id'));
+    }
+
+    public function insert(UserEntity $user)
+    {
+        $this->tableGateway->insert($user->getInsertVariables());
+
+        return $this->tableGateway->getLastInsertValue();
+    }
+
+    public function update(UserEntity $user, $id)
+    {
+        $this->tableGateway->update($user->getUpdateVariables(), array('id' => $id));
+    }
+
+    public function delete($id)
+    {
+        $this->tableGateway->delete(array('id' => (int) $id));
+    }
+
+    public function getUser($id)
+    {
+        $id  = (int)$id;
+        $rowset = $this->tableGateway->select(array('id' => $id));
+        $row = $rowset->current();
+        if (false == $row) {
+            throw new \Exception("Could not find row $id");
+        }
+        return $row;
+    }
+
+    public function fetchAll()
+    {
+        return $this->tableGateway->select();
+    }
+}
+```
+
+Varlık ve Depo nesneleri ile veritabanına bir kayıt ekleyelim.
+
+```php
+$user = new UserEntity;
+$user->setFirstname('firstname');
+$user->setLastname('lastname');
+$user->setEmail('test@test.com');
+ 
+$userRepo = new UserRepository($adapter);
+$lastInsertedId = $userRepo->insert($user);
+```
+
+### Sorgu Sonuçları 
+
+Sorgu sonuçlarını elde etmede çoğu amaç için, bir `Zend\Db\ResultSet\ResultSet` örneği veya bir `Zend\Db\ResultSet\AbstractResultSet` türevi kullanılır. `AbstractResultSet` sınıfı aşağıdaki temel işlevleri sunar:
 
 ```php
 namespace Zend\Db\ResultSet;
@@ -189,52 +315,52 @@ abstract class AbstractResultSet implements Iterator, ResultSetInterface
 }
 ```
 
-### Zend\Db\ResultSet\HydratingResultSet
+### Sorgu Sonuçlarını Entity Sınıfı ile Birleştirmek
 
-Zend\Db\ResultSet\HydratingResultSet is a more flexible ResultSet object that allows the developer to choose an appropriate "hydration strategy" for getting row data into a target object. While iterating over results, HydratingResultSet will take a prototype of a target object and clone it once for each row. The HydratingResultSet will then hydrate that clone with the row data.
+`Zend\Db\ResultSet\HydratingResultSet`, geliştiricinin satır verilerini hedef nesneye almak için uygun bir <b>hidrasyon stratejisi</b> seçmesini sağlayan daha esnek bir `ResultSet` nesnesidir. Sonuçların üzerinde yineleme yaparken, `HydratingResultSet` bir hedef nesnenin prototipini alır ve her satır için bir kez klonlar. `HydratingResultSet` daha sonra bu klonu satır verileriyle eşleştirir.
 
-The HydratingResultSet depends on zend-hydrator, which you will need to install:
+`HydratingResultSet`, yüklemeniz gereken zend-hydrator'a bağlıdır:
 
 ```
 $ composer require zendframework/zend-hydrator
 ```
 
-In the example below, rows from the database will be iterated, and during iteration, HydratingResultSet will use the Reflection based hydrator to inject the row data directly into the protected members of the cloned UserEntity object:
+Aşağıdaki örnekte, veritabanından gelen satırlar yinelenecek ve yineleme sırasında `HydratingResultSet`, satır verisini doğrudan klonlanmış `UserEntity` nesnesinin korunan değişkenlerine enjekte edecek şekilde kullanacaktır.
 
 ```php
-se Zend\Db\Adapter\Driver\ResultInterface;
+use Zend\Db\Adapter\Driver\ResultInterface;
 use Zend\Db\ResultSet\HydratingResultSet;
 use Zend\Hydrator\Reflection as ReflectionHydrator;
 
 class UserEntity
 {
-    protected $first_name;
-    protected $last_name;
+    protected $firstname;
+    protected $lastname;
 
     public function getFirstName()
     {
-        return $this->first_name;
+        return $this->firstname;
     }
 
     public function getLastName()
     {
-        return $this->last_name;
+        return $this->lastname;
     }
 
     public function setFirstName($firstName)
     {
-        $this->first_name = $firstName;
+        $this->firstname = $firstName;
     }
 
     public function setLastName($lastName)
     {
-        $this->last_name = $lastName;
+        $this->lastname = $lastName;
     }
 }
 
-$statement = $driver->createStatement($sql);
-$statement->prepare($parameters);
-$result = $statement->execute();
+$statement = $adapter->createStatement('SELECT * FROM `users` WHERE `id` = ?');
+$statement->prepare();
+$result = $statement->execute(['id' => 2]);
 
 if ($result instanceof ResultInterface && $result->isQueryResult()) {
     $resultSet = new HydratingResultSet(new ReflectionHydrator, new UserEntity);
@@ -246,9 +372,4 @@ if ($result instanceof ResultInterface && $result->isQueryResult()) {
 }
 ```
 
-For more information, see the <a href="">zend-hydrator</a> documentation to get a better sense of the different strategies that can be employed in order to populate a target object.
-
-
-
-
-Daha fazla örnek için <a href="https://docs.zendframework.com/zend-db/adapter/">https://docs.zendframework.com/zend-db/adapter/</a> adresini ziyaret edebilirsiniz.
+Bu kısım hakkında daha fazla örnek için <a href="https://docs.zendframework.com/zend-db/adapter/">https://docs.zendframework.com/zend-db/adapter/</a> adresini ziyaret edebilirsiniz.

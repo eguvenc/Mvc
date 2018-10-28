@@ -11,10 +11,6 @@ Yönlendirmeler `config/routes.yaml` dosyası içerisinde muhafaza edilir.
 home:
     path: /
     handler: App\Controller\DefaultController::index
-
-dummy:
-    path: /dummy
-    handler: App\Controller\DefaultController::dummy
 ```
 
 ### Parametreler
@@ -26,26 +22,26 @@ name:
     scheme: http
     middleware: 
       - App\Middleware\Auth
-      - App\Middleware\Dummy
+      - App\Middleware\Guest
     path: /
     handler: App\Controller\DefaultController::index
 ```
 
 ### Önbellekteki dosyalar
 
-Konfigürasyon dosyaları `cache` açıksa önbelleğe alınır. Bu dosyayı aşağıdaki komutla silebilirsiniz.
+Konfigürasyon dosyaları `cache` açıksa önbelleğe alınır. Bu dosyayı proje kök dizininde iken aşağıdaki komutla silebilirsiniz.
 
 ```
-$ rm var/cache/config.php
+$ php console cache:clear
 ```
 
-`dev` ortamında cache parametresinin `false` değerinde olması gerekmektedir.
+Önbellek temizleme yani `cache:clear` komutu `/var/cache/` klasörü altındaki `config.php` dosyasını temizler. Yerel sunucuda yani `dev` ortamında cache parametresinin `false` değerinde olması gerekmektedir. Aksi durumda yönlendirme yada konfigürasyon değişiklikleri çalışmayacaktır.
 
 ```php
 $aggregator = new ConfigAggregator(
     [
         new ArrayProvider(
-            [ConfigAggregator::ENABLE_CACHE => (getenv('APP_ENV') == 'dev') ? false : true]
+            [ConfigAggregator::ENABLE_CACHE => (getenv('APP_ENV') == 'dev') ? false : true ]
         ),
         new ZendConfigProvider(ROOT.'/config/autoload/{,*.}{json,yaml,php}'),
     ],
@@ -53,13 +49,14 @@ $aggregator = new ConfigAggregator(
 );
 ```
 
+> Önbellekleme yerel sunucuda varsayılan olarak kapalıdır, fakat canlı sunucularda (prod ortamında) bu konfigürasyon aktif hale gelir. Konfigürasyon ve yönlendirme dosyalarındaki değişikliklerin geçerli olabilmesi için her `deploy` işleminde `rm var/cache/config.php`  veya `php console cache:clear` komutunu çalıştıran bir `bash script` yazmanız tavsiye edilir. 
+
 Detaylı dökümentasyona <a href="http://config.obullo.com/tr/">http://config.obullo.com/tr/</a> bağlantısından ulaşabilirsiniz.
 
 
 ### Route olayları
 
 Uygulama routing ile ilgili işlemler için `App/Event/RouteListener` sınıfı dinler.
-
 
 <table>
     <thead>
@@ -90,10 +87,8 @@ class RouteListener implements ListenerAggregateInterface,ContainerAwareInterfac
 
     public function onMatch(EventInterface $e)
     {
-        /*
-        $route = $e->getParams();
-        $route->getName();
-        */
+        // $route = $e->getParam('route');
+        // $route->getName();
     }
 }
 ```

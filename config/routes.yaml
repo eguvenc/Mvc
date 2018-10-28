@@ -10,3 +10,12 @@ home:
 dummy:
     path: /dummy
     handler: App\Controller\DefaultController::dummy
+
+user/:
+    add:
+      path: /add
+      handler: App\Controller\UserController::add
+
+    update:
+      path: /update/<int:id>
+      handler: App\Controller\UserController::update
