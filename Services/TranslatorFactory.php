@@ -28,7 +28,7 @@ class TranslatorFactory implements FactoryInterface
             
         $translator = new Translator;
         $translator->setLocale($config->default_locale);
-        $translator->addTranslationFilePattern('PhpArray', ROOT, '/var/messages/%s/messages.php');
+        $translator->addTranslationFilePattern('PhpArray', ROOT, '/var/messages/%s/messages.php', 'system');
 
 		return $translator;
     }

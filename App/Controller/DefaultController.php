@@ -18,11 +18,12 @@ class DefaultController extends Controller
 	{
         // $this->logger->info('My logger is now ready');
 
-        $this->translator->setLocale('en');
-        $this->translator->getLocale();
+        // $this->translator->setLocale('tr');
 
-        $this->translator->addTranslationFilePattern('PhpArray', ROOT, '/var/messages/%s/messages.php');
-        $this->translator->translater(100);
+        // // $this->translator->addTranslationFilePattern('PhpArray', ROOT, '/var/messages/%s/messages.php', 'system');
+        // $this->translator->addTranslationFile('PhpArray', ROOT.'/var/messages/en/messages.php', 'system');
+        // echo $this->translator->translate("Application Error", "system");
+
 
         // echo $this->translator->translate('Invalid type given. String expected', 'default', 'en');   
         // echo $this->translator->translate('Application Error');
@@ -53,14 +54,13 @@ class DefaultController extends Controller
         // $stmt    = $this->adapter->query('SELECT * FROM `users` WHERE `id` = ? AND `name` = ?');
         // $results = $stmt->execute(['name' => 'user_78', 'id' => 2]);
 
-        // // $results = $this->adapter->query('SELECT * FROM `users` WHERE `id` = :id', ['id' => 2]);
+        $results = $this->adapter->query('SELECT * FROM `users` WHERE `id` = ?', ['id' => 2]);
 
-        // foreach ($results as $row) {
-        //     // echo $row->name;
-        // }
-        // $profiler = $this->adapter->getProfiler()->getLastProfile();
 
-        // var_dump($profiler);
+        $profiler = $this->adapter->getProfiler()->getLastProfile();
+
+        var_dump($profiler['sql']);
+        var_dump($profiler['parameters']->getNamedArray());
 
         // var_dump($result->toArray()); // object(Zend\Db\ResultSet\ResultSet)#96
 

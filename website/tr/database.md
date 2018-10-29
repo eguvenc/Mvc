@@ -166,6 +166,20 @@ $result = $stmt->execute();
 
 Bu kısım hakkında daha fazla örnek için <a href="https://docs.zendframework.com/zend-db/adapter/">https://docs.zendframework.com/zend-db/adapter/</a> adresini ziyaret edebilirsiniz.
 
+
+### Son çalıştırılan sorgu
+
+En son çalıştırılan sorgu ve sorgu parametreleri `getProfiler` metodu ile elde edilebilir.
+
+```php
+$adapter->query('SELECT * FROM `users` WHERE `id` = ?', ['id' => 2]);
+
+$profiler = $adapter->getProfiler()->getLastProfile();
+
+echo $profiler['sql'];
+print_r($profiler['parameters']->getNamedArray()); // array(1) { ["id"]=> int(2) } 
+```
+
 ### Depo (Repository) Tasarım Deseni
 
 Depo tasarım deseni veri merkezli uygulamalarda veriye erişimin ve yönetimin tek noktaya indirgenmesini sağlayan bir tasarım desenidir. Bu tasarım deseninde `CRUD` metotları yani; `Create`, `Read`, `Update` ve `Delete` operasyonları tek bir sınıf içerisinden yürütülür. Uygulama varlıkları `Entity` sınıfı tarafından, uygulama veritabanı işlevleri ise `Repository` sınıfı tarafından kontrol edilir. Böylece uygulama katmanlara ayrılarak daha büyük uygulamalar geliştirebilmek için gerekli esneklik sağlanmış olur.

@@ -42,7 +42,7 @@ http://example.com/en
 http://example.com/en/dummy
 ```
 
-App `config/routes.yaml` dosyanızı açın ve yönlendirme kurallarınızı aşağıdaki gibi değiştirin.
+`config/routes.yaml` dosyanızı açın ve yönlendirme kurallarınızı aşağıdaki gibi değiştirin.
 
 ```
 home: 
