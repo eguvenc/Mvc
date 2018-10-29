@@ -3,9 +3,15 @@
 
 Olay sınıfı uygulama içerisinde olaylar ilan edip ve bu olayları önceden belirlediğimiz dinleyici sınıflar içerisinden yönetmemizi sağlar. Çerçeve içerisinde olay paketi harici olarak kullanılır ve bunun için `Zend/EventManager` tercih edilmiştir.
 
+Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
+
+```bash
+composer require zendframework/zend-eventmanager
+```
+
 ### Olay servisi
 
-Olay nesnesi diğer servisler gibi `index.php` dosyası içerisinde konfigüre edilir. 
+Olay nesnesi diğer servisler gibi `index.php` dosyası içerisinden konfigüre edilir. 
 
 ```php
 $container->setFactory('events', 'Services\EventManagerFactory');
@@ -100,7 +106,7 @@ class ErrorListener implements ListenerAggregateInterface,ContainerAwareInterfac
 }
 ```
 
-`Obullo\Http\Error\ErrorHandler` sınıfı içerisinde `ErrorListener` sınıfına ait `error.handler` olayı aşağıdaki gibi tetikleniyor.
+`Obullo\Error\ErrorHandler` sınıfı içerisinde `ErrorListener` sınıfına ait `error.handler` olayı aşağıdaki gibi tetikleniyor.
 
 ```php
 protected function handleError(Throwable $exception)

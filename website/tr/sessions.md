@@ -3,9 +3,15 @@
 
 Session servisi uygulama içerisinde kullanıcı oturumlarını yönetmemizi sağlar. Çerçeve içerisinde session paketi harici olarak kullanılır ve bunun için <a href="https://docs.zendframework.com/zend-session/">Zend/Session</a> tercih edilmiştir.
 
+Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
+
+```bash
+composer require zendframework/zend-session
+```
+
 ### Session servisi
 
-Session nesnesi diğer servisler gibi `index.php` dosyası içerisinde konfigüre edilir. 
+Session nesnesi diğer servisler gibi `index.php` dosyası içerisinden konfigüre edilir. 
 
 ```php
 $container->setFactory('session', 'Services\SessionFactory');
@@ -115,11 +121,11 @@ echo $_SESSION['test']; // foo;
 
 ### Flash messenger
 
-Flash messenger sınıfı uygulama işlemlerinden sonra kullanıcıya gösterilemesi amaçlanan bilgi mesajlarını `$_SESSION` içerisinde geçici olarak tutarak bir sonraki http isteğinde bu mesajın kullanıcıya gösterilmesini sağlar.
+Flash messenger sınıfı uygulama işlemlerinden sonra kullanıcıya gösterilmesi amaçlanan bilgi mesajlarını `$_SESSION` içerisinde geçici olarak tutarak bir sonraki http isteğinde bu mesajın kullanıcıya gösterilmesini sağlar.
 
 ### Flash servisi
 
-Flash nesnesi diğer servisler gibi `index.php` dosyası içerisinde konfigüre edilir. 
+Flash nesnesi diğer servisler gibi `index.php` dosyası içerisinden konfigüre edilir. 
 
 ```php
 $container->setFactory('flash', 'Services\FlashMessengerFactory');

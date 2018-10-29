@@ -18,11 +18,11 @@ class DefaultController extends Controller
 	{
         // $this->logger->info('My logger is now ready');
 
-        // $this->translator->setLocale('es');
-        // echo $this->translator->getLocale();
+        $this->translator->setLocale('en');
+        $this->translator->getLocale();
 
-        // $this->translator->addTranslationFilePattern('PhpArray', ROOT, '/var/messages/%s/messages.php');
-        // echo $this->translator->translate(100);
+        $this->translator->addTranslationFilePattern('PhpArray', ROOT, '/var/messages/%s/messages.php');
+        $this->translator->translater(100);
 
         // echo $this->translator->translate('Invalid type given. String expected', 'default', 'en');   
         // echo $this->translator->translate('Application Error');

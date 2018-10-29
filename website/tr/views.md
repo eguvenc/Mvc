@@ -3,9 +3,15 @@
 
 Görünüm sınıfı uygulama içerisindeki html arayüzünü kontrol eden metotları içerir. Çerçeve içerisinde view paketi harici olarak kullanılır ve bunun için <a href="http://platesphp.com/v3/templates/">PlatesPhp</a> paketi tercih edilmiştir.
 
+Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
+
+```bash
+composer require league/plates
+```
+
 ### View servisi
 
-View nesnesi diğer servisler gibi `index.php` dosyası içerisinde konfigüre edilir. 
+View nesnesi diğer servisler gibi `index.php` dosyası içerisinden konfigüre edilir. 
 
 ```php
 $container = new ServiceManager;
@@ -96,9 +102,9 @@ Render html metodu aslında arka planda aşağıdaki işlevi çağırır.
 return new HtmlResponse('test');
 ```
 
-### Layout tanımlamak
+### Şablon tanımlamak
 
-Görünüm içinde herhangi bir yerde layout metodu çağırılabilir. Tipik olarak dosyanın en üstünde çağırılır.
+Bir şablon yüklemek için görünüm içinde herhangi bir yerde `layout` metodu çağırılabilir. Tipik olarak dosyanın en üstünde kullanılır.
 
 ```php
 <?php $this->layout('template') ?>
@@ -112,7 +118,7 @@ This function also works with folders:
 
 ### Veri atamak
 
-Bir görünüme veri atamak için layout fonksiyonu ikinci parametresi kullanılır. Böylece bu veriler görünüm dosyası içerisinde yerel olarak erişilebilir hale gelir.
+Bir görünüme veri atamak için `layout` fonksiyonu ikinci parametresi kullanılır. Böylece bu veriler görünüm dosyası içerisinde yerel olarak erişilebilir hale gelir.
 
 ```php
 <?php $this->layout('template', ['title' => 'User Profile']) ?>
@@ -120,7 +126,7 @@ Bir görünüme veri atamak için layout fonksiyonu ikinci parametresi kullanıl
 
 ### İçeriğe erişmek
 
-Bir layout içerisinden işlenmiş bir görünüme ulaşmak için `section()` metodu varsayılan `content` parametresi ile kullanılır.
+Bir şablon içerisinden işlenmiş bir görünüme ulaşmak için `section()` metodu varsayılan `content` parametresi ile kullanılır.
 
 ```php
 <html>

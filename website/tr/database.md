@@ -1,9 +1,17 @@
 
 ## Veritabanı
 
-Veritabanı sınıfı uygulama içerisindeki veritabanı bağlantısı ve özelliklerini kontrol eden fonksiyonları içerir. Çerçeve içerisinde veritabanı paketi harici olarak kullanılır ve bunun için varsayılan olarak <a href="https://docs.zendframework.com/zend-db/adapter/">Zend Db</a> paketi tercih edilmiştir. Doctribe DBAL paketi de alternatif olarak desteklenmektedir.
+Veritabanı sınıfı uygulama içerisindeki veritabanı bağlantısı ve özelliklerini kontrol eden fonksiyonları içerir. Çerçeve içerisinde veritabanı paketi harici olarak kullanılır ve bunun için varsayılan olarak <a href="https://docs.zendframework.com/zend-db/adapter/">Zend/Db</a> paketi tercih edilmiştir. Doctribe DBAL paketi de alternatif olarak desteklenmektedir.
+
+Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
+
+```bash
+composer require zendframework/zend-db
+```
 
 ### Zend veritabanı servisi (Varsayılan)
+
+Veritabanı nesnesi diğer servisler gibi `index.php` dosyası içerisinden konfigüre edilir. 
 
 ```php
 $container->setFactory('adapter', 'Services\ZendDbFactory');
@@ -15,10 +23,7 @@ $container->setFactory('adapter', 'Services\ZendDbFactory');
 $container->setFactory('connection', 'DoctrineDBALFactory');
 ```
 
-> Uygulama içinde `Services\ZendDbFactory` index.php içerisinde tanımlı olarak gelir.
-
-
-Veritabanı servisi `Zend\Db\Adapter\Adapter` nesnesine geri döner.
+Varsayılan veritabanı servisi `Zend\Db\Adapter\Adapter` nesnesine geri döner.
 
 ```php
 namespace Services;

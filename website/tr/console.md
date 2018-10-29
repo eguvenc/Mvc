@@ -1,7 +1,13 @@
 
 ## Konsol
 
-Çerçeve içerisinde konsol paketi harici olarak kullanılır ve bunun için varsayılan olarak <a href="https://symfony.com/doc/current/components/console.html">Symfony Console</a> paketi tercih edilmiştir.
+Çerçeve içerisinde konsol paketi harici olarak kullanılır ve bunun için varsayılan olarak <a href="https://symfony.com/doc/current/components/console.html">Symfony/Console</a> paketi tercih edilmiştir.
+
+Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
+
+```bash
+composer require symfony/console
+```
 
 ### Konsol dosyası
 

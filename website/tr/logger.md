@@ -3,9 +3,15 @@
 
 Log servisi loglama işlemleri için `logger` servisi konfigüre edilmelidir. Çerçeve içerisinde logger paketi harici olarak kullanılır ve bunun için <a href="https://seldaek.github.io/monolog/">Monolog/Logger</a> tercih edilmiştir.
 
+Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
+
+```bash
+composer require monolog/monolog
+```
+
 ### Loglama servisi
 
-Logger nesnesi diğer servisler gibi `index.php` dosyası içerisinde konfigüre edilir. 
+Logger nesnesi diğer servisler gibi `index.php` dosyası içerisinden konfigüre edilir. 
 
 ```php
 $container->setFactory('logger', 'Services\LoggerFactory');

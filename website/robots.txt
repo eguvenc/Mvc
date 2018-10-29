@@ -1,2 +1,2 @@
 user-agent: *
-Sitemap: http://mvc.obullo.com/sitemap.xml
+Sitemap: http://framework.obullo.com/sitemap.xml

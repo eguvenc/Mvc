@@ -1,7 +1,67 @@
 
 ## Yönlendirmeler
 
-Yönlendirme sınıfı <a href="http://router.obullo.com/">Obullo/Router</a> paketini kullanır. Bu paket <a href="https://docs.djangoproject.com/en/2.0/topics/http/urls/">Django Url Dispatcher</a> kütüphanesinden ilham alınarak geliştirilmiş bağımsız bir paketdir.
+Yönlendirme sınıfı dışarıdan gelen http uri adresini çözümler ve konfigürasyon dosyasındaki eşleşmeye göre uygulamanın çıktı üretmesi için kullanıcıyı ilgli kontrolör dosyasına yönlendirir. Çerçeve içerisinde yönlendirme paketi harici olarak kullanılır ve bunun için <a href="http://router.obullo.com/">Obullo/Router</a> paketi tercih edilmiştir.
+
+Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
+
+```bash
+composer require obullo/router
+```
+
+### Yönlendirme servisi
+
+Yönelendirme nesnesi diğer servisler gibi `index.php` dosyası içerisinden konfigüre edilir. 
+
+```php
+$container->setFactory('router', 'Services\RouterFactory');
+```
+
+Yönlendirme servisi `Obullo\Router\Router` nesnesine geri döner.
+
+
+```php
+namespace Services;
+
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
+
+class RouterFactory implements FactoryInterface
+{
+    /**
+     * Create an object
+     *
+     * @param  ContainerInterface $container
+     * @param  string             $requestedName
+     * @param  null|array         $options
+     * @return object
+     */
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    {
+        $types = [
+            new IntType('<int:id>'),
+            new IntType('<int:page>'),
+            new StrType('<str:name>'),
+            new TranslationType('<locale:locale>'),
+        ];
+        $context = new RequestContext;
+        $context->fromRequest($container->get('request'));
+         
+        $collection = new RouteCollection(['types' => $types]);
+        $collection->setContext($context);
+
+        $builder = new Builder($collection);
+        $routes = $container
+            ->get('loader')
+            ->load(ROOT, '/config/routes.yaml')
+            ->toArray();
+            
+        $collection = $builder->build($routes);
+
+        return new Router($collection);
+    }
+}
+```
 
 ### Uygulama yönlendirme
 
@@ -14,6 +74,8 @@ home:
 ```
 
 ### Parametreler
+
+Bir yönlendirme konfigürasyonunun alabileceği değerler şeması aşağıdaki gibidir.
 
 ```
 name:
@@ -50,8 +112,6 @@ $aggregator = new ConfigAggregator(
 ```
 
 > Önbellekleme yerel sunucuda varsayılan olarak kapalıdır, fakat canlı sunucularda (prod ortamında) bu konfigürasyon aktif hale gelir. Konfigürasyon ve yönlendirme dosyalarındaki değişikliklerin geçerli olabilmesi için her `deploy` işleminde `rm var/cache/config.php`  veya `php console cache:clear` komutunu çalıştıran bir `bash script` yazmanız tavsiye edilir. 
-
-Detaylı dökümentasyona <a href="http://config.obullo.com/tr/">http://config.obullo.com/tr/</a> bağlantısından ulaşabilirsiniz.
 
 
 ### Route olayları

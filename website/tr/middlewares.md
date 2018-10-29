@@ -3,7 +3,13 @@
 
 Katman sınıfı <a href="https://www.php-fig.org/psr/psr-15/">Psr15</a> standartlarına göre tasarlanmıştır ve <a href="http://stack.obullo.com/">Obullo/Stack</a> paketini kullanır.
 
-> Http katmanları http çözümlemesinden önce `$request` yada `$response` nesnelerini etkilemek için kullanılırlar. Her bir katman uygulamayı sarar ve merkeze doğru ilerledikçe uygulamaya ulaşılır. Merkeze ulaşıldığında route eşleşmesi var ise eşleşme çıktısı, yok ise `Error` katmanı ile `$response` nesnesine dönülerek çıktı ekrana yazdırılır.
+> Http katmanları http çözümlemesinden önce `$request` yada `$response` nesnelerini tek başına yada her ikisini birden etkilemek için kullanılırlar. Uygulamaya eklenen her bir katman uygulamayı sarar ve merkeze doğru ilerledikçe uygulamaya ulaşılır. Merkeze ulaşıldığında `$response` nesnesine dönülerek çıktı ekrana yazdırılır.
+
+Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
+
+```bash
+composer require obullo/stack
+```
 
 ### Küresel katmanlar
 
@@ -43,9 +49,9 @@ home:
     path: /<locale:locale>
     handler: App\Controller\DefaultController::index
 
-dummy:
-    path: /<locale:locale>/dummy
-    handler: App\Controller\DefaultController::dummy
+test:
+    path: /<locale:locale>/test
+    handler: App\Controller\DefaultController::test
 ```
 
 `index.php` dosyanızı açın ve dil katmanını ekleyin.
@@ -69,7 +75,7 @@ foreach ($queue as $value) {
 Http isteği
 
 ```
-http://example.com/en/dummy
+http://example.com/en/test
 ```
 
 Kontrolör dosyası
@@ -83,7 +89,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 
 class DefaultController extends Controller
 {
-    public function dummy(Request $request) : Response
+    public function test(Request $request) : Response
     {
         $locale = $this->translator->getLocale();
 

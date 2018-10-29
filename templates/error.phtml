@@ -20,18 +20,18 @@ h1, h2, h3, h4 {
 <?php } else { ?>
 <section class="head">
 	<table>
-		<tr><td style="width:10%"><?php echo $translator->translate('Type') ?></td><td><?php echo get_class($e) ?></td></tr>
+		<tr><td style="width:15%">Type</td><td><?php echo get_class($e) ?></td></tr>
 		<?php if (($message = $e->getMessage())) { ?>
-		    <tr><td><?php echo $translator->translate('Message') ?></td><td><?php echo $message ?></td></tr>
+		    <tr><td>Message</td><td><?php echo $message ?></td></tr>
 		<?php } ?>
 		<?php if (($code = $e->getCode())) { ?>
-    		<tr><td><?php echo $translator->translate('Code') ?></td><td><?php echo $code ?></td></tr>
+    		<tr><td>Code</td><td><?php echo $code ?></td></tr>
 		<?php } ?>
 		<?php if (($file = $e->getFile())) { ?>
-		    <tr><td><?php echo $translator->translate('File') ?></td><td><?php echo $file ?></td></tr>
+		    <tr><td>File</td><td><?php echo $file ?></td></tr>
 		<?php } ?>
 		<?php if (($line = $e->getLine())) { ?>
-		    <tr><td><?php echo $translator->translate('Line') ?></td><td><?php echo $line ?></td></tr>
+		    <tr><td>Line</td><td><?php echo $line ?></td></tr>
 		<?php } ?>
 	</table>
 </section>

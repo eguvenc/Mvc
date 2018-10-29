@@ -9,16 +9,16 @@ Uygulamadaki tüm hatalar `error` servisi üzerinden yönetilir.
 $container->setFactory('error', 'Services\ErrorHandlerFactory');
 ```
 
-Hata servisi diğer servisler gibi `index.php` dosyasında tanımlıdır.
+Hata servisi diğer servisler gibi `index.php` dosyası içerisinden konfigüre edilir.
 
 ### Hata stratejileri
 
-`Html` ve `Json` olmak iki tür hata stratejisi vardır. Varsayılan strateji html türüdür. Uygulama bir hata ile karşılaştığında error servisi üzerinden `templates/error.phtml` görünümünü işleyerek `Obullo\Http\Error\ErrorHandler->handle()` fonksiyonu ile Psr7 `response` nesnesine geri döner.
+`Html` ve `Json` olmak iki tür hata stratejisi vardır. Varsayılan strateji html türüdür. Uygulama bir hata ile karşılaştığında error servisi üzerinden `templates/error.phtml` görünümünü işleyerek `Obullo\Error\ErrorHandler->handle()` fonksiyonu ile Psr7 `response` nesnesine geri döner.
 
 ```php
 namespace Services;
 
-use Obullo\Http\Error\{
+use Obullo\Error\{
     ErrorHandler,
     HtmlStrategy
 };
@@ -46,7 +46,24 @@ App `templates/error.phtml` görünümü özelleştirilebilir.
 
 ### Hata katmanı
 
-Hata katmanı varsayılan olarak `index.php` dosyasında tanımlıdır. Uygulama içerisindeki diğer katmanlar içerisinden eğer özel bir hata gönderilmek istenirse hata katmanı çağırılır.
+Katmanlar varsayılan olarak `index.php` dosyasında tanımlıdır.
+
+```php
+// -------------------------------------------------------------------
+// Stack Queue
+// -------------------------------------------------------------------
+//
+$queue = [
+    new App\Middleware\HttpMethod
+];
+$stack = new Stack;
+$stack->setContainer($container);
+foreach ($queue as $value) {
+    $stack = $stack->withMiddleware($value);
+}
+```
+
+Uygulama içerisindeki diğer katmanlar içerisinden özel bir hata gönderilmek istenirse hata katmanı çağırılır.
 
 ```php
 public function process(Request $request, RequestHandler $handler) : ResponseInterface
@@ -131,3 +148,5 @@ set_error_handler(function($errno, $errstr, $errfile, $errline) {
     throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 });
 ```
+
+> Error yönetimi `index.php` dosyasından özelleştirilebilir.

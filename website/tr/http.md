@@ -1,11 +1,17 @@
 
 ## Http
 
-Request sınıfı sunucuya gelen http isteklerini yönetir ve <a href="https://www.php-fig.org/psr/psr-7/">Psr7</a> standartlarını zorunlu tutar. Çerçeve içerisinde request paketi harici olarak kullanılır ve bunun için `Zend/Diactoros` paketi tercih edilmiştir.
+Request sınıfı sunucuya gelen http isteklerini yönetir ve <a href="https://www.php-fig.org/psr/psr-7/">Psr7</a> standartlarını zorunlu tutar. Çerçeve içerisinde request paketi harici olarak kullanılır ve bunun için <a href="https://docs.zendframework.com/zend-diactoros/">Zend/Diactoros</a> paketi tercih edilmiştir.
+
+Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
+
+```bash
+composer require zendframework/zend-diactoros
+```
 
 ### Request servisi
 
-Request nesnesi diğer servisler gibi `index.php` dosyası içerisinde konfigüre edilir. 
+Request nesnesi diğer servisler gibi `index.php` dosyası içerisinden konfigüre edilir. 
 
 ```php
 $container = new ServiceManager;

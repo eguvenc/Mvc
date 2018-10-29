@@ -138,9 +138,9 @@ $response = $kernel->handle($request);
 $kernel->send($response);
 ```
 
-## Konteyner
+## Servisler
 
-[Container.md](container.md)
+[Services.md](services.md)
 
 ## Yönlendirmeler
 

@@ -1,8 +1,14 @@
 
-## Konteyner
+## Servis Yönetimi
 
-Konteyner sınıfı uygulamanızda `instance` yönetimi üstlenir. Paylaşımlı nesneler bu sınıf içerisine servis olarak konfigüre edilir ve ihtiyaç olduğunda yeniden ilan edilmeye gerek kalmadan çağırılırlar.
-Çerçeve içerisinde konteyner paketi harici olarak kullanılır ve bunun için <a href="https://docs.zendframework.com/zend-servicemanager/">Zend/ServiceManager</a> paketi tercih edilmiştir.
+Servis yönetim sınıfı uygulamanızda `instance` yönetimi üstlenir. Paylaşımlı nesneler bu sınıf içerisine servis olarak konfigüre edilir ve ihtiyaç olduğunda yeniden ilan edilmeye gerek kalmadan kullanılabilirler.
+Çerçeve içerisinde bu paket harici olarak kullanılır ve bunun için <a href="https://docs.zendframework.com/zend-servicemanager/">Zend/ServiceManager</a> paketi tercih edilmiştir.
+
+Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
+
+```bash
+composer require zendframework/zend-servicemanager
+```
 
 ### Servisler
 

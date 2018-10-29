@@ -1,7 +1,14 @@
 
 ## Konfigürasyon
 
-Konfigürasyon paketi konfigürasyon dosyaları yönetimini üstlenir. Çerçeve içerisinde bu paket bir bileşen olarak kullanılır ve bunun için `Zend/Config` paketi üzerinde çalışan <a href="http://config.obullo.com/">Obullo Config</a> paketi tercih edilmiştir.
+Konfigürasyon paketi konfigürasyon dosyaları yönetimini üstlenir. Çerçeve içerisinde bu paket bir bileşen olarak kullanılır ve bunun için `Zend/Config` paketi üzerinde çalışan <a href="http://config.obullo.com/">Obullo/Config</a> paketi tercih edilmiştir.
+
+
+Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
+
+```bash
+composer require obullo/config
+```
 
 ### Dosyalar
 
@@ -17,7 +24,7 @@ echo $amqp->host; // 127.0.0.1
 
 ### Konfigürasyon yükleyici
 
-Yükleyici nesnesi diğer servisler gibi `index.php` dosyası içerisinde konfigüre edilir. 
+Yükleyici nesnesi diğer servisler gibi `index.php` dosyası içerisinden konfigüre edilir. 
 
 ```php
 $container->setFactory('loader', 'Services\LoaderFactory');
