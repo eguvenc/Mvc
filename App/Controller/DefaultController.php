@@ -9,6 +9,7 @@ namespace App\Controller;
 // use Zend\Db\TableGateway\Feature\RowGatewayFeature;
 
 use Obullo\Http\Controller;
+use Zend\Diactoros\Response\HtmlResponse;
 use Psr\Http\Message\RequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
@@ -30,6 +31,8 @@ class DefaultController extends Controller
 
     public function index(Request $request) : Response
     {
+        return new HtmlResponse($this->render('welcome'));
+
         // $sql = new Sql($this->adapter);
 
         // // $select = $sql->select();
@@ -83,11 +86,11 @@ class DefaultController extends Controller
         // 
         // $this->redirect();
 
-        return $this->render('welcome');
+        
     }
 
     public function dummy()
     {    
-        return $this->render('welcome');
+        return new HtmlResponse($this->render('welcome'));
     }
 }
