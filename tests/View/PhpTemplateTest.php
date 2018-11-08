@@ -1,5 +1,6 @@
 <?php
 
+use Zend\I18n\View\Helper\Translate;
 use Zend\ServiceManager\ServiceManager;
 use League\Plates\Engine;
 use Obullo\View\PlatesPhp;
@@ -29,6 +30,7 @@ class PhpTemplateTest extends PHPUnit_Framework_TestCase
 
 		$container = new ServiceManager;
         $container->setFactory('loader', 'Tests\App\Services\LoaderFactory');
+        $container->setFactory('translator', 'Tests\App\Services\TranslatorFactory');
 
         $context = new RequestContext;
         $context->setPath('/');
@@ -53,10 +55,12 @@ class PhpTemplateTest extends PHPUnit_Framework_TestCase
         $router = new Router($collection);
         $container->setService('router',$router);
 
-        /**
-         * View helpers
-         */
-        $engine->registerFunction('url', new Helper\Url($container));
+        // -------------------------------------------------------------------
+        // View helpers
+        // -------------------------------------------------------------------
+        //
+        $engine->registerFunction('url', (new Helper\Url)->setRouter($router));
+        $engine->registerFunction('translate', (new Translate)->setTranslator($container->get('translator')));
         $engine->registerFunction('escapeHtml', new Helper\EscapeHtml);
         $engine->registerFunction('escapeHtmlAttr', new Helper\EscapeHtmlAttr);
         $engine->registerFunction('escapeCss', new Helper\EscapeCss);

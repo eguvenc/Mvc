@@ -28,7 +28,8 @@
         }
     },
     "require": {
-        "php": "^7.0"
+        "php": "^7.0",
+        "zendframework/zend-view": "^2.10"
     },
     "require-dev": {
         "obullo/stack": "^1.1",

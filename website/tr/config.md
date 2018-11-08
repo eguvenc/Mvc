@@ -43,8 +43,6 @@ class LoaderFactory implements FactoryInterface
 {
     /**
      * Create an object
-     *
-     * @link http://config.obullo.com/ documentation of config package.
      * 
      * @param  ContainerInterface $container
      * @param  string             $requestedName
@@ -77,9 +75,7 @@ class LoaderFactory implements FactoryInterface
         $loader->setEnv($env);
         $loader->addProcessor(new EnvProcessor);
         $loader->addProcessor(new ConstantProcessor);
-
         $loader->load(ROOT, '/config/%s/framework.yaml');
-        
         return $loader;
     }
 }

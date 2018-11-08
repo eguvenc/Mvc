@@ -41,7 +41,7 @@ class HttpMethod implements MiddlewareInterface,ContainerAwareInterface
             if (! in_array($request->getMethod(), $methods)) {
                 
                 $event = new Event;
-                $event->setName('method.notAllowed');
+                $event->setName('dissallowed.method');
                 $event->setParam('methods', $methods);
                 $message = $events->triggerEvent($event)->last();
 
@@ -50,7 +50,7 @@ class HttpMethod implements MiddlewareInterface,ContainerAwareInterface
                 );
             }
             $event = new Event;
-            $event->setName('method.allowed');
+            $event->setName('allowed.method');
             $event->setParam('methods', $methods);
             $events->triggerEvent($event);
         }

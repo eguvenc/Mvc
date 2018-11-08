@@ -21,7 +21,32 @@ class Template extends PlatesTemplate implements ContainerAwareInterface
     use ContainerProxyTrait;
 
     /**
+     * Returns to instance of helper class
+     * 
+     * @param  string $name helper name
+     * @return object
+     */
+    public function plugin($name)
+    {
+        $engine   = $this->getEngine();
+        $function = $engine->getFunction($name);
+
+        return $function->getCallback();
+    }
+
+    /**
+     * Returns to plates Engine class
+     * 
+     * @return object
+     */
+    public function getEngine()
+    {
+        return $this->engine;
+    }
+
+    /**
      * Container proxy:
+     * 
      * Provides access to container variables from template files
      *
      * @param string $key key

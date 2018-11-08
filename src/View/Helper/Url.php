@@ -2,23 +2,27 @@
 
 namespace Obullo\View\Helper;
 
-use Psr\Container\ContainerInterface;
+use Obullo\Router\Router;
 
 /**
  * Url helper
  */
 class Url
 {
-	protected $container;
+	protected $router;
 
 	/**
-	 * Constructor
+	 * Router
 	 * 
-	 * @param ContainerInterface $container container
+	 * @param Router $router object
+	 * 
+	 * @return object self
 	 */
-	public function __construct(ContainerInterface $container)
+	public function setRouter(Router $router)
 	{
-		$this->container = $container;
+		$this->router = $router;
+
+		return $this;
 	}
 
 	/**
@@ -35,7 +39,6 @@ class Url
         if ($scheme != null) {
             return $url;
         }
-        return $this->container->get('router')
-        	->url($url, $params);
+        return $this->router->url($url, $params);
     }
 }

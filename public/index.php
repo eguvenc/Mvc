@@ -25,6 +25,7 @@ if (false == isset($_SERVER['APP_ENV'])) {
 }
 $env = $_SERVER['APP_ENV'] ?? 'dev';
 
+error_reporting(0);
 if ('prod' !== $env) {
     ini_set('display_errors', 1);  
     error_reporting(E_ALL);

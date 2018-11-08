@@ -23,11 +23,6 @@ View servisi `Obullo\View\PlatesPhp` nesnesine geri döner ve bu nesne içerisin
 ```php
 namespace Services;
 
-use Obullo\View\Helper;
-use Obullo\View\PlatesPhp;
-use League\Plates\Engine;
-use League\Plates\Extension\Asset;
-
 class ViewPlatesFactory implements FactoryInterface
 {
     /**
@@ -45,13 +40,15 @@ class ViewPlatesFactory implements FactoryInterface
         $engine->addFolder('templates', ROOT.'/templates');
         $engine->loadExtension(new Asset(ROOT.'/public/'.strtolower(APP).'/', false));
 
-        /**
-         * View helpers
-         */
-        $engine->registerFunction('url', new Helper\Url($container));
-        $engine->registerFunction('escapeHtml', new Helper\EscapeHtml);
-        $engine->registerFunction('escapeHtmlAttr', new Helper\EscapeHtmlAttr);
-        $engine->registerFunction('escapeUrl', new Helper\EscapeUrl);
+        // -------------------------------------------------------------------
+        // View helpers
+        // -------------------------------------------------------------------
+        //
+        $engine->registerFunction('url', (new Url)->setRouter($container->get('router')));
+        $engine->registerFunction('translate', (new Translate)->setTranslator($container->get('translator')));
+        $engine->registerFunction('escapeHtml', new EscapeHtml);
+        $engine->registerFunction('escapeHtmlAttr', new EscapeHtmlAttr);
+        $engine->registerFunction('escapeUrl', new EscapeUrl);
 
         $template = new PlatesPhp($engine);
         $template->setContainer($container);
@@ -85,7 +82,7 @@ return new HtmlResponse($this->view->render('welcome'));
 RenderHtml metodu ise view nesnesi kullanmadan Response nesnesine içerisine html çıktısını direkt ekler.
 
 ```php
-$html = $name.'<br />';
+$html = '<h1>Hello World !</h1>';
 
 return $this->renderHtml($html);
 ```
@@ -93,10 +90,10 @@ return $this->renderHtml($html);
 Yukarıdaki örneğin çıktısı:
 
 ```php
-test<br />
+<h1>Hello World !</h1>
 ```
 
-Render html metodu aslında arka planda aşağıdaki işlevi çağırır.
+Render html metodu arka planda aşağıdaki gibi `HtmlResponse` nesnesine geri döner.
 
 ```php
 return new HtmlResponse('test');
@@ -110,8 +107,9 @@ Bir şablon yüklemek için görünüm içinde herhangi bir yerde `layout` metod
 <?php $this->layout('template') ?>
 
 <h1>User Profile</h1>
-<p>Hello, <?=$this->escape($name)?></p>
-This function also works with folders:
+<p>Hello, <?php echo $this->escape($name)?></p>
+
+// Bu fonksiyon klasör grupları için de aynı işleve sahiptir.
 
 <?php $this->layout('shared::template') ?>
 ```
@@ -131,11 +129,11 @@ Bir şablon içerisinden işlenmiş bir görünüme ulaşmak için `section()` m
 ```php
 <html>
 <head>
-    <title><?=$this->escape($title)?></title>
+    <title><?php echo $this->escape($title)?></title>
 </head>
 <body>
 
-<?=$this->section('content')?>
+<?php echo $this->section('content')?>
 
 </body>
 </html>
@@ -149,7 +147,7 @@ Bölümler (sections) oluşturmak için `start()` metodu kullanılır. Bölümü
 <?php $this->start('welcome') ?>
 
     <h1>Welcome!</h1>
-    <p>Hello <?=$this->escape($name)?></p>
+    <p>Hello <?php echo $this->escape($name)?></p>
 
 <?php $this->stop() ?>
 ```
@@ -164,12 +162,12 @@ Uygulama kaynaklarına ait url adreslerini yaratmayı sağlar.
 <html>
 <head>
     <title>Asset Extension Example</title>
-    <link rel="stylesheet" href="<?=$this->asset('/css/bootstrap.css')?>" />
+    <link rel="stylesheet" href="<?php echo $this->asset('/css/bootstrap.css')?>" />
 </head>
 
 <body>
 
-<img src="<?=$this->asset('/images/logo.png')?>">
+<img src="<?php echo $this->asset('/images/logo.png')?>">
 
 </body>
 </html>
@@ -177,7 +175,9 @@ Uygulama kaynaklarına ait url adreslerini yaratmayı sağlar.
 
 #### $this->url(string $url, $params = []);
 
-Uygulamanızadaki route paketine tanımlanmış route isimleri ile uyumlu çalışarak güvenli url adresleri üretmenizi sağlar. Aşağıdaki gibi route konfigürasyonunuz olduğunu varsayalım.
+Uygulamanızda önceden `config/routes.yaml` dosyasında tanımlanmış yönlendirme türlerine göre güvenli url adresleri üretmenizi sağlar.
+
+Aşağıdaki gibi bir yönlendirme konfigürasyonunuz olduğunu varsayalım.
 
 ```yaml
 
@@ -194,17 +194,17 @@ user/:
         handler: App\Controller\UserController::delete
 ```
 
-Url fonksiyonunu çağırdığınızda url adresleri route konfigürasyonunda belirlenmiş türlere göre üretilir.
+Url fonksiyonunu çağırdığınızda url adresleri yönlendirme konfigürasyonunda belirlenmiş türlere göre üretilir.
 
 ```php
 $this->url('user/update', ['id' => 5]);  // Çıktı:  /user/update/5
 $this->url('user/delete', ['id' => 5]);  // Çıktı:  /user/delete/5
 ```
 
-Bu fonksiyon arka planda router paketi `generate` fonksiyonunu çağırır.
+Bu fonksiyon arka planda yönlendirme paketi `url` fonksiyonuna geri döner.
 
 ```php
-$router->generate($url $params = []);
+$router->url($url, $params = []);
 ```
 
 #### $this->escapeHtml($value);
@@ -213,7 +213,6 @@ Dinamik oluşturulan html etiketlerindeki olası tehlikeli karakterlerden kaçı
 
 ```php
 $this->escapeHtml($row['blog_comment']);
-$escaper = new Zend\Escaper\Escaper('utf-8');
 ```
 
 #### $this->escapeHtmlAttr($value);

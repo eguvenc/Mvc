@@ -64,8 +64,6 @@ $translator = $container->get('translator');
 $translator->addTranslationFilePattern($type, $baseDir, $pattern, $textDomain);
 ```
 
-Argümanlar:
-
 <table>
     <thead>
         <tr>
@@ -223,12 +221,390 @@ class DefaultController extends Controller
         $locale = $this->translator->getLocale();
 
         return $this->renderHtml(
-            'locale:'.sprintf('%02s', $locale)
+            'locale variable:'.sprintf('%02s', $locale)
         );
     }
 }
 ```
 
+Çıktı
+
+```
+locale variable: en
+```
+
 ### Önbellekleme
 
 Canlı sunucu ortamında, çevirilerinizi önbelleğe almak anlamlıdır. Bu, her defasında tek tek formatları yüklemekten ve ayrıştırmanızdan kurtarmaz, aynı zamanda optimize edilmiş bir yükleme prosedürünü de garanti eder. Önbelleğe almayı etkinleştirmek için bir `Zend\Cache\Storage\Adapter` öğesini `$translator->setCache()` yöntemine iletin. Önbelleği devre dışı bırakmak için, yönteme boş bir değer iletmeniz yeterli olacaktır.
+
+## Görünüm yardımcıları
+
+Tarih ve para birimleri gibi formatları farklı dillerde görünüm dosyalarınız içerisinde gösterebilmek için `Services\ViewPlatesFactory` servisi içerisinde bu fonksiyonları tanımlanmanız gerekir.
+
+> Zend I18n kütüphanesi View fonksiyonlarını kullanabilmek için Php <b>ext/intl</b> kütüphanesinin yüklü olması gerekir.
+
+
+### CurrencyFormat Helper
+
+Konfigürasyon:
+
+```php
+$engine->registerFunction('currencyFormat', new \Zend\I18n\View\Helper\CurrencyFormat);
+```
+
+Örnekler:
+
+```php
+echo $this->currencyFormat(1234.56, 'TRY', null, 'tr_TR');
+// Çıktı: ₺1.234,56
+
+echo $this->currencyFormat(1234.56, 'USD', null, 'en_US');
+// Çıktı: "$1,234.56"
+
+echo $this->currencyFormat(1234.56, 'EUR', null, 'de_DE');
+// Çıktı: "1.234,56 €"
+
+echo $this->currencyFormat(1234.56, 'USD', true, 'en_US');
+// Çıktı: "$1,234.56"
+
+echo $this->currencyFormat(1234.56, 'USD', false, 'en_US');
+// Çıktı: "$1,235"
+
+echo $this->currencyFormat(12345678.90, 'EUR', true, 'de_DE', '#0.# kg');
+// Çıktı: "12345678,90 kg"
+
+echo $this->currencyFormat(12345678.90, 'EUR', false, 'de_DE', '#0.# kg');
+// Çıktı: "12345679 kg"
+```
+
+`$currencyCode` ve `$locale` seçenekleri biçimlendirmeden önce ayarlanabilir ve fonksiyon her kullanıldığında uygulanması sağlanabilir.
+
+```php
+// Görünüm dosyaları içerisinde
+
+$this->plugin('currencyformat')->setCurrencyCode('USD')->setLocale('en_US');
+
+echo $this->currencyFormat(1234.56);
+// This returns: "$1,234.56"
+
+echo $this->currencyFormat(5678.90);
+// This returns: "$5,678.90"
+```
+
+Ondalık sayıları kapatıp açmak:
+
+```php
+// Görünüm dosyaları içerisinde
+
+$this->plugin('currencyFormat')->setShouldShowDecimals(false);
+
+echo $this->currencyFormat(1234.56, 'USD', null, 'en_US');
+
+// Çıktı: "$1,235"
+```
+
+Para birimi şablonunu ayarlamak:
+
+```php
+// Görünüm dosyaları içerisinde
+
+$this->plugin('currencyFormat')->setCurrencyPattern('#0.# kg');
+
+echo $this->currencyFormat(12345678.90, 'EUR', null, 'de_DE');
+
+// Çıktı: "12345678,90 kg"
+```
+
+<table>
+    <thead>
+        <tr>
+            <th>Argüman</th>
+            <th>Açıklama</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>$number</td>
+            <td>Sayısal para birimi değeri.</td>
+        </tr>
+        <tr>
+            <td>$currencyCode</td>
+            <td>Kullanılacak para birimini gösteren 3 harfli ISO 4217 para birimi kodu. Eğer girilmedi ise, varsayılan değeri kullanacaktır (varsayılan olarak boş).</td>
+        </tr>
+        <tr>
+            <td>$showDecimals</td>
+            <td>Boolean false, ondalığın temsil edilmemesi gerektiğini gösterir. Eğer girilmedi ise, varsayılan değeri kullanacaktır (varsayılan olarak true).</td>
+        </tr>
+        <tr>
+            <td>$locale</td>
+            <td>Para biriminin biçimlendirileceği yer (yerel ad, ör. En_US). Eğer girilmedi ise, varsayılan yerel ayarı kullanacaktır (varsayılan değer Locale :: getDefault () değeridir).</td>
+        </tr>
+        <tr>
+            <td>$pattern</td>
+            <td>Biçimlendiricinin kullanması gereken desen dizesi. Eğer girilmedi ise, varsayılan değeri kullanır (varsayılan olarak boş).</td>
+        </tr>
+    </tbody>
+</table>
+
+
+### DateFormat Helper
+
+DateFormat fonksiyonu, yerelleştirilmiş tarih/saat değerlerinin oluşturulmasını basitleştirmek için kullanılabilir.
+
+Konfigürasyon:
+
+```php
+$engine->registerFunction('dateFormat', new \Zend\I18n\View\Helper\DateFormat);
+```
+
+Örnekler:
+
+```php
+// Görünüm dosyaları içerisinde
+
+// Tarih ve saat
+echo $this->dateFormat(
+    new DateTime(),
+    IntlDateFormatter::MEDIUM, // date
+    IntlDateFormatter::MEDIUM, // time
+    "en_US"
+);
+// Çıktı: "Jul 2, 2012 6:44:03 PM"
+```
+
+Sadece tarih
+
+```php
+echo $this->dateFormat(
+    new DateTime(),
+    IntlDateFormatter::LONG, // date
+    IntlDateFormatter::NONE, // time
+    "en_US"
+);
+// Çıktı: "July 2, 2012"
+```
+
+Sadece saat
+
+```php
+echo $this->dateFormat(
+    new DateTime(),
+    IntlDateFormatter::NONE,  // date
+    IntlDateFormatter::SHORT, // time
+    "en_US"
+);
+// Çıktı: "6:44 PM"
+```
+
+<table>
+    <thead>
+        <tr>
+            <th>Argüman</th>
+            <th>Açıklama</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>$date</td>
+            <td>Biçimlendirilecek değer. Bu bir DateTime örneği, bir Unix zaman damgası değerini temsil eden bir tam sayı veya localtime() tarafından döndürülen biçimde bir dizi olabilir.</td>
+        </tr>
+        <tr>
+            <td>$dateType</td>
+            <td>Kullanılacak tarih türü (none, short, medium, long, full). Bu IntlDateFormatter sabitlerinden biridir. IntlDateFormatter için varsayılan değer: IntlDateFormatter::NONE.</td>
+        </tr>
+        <tr>
+            <td>$timeType</td>
+            <td>Kullanılacak saat türü (none, short, medium, long, full). Bu IntlDateFormatter sabitlerinden biridir. IntlDateFormatter için varsayılan değer: IntlDateFormatter::NONE.</td>
+        </tr>
+        <tr>
+            <td>$locale</td>
+            <td>Tarihin biçimlendirileceği yer (yerel ad, ör. En_US). Girilmedi ise, varsayılan yerel ayarı kullanacaktır (Locale :: getDefault () öğesinin dönüş değeri).</td>
+        </tr>
+    </tbody>
+</table>
+
+#### Dışarıya açık metotlar
+
+`$locale` seçeneği, `setLocale()` yöntemiyle biçimlendirmeden önce ayarlanabilir ve fonskiyon her kullanıldığında bu zaman uygulanır.
+
+Varsayılan olarak, biçimlendirme sırasında sistemin varsayılan saat dilimi kullanılır. Bu, bir DateTime nesnesinde ayarlanabilecek herhangi bir zaman dilimini geçersiz kılar. Biçimlendirme sırasında saat dilimini değiştirmek için `setTimezone()` yöntemini kullanın.
+
+```php
+// Görünüm dosyası içerisinde
+
+$this->plugin('dateFormat')
+    ->setTimezone('America/New_York')
+    ->setLocale('en_US');
+
+echo $this->dateFormat(new DateTime(), IntlDateFormatter::MEDIUM);  // "Jul 2, 2012"
+echo $this->dateFormat(new DateTime(), IntlDateFormatter::SHORT);   // "7/2/12"
+```
+
+### NumberFormat Helper
+
+NumberFormat fonksiyonu, yerel ayara özgü sayı ve/veya yüzde dizelerinin oluşturulmasını basitleştirmek için kullanılabilir.
+
+Konfigürasyon:
+
+```php
+$engine->registerFunction('numberFormat', new \Zend\I18n\View\Helper\NumberFormat);
+```
+
+Örnekler:
+
+Ondalık biçimlendirme örneği:
+
+```php
+// Görünüm dosyası içinde
+
+echo $this->numberFormat(
+    1234567.891234567890000,
+    NumberFormatter::DECIMAL,
+    NumberFormatter::TYPE_DEFAULT,
+    'de_DE'
+);
+// Çıktı: "1.234.567,891"
+```
+
+Yüzde biçimlendirme örneği:
+
+```php
+echo $this->numberFormat(
+    0.80,
+    NumberFormatter::PERCENT,
+    NumberFormatter::TYPE_DEFAULT,
+    'en_US'
+);
+// Çıktı: "80%"
+```
+
+Bilimsel gösterim formatı örneği:
+
+```php
+echo $this->numberFormat(
+    0.00123456789,
+    NumberFormatter::SCIENTIFIC,
+    NumberFormatter::TYPE_DEFAULT,
+    'fr_FR'
+);
+// Çıktı: "1,23456789E-3"
+```
+
+<table>
+    <thead>
+        <tr>
+            <th>Argüman</th>
+            <th>Açıklama</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>$number</td>
+            <td>Numara formatı.</td>
+        </tr>
+        <tr>
+            <td>$formatStyle</td>
+            <td>Numara Format sitillerinden biri: NumberFormatter::DECIMAL, NumberFormatter::CURRENCY, gibi.</td>
+        </tr>
+        <tr>
+            <td>$formatType</td>
+            <td>Numara Format türleri: NumberFormatter::TYPE_DEFAULT (temel sayısal), NumberFormatter::TYPE_CURRENCY, gibi.</td>
+        </tr>
+        <tr>
+            <td>$locale</td>
+            <td>Geçerli bir yerel değişken.</td>
+        </tr>
+        <tr>
+            <td>$decimals</td>
+            <td>Gösterilecek ondalık noktasının ötesindeki basamak sayısı.</td>
+        </tr>
+        <tr>
+            <td>$textAttributes</td>
+            <td>Numarayla kullanılacak metin nitelikleri (ör., pozitif/negatif sayılar için önek ve/veya sonek, para birimi kodu): NumberFormatter::POSITIVE_PREFIX, NumberFormatter::NEGATIVE_PREFIX, gibi. </td>
+        </tr>
+    </tbody>
+</table>
+
+#### Dışarıya açık metotlar
+
+Biçimlendirmeden önce `$formatStyle`, `$formatType`, `$locale` ve `$textAttributes` seçeneklerinin her biri öncelikli ayarlanabilir ve fonksiyon her çağırıldığında uygulanır.
+
+```php
+// Görünüm dosyası içinde
+
+$this->plugin("numberFormat")
+            ->setFormatStyle(NumberFormatter::PERCENT)
+            ->setFormatType(NumberFormatter::TYPE_DOUBLE)
+            ->setLocale("en_US")
+            ->setTextAttributes([
+                NumberFormatter::POSITIVE_PREFIX => '^ ',
+                NumberFormatter::NEGATIVE_PREFIX => 'v ',
+            ]);
+
+echo $this->numberFormat(0.56);   // "^ 56%"
+echo $this->numberFormat(-0.90);  // "v 90%"
+```
+
+### Translate Helper
+
+`Zend\I18n\Translator\Translator` sınıfı için  sınıfı için yardımcı fonksiyon görevi görür.
+
+Konfigürasyon:
+
+```php
+$engine->registerFunction('translate', (new Translate)->setTranslator($container->get('translator')));
+```
+
+Örnekler:
+
+```php
+// Görünüm dosyarı içerisinde
+
+echo $this->translate("Some translated text.");
+echo $this->translate("Translated text from a custom text domain.", "customDomain");
+echo sprintf($this->translate("The current time is %s."), $currentTime);
+echo $this->translate("Translate in a specific locale", "default", "de");
+```
+
+<table>
+    <thead>
+        <tr>
+            <th>Argüman</th>
+            <th>Açıklama</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>$message</td>
+            <td>Çevirilecek metin.</td>
+        </tr>
+        <tr>
+            <td>$textDomain</td>
+            <td>Çevirinin metin alanı/bağlamı; varsayılan "default".</td>
+        </tr>
+        <tr>
+            <td>$locale</td>
+            <td>Metinin çevrilmesi gereken yer (yerel adı, ör. en_US). Eğer girilmedi ise, varsayılan yerel ayarı kullanacaktır (Locale::getDefault() öğesinin dönüş değeri).</td>
+        </tr>
+
+    </tbody>
+</table>
+
+#### Gettext aracı
+
+`xgettext` aracı, translate fonksiyonu içeren PHP kaynak dosyalarından `*.po` dosyalarını derlemek için kullanılabilir.
+
+
+```bash
+$ xgettext --language=php --add-location --keyword=translate --keyword=translatePlural:1,2 my-view-file.phtml
+```
+
+Daha detaylı bilgi için <a href="https://en.wikipedia.org/wiki/Gettext">Gettext Wikipedia</a> sayfasınız ziyaret edebilirsiniz.
+
+
+#### Dışarıya açık metotlar
+
+Bir `Zend\I18n\Translator\Translator` ve bir varsayılan metin alanı ayarlamak için genel yöntemler <a href="https://docs.zendframework.com/zend-i18n/view-helpers/#abstract-translator-helper">AbstractTranslatorHelper</a> öğesinden devralınır.
+
+
+Çeviri fonksiyonları hakkında data geniş bilgiye <a hreg="https://docs.zendframework.com/zend-i18n/view-helpers/">https://docs.zendframework.com/zend-i18n/view-helpers/</a> adresinden ulaşabilirsiniz.

@@ -6,7 +6,6 @@ use Zend\EventManager\EventInterface;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateTrait;
 use Zend\EventManager\ListenerAggregateInterface;
-
 use Obullo\Container\{
     ContainerAwareInterface,
     ContainerAwareTrait
@@ -22,6 +21,7 @@ class ErrorListener implements ListenerAggregateInterface,ContainerAwareInterfac
     public function attach(EventManagerInterface $events, $priority = null)
     {
         $this->listeners[] = $events->attach('error.handler', [$this, 'onErrorHandler']);
+        $this->listeners[] = $events->attach('error.output', [$this, 'onErrorOutput']);
     }
 
     public function onErrorHandler(EventInterface $e)
@@ -34,5 +34,14 @@ class ErrorListener implements ListenerAggregateInterface,ContainerAwareInterfac
                 // error log
                 break;
         }
+    }
+
+    public function onErrorOutput(EventInterface $e) : bool
+    {
+        $level = error_reporting();
+        if ($level > 0) {
+            return true;
+        }
+        return false;
     }
 }

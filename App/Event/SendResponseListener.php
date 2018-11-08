@@ -6,7 +6,6 @@ use Zend\EventManager\EventInterface;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateTrait;
 use Zend\EventManager\ListenerAggregateInterface;
-
 use Obullo\Container\{
     ContainerAwareInterface,
     ContainerAwareTrait
@@ -21,7 +20,7 @@ class SendResponseListener implements ListenerAggregateInterface,ContainerAwareI
     public function attach(EventManagerInterface $events, $priority = null)
     {
         $this->listeners[] = $events->attach('before.headers', [$this, 'onBeforeHeaders']);
-        $this->listeners[] = $events->attach('before.emit', [$this, 'onBeforeEmit']);
+        $this->listeners[] = $events->attach('before.emit',[$this, 'onBeforeEmit']);
         $this->listeners[] = $events->attach('after.emit', [$this, 'onAfterEmit']);
     }
 

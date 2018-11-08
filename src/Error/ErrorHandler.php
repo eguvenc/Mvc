@@ -137,6 +137,17 @@ class ErrorHandler implements ContainerAwareInterface
      */
     protected function emitBody($response)
     {
-        echo $response->getBody();
+        $event = new Event;
+        $event->setName('error.output');
+        $event->setTarget($this);
+
+        $container = $this->getContainer();
+        $result = $container->get('events')
+            ->triggerEvent($event)
+            ->last();
+
+        if ($result) {
+            echo $response->getBody();
+        }
     }
 }

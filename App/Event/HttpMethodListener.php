@@ -6,7 +6,6 @@ use Zend\EventManager\EventInterface;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateTrait;
 use Zend\EventManager\ListenerAggregateInterface;
-
 use Obullo\Container\{
     ContainerAwareInterface,
     ContainerAwareTrait
@@ -18,8 +17,8 @@ class HttpMethodListener implements ListenerAggregateInterface,ContainerAwareInt
 
     public function attach(EventManagerInterface $events, $priority = null)
     {
-        $this->listeners[] = $events->attach('method.notAllowed', [$this, 'onNotAllowedMethod']);
-        $this->listeners[] = $events->attach('method.allowed', [$this, 'onAllowedMethod']);
+        $this->listeners[] = $events->attach('allowed.method', [$this, 'onAllowedMethod']);
+        $this->listeners[] = $events->attach('disallowed.method', [$this, 'onNotAllowedMethod']);
     }
 
     public function onNotAllowedMethod(EventInterface $e) : string

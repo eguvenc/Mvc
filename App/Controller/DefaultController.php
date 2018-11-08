@@ -17,16 +17,8 @@ class DefaultController extends Controller
 	public function __construct(Request $request)
 	{
         // $this->logger->info('My logger is now ready');
-
-        // $this->translator->setLocale('tr');
-
-        // // $this->translator->addTranslationFilePattern('PhpArray', ROOT, '/var/messages/%s/messages.php', 'system');
-        // $this->translator->addTranslationFile('PhpArray', ROOT.'/var/messages/en/messages.php', 'system');
-        // echo $this->translator->translate("Application Error", "system");
-
-
-        // echo $this->translator->translate('Invalid type given. String expected', 'default', 'en');   
-        // echo $this->translator->translate('Application Error');
+        
+        // echo $this->translator->translate('Application Error', 'default', 'tr');   
 
 		// $this->middleware->add('Error')
   //           ->addArguments(array('code' => 404, 'message' => '404 - Sayfa bulunamadı'));
@@ -54,13 +46,13 @@ class DefaultController extends Controller
         // $stmt    = $this->adapter->query('SELECT * FROM `users` WHERE `id` = ? AND `name` = ?');
         // $results = $stmt->execute(['name' => 'user_78', 'id' => 2]);
 
-        $results = $this->adapter->query('SELECT * FROM `users` WHERE `id` = ?', ['id' => 2]);
+        // $results = $this->adapter->query('SELECT * FROM `users` WHERE `id` = ?', ['id' => 2]);
 
 
-        $profiler = $this->adapter->getProfiler()->getLastProfile();
+        // $profiler = $this->adapter->getProfiler()->getLastProfile();
 
-        var_dump($profiler['sql']);
-        var_dump($profiler['parameters']->getNamedArray());
+        // var_dump($profiler['sql']);
+        // var_dump($profiler['parameters']->getNamedArray());
 
         // var_dump($result->toArray()); // object(Zend\Db\ResultSet\ResultSet)#96
 
