@@ -30,7 +30,7 @@ class DefaultController extends Controller
     
     public function index(Request $request) : Response
     {
-        return new HtmlResponse($this->render('welcome'));
+        return new HtmlResponse($this->render('users/test'));
 
         // $sql = new Sql($this->adapter);
 

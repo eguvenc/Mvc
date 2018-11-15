@@ -59,7 +59,7 @@ class ViewPlatesFactory implements FactoryInterface
 
 > Görünüm yardımcı metotlarına geçerli görünüm dosyası içerisinden `$this->method()` yöntemi ile ulaşılabilir.
  
-### Kontrolör render metodu
+### Görünüm işleyici
 
 #### $this->render($name, $data = null);
 
@@ -106,9 +106,30 @@ class DefaultController extends Controller
 }
 ```
 
-### Şablon tanımlamak
+### Klasörler
 
-Bir şablon yüklemek için görünüm içinde herhangi bir yerde `layout` metodu çağırılabilir. Tipik olarak dosyanın en üstünde kullanılır.
+Eğer `App/View/users/` adlı klasörünüz var ise `/` bölü işareti ile  ilgili görünümü ilgili klasör altından çağırabilirsiniz.
+
+```php
+
+return new HtmlResponse($this->render('users/dashboard'));
+```
+
+Eğer görünüm servisi içerisinde bir klasör `addFolder()` metodu ile önceden aşağıdaki gibi başka bir dizine tanımlı ise,
+
+```php
+$engine->addFolder('templates', ROOT.'/templates');
+```
+
+klasör ismi ardından `::` karakteri ile tanımlı klasör yolu içerisindeki görünüm dosyalarınızı çağırabilirsiniz.
+
+```php
+return new HtmlResponse($this->render('templates::error', $data));
+```
+
+### Şablonlar
+
+Şablon yüklemek için tipik olarak dosyanın en üstünde `layout` metodu çağırılır.
 
 ```php
 <?php $this->layout('template') ?>
@@ -123,7 +144,7 @@ Bir şablon yüklemek için görünüm içinde herhangi bir yerde `layout` metod
 
 ### Veri atamak
 
-Bir görünüme veri atamak için `layout` fonksiyonu ikinci parametresi kullanılır. Böylece bu veriler görünüm dosyası içerisinde yerel olarak erişilebilir hale gelir.
+Bir görünüme veri atamak için `layout` fonksiyonu ikinci parametresi kullanılır.
 
 ```php
 <?php $this->layout('template', ['title' => 'User Profile']) ?>
