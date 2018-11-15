@@ -29,7 +29,9 @@
     },
     "require": {
         "php": "^7.0",
-        "zendframework/zend-view": "^2.10"
+        "zendframework/zend-view": "^2.10",
+        "zendframework/zend-validator": "^2.10",
+        "zendframework/zend-http": "^2.8"
     },
     "require-dev": {
         "obullo/stack": "^1.1",

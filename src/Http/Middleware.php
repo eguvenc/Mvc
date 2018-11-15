@@ -2,7 +2,7 @@
 
 namespace Obullo\Http;
 
-use Obullo\Exception\MiddlewareArgumentException;
+use Obullo\Http\Exception\InvalidArgumentException;
 
 /**
  * Middleware manager
@@ -53,7 +53,7 @@ class Middleware
     public function addArguments(array $args)
     {
         if (false == $this->isAssocativeArray($args)) {
-            throw new MiddlewareArgumentException('Middleware add argument method parameter must be associative array.');
+            throw new InvalidArgumentException('Add arguments method parameter must be associative array.');
         }
         $this->middleware[$this->count]['arguments'] = $args;
         return $this;

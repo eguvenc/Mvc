@@ -1,41 +1,41 @@
 
-# Obullo / Mvc
+# Obullo / Framework
 
-[![Build Status](https://travis-ci.org/obullo/Mvc.svg?branch=master)](https://travis-ci.org/obullo/Mvc)
+[![Build Status](https://travis-ci.org/obullo/Framework.svg?branch=master)](https://travis-ci.org/obullo/Framework)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
-[![Total Downloads](https://img.shields.io/packagist/dt/obullo/mvc.svg)](https://packagist.org/packages/obullo/mvc)
+[![Total Downloads](https://img.shields.io/packagist/dt/obullo/framework.svg)](https://packagist.org/packages/obullo/framework)
 
-> Create your mvc framework using obullo and zend components.
+> Obullo ve Zend bileşenleri ile mvc uygulamaları oluşturun.
 
-## Create your project
+## Proje yaratmak
 
 ``` bash
 $ composer create project obullo/skeleton
 ```
 
-## Install
+## Kurulum
 
 ``` bash
 $ composer update
 ```
 
-## Requirements
+## Gereksinimler
 
-The following versions of PHP are supported by this version.
+Bu versiyon aşağıdaki PHP sürümlerini destekliyor.
 
 * 7.0
 * 7.1
 * 7.2
 
-## Testing
+## Testler
 
 ``` bash
 $ vendor/bin/phpunit
 ```
 
-## Quick start
+## Hızlı başlangıç
 
-Check your `public/index.php` file.
+Kök dizindeki `public/index.php` dosyasına göz atın.
 
 ```php
 require '../../vendor/autoload.php';
@@ -48,7 +48,7 @@ use Zend\ServiceManager\ServiceManager;
 use Dotenv\Dotenv;
 ```
 
-Environment Manager
+Ortam Yöneticisi
 
 ```php
 if (false == isset($_SERVER['APP_ENV'])) {
@@ -56,21 +56,24 @@ if (false == isset($_SERVER['APP_ENV'])) {
 }
 $env = $_SERVER['APP_ENV'] ?? 'dev';
 
+error_reporting(0);
 if ('prod' !== $env) {
     ini_set('display_errors', 1);  
     error_reporting(E_ALL);
 }
 ```
 
-Service Manager
+Servis Yöneticisi
 
 ```php
 $container = new ServiceManager;
+$container->setFactory('request', 'Services\RequestFactory');
 $container->setFactory('loader', 'Services\LoaderFactory');
+$container->setFactory('router', 'Services\RouterFactory');
 $container->setFactory('translator', 'Services\TranslatorFactory');
 $container->setFactory('events', 'Services\EventManagerFactory');
-$container->setFactory('request', 'Services\RequestFactory');
 $container->setFactory('session', 'Services\SessionFactory');
+$container->setFactory('adapter', 'Services\ZendDbFactory');
 $container->setFactory('view', 'Services\ViewPlatesFactory');
 $container->setFactory('logger', 'Services\LoggerFactory');
 $container->setFactory('cookie', 'Services\CookieFactory');
@@ -79,73 +82,128 @@ $container->setFactory('error', 'Services\ErrorHandlerFactory');
 $container->setFactory('escaper', 'Services\EscaperFactory');
 ```
 
-Exception Handler
+Üst seviye kütüphaneler
+
+$events  = $container->get('events');
+$request = $container->get('request');
+$session = $container->get('session');
+
+
+Hata Kontrolü
+
+```php
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+});
+```
+
+İstisnai Hata Kontrolü
 
 ```php
 set_exception_handler(array($container->get('error'), 'handle'));
 ```
 
-Event Listeners
+Olay Dinleyiciler
 
 ```php
 $listeners = [
-    'App\Event\SessionListener',
     'App\Event\ErrorListener',
     'App\Event\RouteListener',
-    // 'App\Event\HttpMethodListener',
+    'App\Event\HttpMethodListener',
     'App\Event\SendResponseListener',
 ];
-$application = new Application($container, $listeners);
-$application->start();
+foreach ($listeners as $listener) { // Create listeners
+    $object = new $listener;
+    if ($object instanceof ContainerAwareInterface) {
+        $object->setContainer($container);
+    }
+    $object->attach($events);
+}
 ```
 
-Response Sender
+Katmanlar
 
 ```php
-$response = $application->process($queue = [], $container->get('request'));
-$application->sendResponse($response);
+$queue = [
+    new App\Middleware\HttpMethod
+];
+$stack = new Stack;
+$stack->setContainer($container);
+foreach ($queue as $value) {
+    $stack = $stack->withMiddleware($value);
+}
 ```
 
-## Container & Services
+Çekirdek
 
-[Container.md](/en/Container.md)
+```php
+$kernel = new Kernel($events, $container->get('router'), new ControllerResolver, $stack, new ArgumentResolver);
+$kernel->setContainer($container)
+```
 
-## Routing
+Yanıt Gönderici
 
-[Router.md](/en/Router.md)
+```php
+$response = $kernel->handle($request);
+$kernel->send($response);
+```
 
-## Config
+## Servisler
 
-[Config.md](/en/Couter.md)
+[Services.md](services.md)
 
-## Controller & Depedencies
+## Yönlendirmeler
 
-[Controller.md](/en/Controller.md)
+[Router.md](router.md)
 
-## Error
+## Konfigürasyon
 
-[Error.md](/en/Error.md)
+[Config.md](config.md)
 
-## Cookie
+## Kontrolör
 
-[Coookie.md](/en/Cookie.md)
+[Controller.md](controller.md)
 
-## Logger
+## Http
 
-[Logger.md](/en/Logger.md)
+[Http.md](http.md)
 
-## Middleware
+## Katmanlar
 
-[Middleware.md](/en/Middleware.md)
+[Middlewares.md](middlewares.md)
 
-## Events
+## Hatalar
 
-[Events.md](/en/Events.md)
+[Errors.md](errors.md)
 
-## Session
+## Çerezler
 
-[Logging.md](/en/Logging.md)
+[Cookies.md](cookies.md)
 
-## View
+## Loglama
 
-[View.md](/en/View.md)
+[Logger.md](logger.md)
+
+## Olaylar
+
+[Events.md](events.md)
+
+## Oturumlar
+
+[Sessions.md](sessions.md)
+
+## Görünümler
+
+[Views.md](views.md)
+
+## Veritabanı
+
+[Database.md](database.md)
+
+## Konsol
+
+[Console.md](console.md)
+
+## Çoklu Dil Desteği
+
+[Translation.md](translation.md)

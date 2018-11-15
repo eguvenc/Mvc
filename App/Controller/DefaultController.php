@@ -27,8 +27,7 @@ class DefaultController extends Controller
         // $stack = $this->middleware->getStack();
         //  print_r($stack);
 	}
-
-
+    
     public function index(Request $request) : Response
     {
         return new HtmlResponse($this->render('welcome'));
@@ -85,8 +84,6 @@ class DefaultController extends Controller
         // $this->response->render(array $data);
         // 
         // $this->redirect();
-
-        
     }
 
     public function dummy()

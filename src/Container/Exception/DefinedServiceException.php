@@ -1,6 +1,6 @@
 <?php
 
-namespace Obullo\Exception;
+namespace Obullo\Container\Exception;
 
 use InvalidArgumentException;
 

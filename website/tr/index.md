@@ -5,7 +5,7 @@
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 [![Total Downloads](https://img.shields.io/packagist/dt/obullo/framework.svg)](https://packagist.org/packages/obullo/framework)
 
-> Obullo ve Zend bileşenleri ile mvc çatınızı oluşturun.
+> Obullo ve Zend bileşenleri ile mvc uygulamaları oluşturun.
 
 ## Proje yaratmak
 
@@ -56,6 +56,7 @@ if (false == isset($_SERVER['APP_ENV'])) {
 }
 $env = $_SERVER['APP_ENV'] ?? 'dev';
 
+error_reporting(0);
 if ('prod' !== $env) {
     ini_set('display_errors', 1);  
     error_reporting(E_ALL);
@@ -66,11 +67,13 @@ Servis Yöneticisi
 
 ```php
 $container = new ServiceManager;
+$container->setFactory('request', 'Services\RequestFactory');
 $container->setFactory('loader', 'Services\LoaderFactory');
+$container->setFactory('router', 'Services\RouterFactory');
 $container->setFactory('translator', 'Services\TranslatorFactory');
 $container->setFactory('events', 'Services\EventManagerFactory');
-$container->setFactory('request', 'Services\RequestFactory');
 $container->setFactory('session', 'Services\SessionFactory');
+$container->setFactory('adapter', 'Services\ZendDbFactory');
 $container->setFactory('view', 'Services\ViewPlatesFactory');
 $container->setFactory('logger', 'Services\LoggerFactory');
 $container->setFactory('cookie', 'Services\CookieFactory');
@@ -78,6 +81,13 @@ $container->setFactory('flash', 'Services\FlashMessengerFactory');
 $container->setFactory('error', 'Services\ErrorHandlerFactory');
 $container->setFactory('escaper', 'Services\EscaperFactory');
 ```
+
+Üst seviye kütüphaneler
+
+$events  = $container->get('events');
+$request = $container->get('request');
+$session = $container->get('session');
+
 
 Hata Kontrolü
 
@@ -115,7 +125,7 @@ Katmanlar
 
 ```php
 $queue = [
-    new App\Middleware\HttpMethod,
+    new App\Middleware\HttpMethod
 ];
 $stack = new Stack;
 $stack->setContainer($container);
@@ -127,8 +137,8 @@ foreach ($queue as $value) {
 Çekirdek
 
 ```php
-$kernel = new Kernel($events, new Router($collection), new ControllerResolver, $stack, new ArgumentResolver);
-$kernel->setContainer($container);
+$kernel = new Kernel($events, $container->get('router'), new ControllerResolver, $stack, new ArgumentResolver);
+$kernel->setContainer($container)
 ```
 
 Yanıt Gönderici

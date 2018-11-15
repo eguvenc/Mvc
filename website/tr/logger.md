@@ -138,4 +138,4 @@ Log file deleted successfully.
     </tbody>
 </table>
 
-Detaylı dökümentasyona <a href="https://seldaek.github.io/monolog/">https://seldaek.github.io/monolog/</a> bağlantısından ulaşabilirsiniz.
+> Monolog sınıfı hakkında detaylı dökümentasyona <a href="https://seldaek.github.io/monolog/">https://seldaek.github.io/monolog/</a> bağlantısından ulaşabilirsiniz.

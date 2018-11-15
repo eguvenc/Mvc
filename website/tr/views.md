@@ -1,7 +1,7 @@
 
 ## Görünümler
 
-Görünüm sınıfı uygulama içerisindeki html arayüzünü kontrol eden metotları içerir. Çerçeve içerisinde view paketi harici olarak kullanılır ve bunun için <a href="http://platesphp.com/v3/templates/">PlatesPhp</a> paketi tercih edilmiştir.
+Görünüm sınıfı uygulama içerisindeki html arayüzünü kontrol eden metotları içerir. Çerçeve içerisinde bu paket harici olarak kullanılır ve bunun için <a href="http://platesphp.com/v3/templates/">PlatesPhp</a> paketi tercih edilmiştir.
 
 Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
 
@@ -9,16 +9,15 @@ Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
 composer require league/plates
 ```
 
-### View servisi
+### Görünüm servisi
 
-View nesnesi diğer servisler gibi `index.php` dosyası içerisinden konfigüre edilir. 
+`View` nesnesi diğer servisler gibi `index.php` dosyası içerisinden konfigüre edilir. 
 
 ```php
-$container = new ServiceManager;
 $container->setFactory('view', 'Services\ViewPlatesFactory');
 ```
 
-View servisi `Obullo\View\PlatesPhp` nesnesine geri döner ve bu nesne içerisindeki `render` metodu `League\Plates\Template\Template` sınıfı render metodunu çağırır.
+Görünüm servisi `Obullo\View\PlatesPhp` nesnesine geri döner ve bu nesne içerisindeki `render()` metodu `League\Plates\Template\Template` sınıfı render metodunu çağırır.
 
 ```php
 namespace Services;
@@ -58,45 +57,53 @@ class ViewPlatesFactory implements FactoryInterface
 }
 ```
 
-View fonksiyonlarına geçerli view dosyası içerisinden `$view->method()` yerine `$this->method()` yöntemi ile ulaşılabilir.
+> Görünüm yardımcı metotlarına geçerli görünüm dosyası içerisinden `$this->method()` yöntemi ile ulaşılabilir.
  
+### Kontrolör render metodu
 
-### Kontrolör fonksiyonları
+#### $this->render($name, $data = null);
 
-#### $this->render($name, $data = null, $status = 200, $headers = []) : ResponseInterface
-
-Response nesnesi içerisine view nesnesi render metodunu kullanarak html çıktısını ekler.
+Kontrolör sınıfı içerisindeki `render()` metodu html çıktısı oluşturur.
 
 ```php
-$this->render('welcome');
+$html = $this->render('welcome');
 ```
 
-Render metodu aslında arka planda konteyner içerisinden view servisine bağlanarak aşağıdaki işlevi çağırır.
+Bu fonksiyon kontrolör sınıfı içerisinden görünüm sınıfı `render()` metodunu çağırır.
 
 ```php
-return new HtmlResponse($this->view->render('welcome'));
+$html = $this->view->render('welcome');
 ```
 
-#### $this->renderHtml(string $html, $status = 200, $headers = []) : ResponseInterface
-
-RenderHtml metodu ise view nesnesi kullanmadan Response nesnesine içerisine html çıktısını direkt ekler.
+Elde edilen string türündeki html görünümü kontrolör sınıfı içerisinde `\Zend\Diactoros\Response\HtmlResponse` nesnesine aktarılmalıdır.
 
 ```php
-$html = '<h1>Hello World !</h1>';
-
-return $this->renderHtml($html);
+return new HtmlResponse($this->render('welcome'));
 ```
 
-Yukarıdaki örneğin çıktısı:
+Görünüm dosyasına veri göndermek için render metodu ikinci parametresi kullanılır. Böylece bu veriler görünüm dosyası içerisinde yerel olarak erişilebilir hale gelir.
 
 ```php
-<h1>Hello World !</h1>
+$this->render('welcome', ['foo' => 'bar']);
 ```
 
-Render html metodu arka planda aşağıdaki gibi `HtmlResponse` nesnesine geri döner.
+Örnek.
 
 ```php
-return new HtmlResponse('test');
+namespace App\Controller;
+
+use Obullo\Http\Controller;
+use Zend\Diactoros\Response\HtmlResponse;
+use Psr\Http\Message\RequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
+
+class DefaultController extends Controller
+{
+    public function index(Request $request) : Response
+    {
+        return new HtmlResponse($this->render('welcome'));
+    }
+}
 ```
 
 ### Şablon tanımlamak
@@ -228,7 +235,7 @@ Dinamik oluşturulan html niteliklerindeki olası tehlikeli karakterlerden kaç�
 #### $this->escapeUrl($value);
 
 ```html
-<a href="http://example.com/?name=<?php echo $this->escapeUrl($input); ?>">Click here!</a>
+<a href="http://example.com/?redirect=<?php echo $this->escapeUrl($input); ?>">Click here!</a>
 ```
 
-Daha fazla detay için <a href="http://platesphp.com/v3/extensions/asset/">Platesphp.com</a> adresini ziyaret edebilirsiniz.
+> PlatesPhp hakkında daha fazla detay için <a href="http://platesphp.com/v3/extensions/asset/">Platesphp.com</a> adresini ziyaret edebilirsiniz.

@@ -7,7 +7,7 @@ use Obullo\Container\{
     ContainerAwareInterface
 };
 use ReflectionClass;
-use Obullo\Exception\UndefinedServiceException;
+use Obullo\Container\Exception\UndefinedServiceException;
 
 /**
  * Argument resolver

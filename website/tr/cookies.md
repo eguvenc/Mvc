@@ -5,95 +5,19 @@
 
 > Bir çereze kayıt edilebilecek maksimum veri 4KB tır.
 
-### Çerez servisi
+Çerezler uygulama içinde doğal php yöntemi `setcookie()` metodu ile kaydedilmelidir.
 
-```php
-$container->setFactory('cookie', 'Services\CookieFactory');
-```
+##### setcookie($name, $value = "", $expires = 0 , $path = "", $domain = "", $secure = false, $httponly = false);
 
 ### Bir çereze veri kaydetmek
 
-Çereze sınıfı varsayılan değerleri App `config/dev/framework.yaml` dosyasından okur.
-
-```yaml
-# application
-#    
-
-framework:
-    cookie:
-        domain:
-        path: /
-        secure: false
-        httpOnly: true
-        expire: 0
-```
-
-Varsayılan değerlerle bir çereze veri kaydetmek için set metodu kullanılır.
+Aşağıdaki örnekte tarayıcıda 1 saatliğine geçerli olan bir çerez kaydediyoruz. 1 saatlik süre sonunda çereze tarayıcıdan silinmiş olur.
 
 ```php
-$this->cookie
-    ->expire(0)
-    ->set('name', 'value'); 
-```
+$value = 'foo';
 
-Varsayılan değerleri aşağıdaki gibi değiştrilebilir.
-
-```php
-$this->cookie
-    ->name('hello')
-    ->value('world')
-    ->expire(86400)
-    ->domain('')
-    ->path('/')
-    ->set();
-```
-
-### Bir çerez verisini okumak
-
-Bir çerezi okumak için get metodu kullanılır.
-
-```php
-if ($value = $this->cookie->get('name')) {
-	echo $value;
-}
-```
-
-Eğer çereze kayıtlı bir değer yoksa fonksiyon varsayılan <kbd>null</kbd> değerine döner.
-
-
-```php
-if (false == $this->cookie->get('name', false)) {
-    echo "Cookie does not exist";
-}
-```
-
-İkinci parametre çerez bulunamadığında fonksiyonun hangi türe döneceğini belirler.
-
-### Bir çerezi silmek
-
-Bir çerezi silmek için çerez ismi girmeniz yeterlidir.
-
-```php
-$this->cookie->delete("name");
-```
-
-Domain ve path metotları ile bir örnek.
-
-```php
-$this->cookie
-	->domain('my.subdomain.com')
-	->path('/')
-	->delete("name");
-```
-
-veya
-
-```php
-$this->cookie
-	->name('name')
-	->domain('my.subdomain.com')
-	->path('/')
-	->delete();
+setcookie("TestCookie", $value);
+setcookie("TestCookie", $value, time()+3600);  /* 1 saatliğine geçerli */
 ```
 
 ### Parametreler
@@ -120,7 +44,7 @@ $this->cookie
         </tr>
         <tr>
             <td>domain</td>
-            <td>Çerezin geçerli olacağı alan adıdır. Site-wide çerezler ( tüm alt domainlerde geçerli çerezler ) kaydetmek için domain parametresini <kbd>.your-domain.com</kbd> gibi girmeniz gereklidir.</td>
+            <td>Çerezin geçerli olacağı alan adıdır. Tüm alt domainlerde geçerli (site-wide) çerezler kaydetmek için domain parametresini <kbd>.your-domain.com</kbd> gibi girmeniz gereklidir.</td>
         </tr>
         <tr>
             <td>path</td>
@@ -131,51 +55,54 @@ $this->cookie
             <td>Eğer çerez güvenli bir <kbd>https://</kbd> protokolü üzerinden okunuyorsa bu değerin true olması gerekir. Protokol güvenli olmadığında çereze erişilemez.</td>
         </tr>
         <tr>
-            <td>httpOnly</td>
+            <td>httponly</td>
             <td>Eğer http only parameteresi true gönderilirse çerez sadece http protokolü üzerinden okunabilir hale gelir javascript gibi diller ile çerezin okunması engellenmiş olur. Çerez güvenliği ile ilgili daha fazla bilgi için <a href="http://resources.infosecinstitute.com/securing-cookies-httponly-secure-flags/" target="_blank">bu makaleden</a> faydalanabilirsiniz.</td>
         </tr>
         </tbody>
 </table>
 
 
-### Cookie sınıfı referansı
+### Diziler
 
-#### $this->cookie->name(string $name);
+Çerez ismini belirtirken dizi gösterimini kullanmak suretiyle çerez dizileri tanımlayabilirsiniz. Bu sayede dizi elemanı sayısı kadar çerez tanımlayabilirsiniz, fakat çerezleri betiğinizle aldığınızda değerlerin hepsi çerez isminde bir diziye yerleştirilirler:
 
-Kaydedilmek üzere olan bir çereze isim atar.
+```php
+// çerezleri tanımlayalım
 
-#### $this->cookie->value(mixed $value);
+setcookie("cookie[three]", "cookiethree");
+setcookie("cookie[two]", "cookietwo");
+setcookie("cookie[one]", "cookieone");
 
-Kaydedilmek üzere olan bir çerez ismine değer atar.
+// sayfayı yeniden yükledikten sonra çerezler okuyalım
 
-#### $this->cookie->expire(int $expire = 0);
+if (isset($_COOKIE['cookie'])) {
+    foreach ($_COOKIE['cookie'] as $name => $value) {
+        $name = htmlspecialchars($name);
+        $value = htmlspecialchars($value);
+        echo "$name : $value <br />\n";
+    }
+}
+```
 
-Kaydedilmek üzere olan bir çerezin sona erme süresini belirler.
 
-#### $this->cookie->domain(string $domain = '');
+### Bir çerez verisini okumak
 
-Kaydedilmek üzere olan bir çereze ait alanadını belirler.
+```php
+// Bağımsız bir çerezi oku
 
-#### $this->cookie->path(string $path = '/');
+echo $_COOKIE["TestCookie"];
 
-Kaydedilmek üzere olan bir çereze ait path parametresini tanımlar.
+// Tüm çerezleri görmek için başka bir yol
+print_r($_COOKIE);
+```
 
-#### $this->cookie->secure(boolean $bool = false);
+### Bir çerezi silmek
 
-Kaydedilmek üzere olan bir çereze ait secure parametresini tanımlar.
+Bir çerezi silerken, tarayıcınızın yürürlükten kaldırma mekanizmasını tetikleyebilmek için, süre bitiminin geçmişte kalmasını sağlamanız gerekir. Önceki örnekte gönderilen çerezin nasıl silineceğini görelim:
 
-#### $this->cookie->httpOnly(boolean $bool = false);
+```php
+// süre bitimini 1 saat önceye ayarlayalım
 
-Kaydedilmek üzere olan bir çereze ait httpOnly parametresini tanımlar.
-
-#### $this->cookie->set(mixed $name, string $value);
-
-Gönderilen parametrelere göre bir çereze veri kaydeder. En son çalıştırılmalıdır. Kayıt işleminden sonra daha önce kullanılan çereze ait veriler başa döndürülür.
-
-#### $this->cookie->get(string $name, mixed $return = null);
-
-Kayıtlı bir çerezi okur eğer çerez mevcut değilse <kbd>null</kbd> değerine döner.
-
-#### $this->cookie->delete(string $name);
-
-Gönderilen parametrelere göre bir çerezi tarayıcıdan siler.
+setcookie ("TestCookie", "", time() - 3600);
+setcookie ("TestCookie", "", time() - 3600, "/", "example.com", 1);
+```

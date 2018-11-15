@@ -44,7 +44,6 @@ $container->setFactory('session', 'Services\SessionFactory');
 $container->setFactory('adapter', 'Services\ZendDbFactory');
 $container->setFactory('view', 'Services\ViewPlatesFactory');
 $container->setFactory('logger', 'Services\LoggerFactory');
-$container->setFactory('cookie', 'Services\CookieFactory');
 $container->setFactory('flash', 'Services\FlashMessengerFactory');
 $container->setFactory('error', 'Services\ErrorHandlerFactory');
 $container->setFactory('escaper', 'Services\EscaperFactory');

@@ -1,7 +1,7 @@
 
 ## Veritabanı
 
-Veritabanı sınıfı uygulama içerisindeki veritabanı bağlantısı ve özelliklerini kontrol eden fonksiyonları içerir. Çerçeve içerisinde veritabanı paketi harici olarak kullanılır ve bunun için varsayılan olarak <a href="https://docs.zendframework.com/zend-db/adapter/">Zend/Db</a> paketi tercih edilmiştir. Doctribe DBAL paketi de alternatif olarak desteklenmektedir.
+Veritabanı sınıfı uygulama içerisindeki veritabanı bağlantısı ve özelliklerini kontrol eden fonksiyonları içerir. Çerçeve içerisinde veritabanı paketi harici olarak kullanılır ve bunun için varsayılan olarak <a href="https://docs.zendframework.com/zend-db/adapter/">Zend/Db</a> paketi tercih edilmiştir. Doctrine DBAL paketi de alternatif olarak desteklenmektedir.
 
 Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
 
@@ -157,7 +157,7 @@ $adapter->query(
 
 ### Sorgu ifadeleri
 
-`Query()` metodu bir bağdaştırıcı ve bir veritabanının bağdaştırıcı aracılığıyla hızlı sorgulanması için oldukça kullanışlıdır, ancak genellikle bir deyim oluşturmak ve bununla doğrudan etkileşimde bulunmak daha mantıklıdır, böylece hazırla-sonra çalıştır iş akışı üzerinde daha fazla kontrole sahip olursunuz. Bunu yapmak için bağdaştırıcı size, kendi hazırladığınız yürütme iş akışınızı yönetebilmeniz için kullanmak üzere sürücüye özel bir açıklama oluşturmanıza olanak sağlayan `createStatement()` adında bir rutin verir.
+`Query()` metodu bir bağdaştırıcı ve bir veritabanının bağdaştırıcı aracılığıyla hızlı sorgulanması için oldukça kullanışlıdır, ancak genellikle bir deyim oluşturmak ve bununla doğrudan etkileşimde bulunmak daha mantıklıdır, böylece hazırla-sonra çalıştır iş akışı üzerinde daha fazla kontrole sahip olursunuz. Bunu yapmak için bağdaştırıcı size, kendi hazırladığınız iş akışınızı yönetebilmeniz için kullanmak üzere sürücüye özel bir açıklama oluşturmanıza olanak sağlayan `createStatement()` adında bir rutin verir.
 
 ```php
 $stmt   = $adapter->createStatement($sql, $optionalParameters);

@@ -15,7 +15,7 @@ use Obullo\Router\{
     Router
 };
 use ReflectionClass;
-use RuntimeException;
+use Obullo\Http\Exception\RuntimeException;
 
 /**
  * Kernel
@@ -202,20 +202,6 @@ class Kernel
                     $name,
                     $value
                 ), true, $statusCode);
-            }
-        }
-        $container = $this->getContainer();
-        if ($container->has('cookie')) {
-            foreach ($container->get('cookie')->toArray() as $name => $cookie) {
-                setcookie(
-                    $name,
-                    $cookie['value'],
-                    $cookie['expire'],
-                    $cookie['path'],
-                    $cookie['domain'],
-                    $cookie['secure'],
-                    $cookie['httpOnly']
-                );   
             }
         }
     }

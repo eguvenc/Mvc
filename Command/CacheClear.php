@@ -19,12 +19,20 @@ class CacheClear extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $file  = ROOT.'/var/cache/config.php';
-        if (is_file($file)) {
-            unlink($file);
-            $output->writeln('<info>Cache file deleted successfully.</info>');
-        } else {
-            $output->writeln('<error>Cache file is not exists.</error>');
+        $files = glob(ROOT.'/var/cache/*');
+        
+        if (empty($files)) {
+            $output->writeln('<error>No file exists in cache folder.</error>');
+        }
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                if (! $fh = fopen($file, 'rb')) {
+                    $output->writeln('<error>You haven\'t got a write permission to /var/cache/ folder.</error>');
+                    die;
+                }
+                unlink($file);
+                $output->writeln('<info>Cache file <comment>'.str_replace(ROOT, "", $file).'</comment> deleted successfully.</info>');
+            }
         }
     }
 }

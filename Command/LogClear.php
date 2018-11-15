@@ -20,6 +20,7 @@ class LogClear extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $file = ROOT.'/var/log/debug.log';
+        
         if (is_file($file)) {
             unlink($file);
             $output->writeln('<info>Log file deleted successfully.</info>');

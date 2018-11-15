@@ -1,7 +1,7 @@
 
 ## Kontrolör
 
-Kontrolör sınıfı http isteklerini kontrol ederek içerdiği metotlar ile istenen http yanıtlarına dönmenizi sağlar.
+`Obullo\Http` kontrolör sınıfı http isteklerini kontrol ederek içerdiği yardımcı metotlar ile istenen http yanıtlarına dönmeniz için ortak bir arayüz sağlar.
 
 ```php
 namespace App\Controller;
@@ -27,9 +27,10 @@ Render metodu `view` nesnesi kullanarak html çıktısına döner.
 
 ```php
 $html = $this->render('welcome');
+$html = $this->view->render('welcome'); 
 ```
 
-Ve işlenmiş görünüm string türünde HtmlResponse nesnesine aktarılır.
+Yukarıdaki iki fonksiyon aynı işlevi görür ve işlenmiş görünüm string türünde HtmlResponse nesnesine aktarılır.
 
 ```php
 return new HtmlResponse($html);
@@ -37,7 +38,7 @@ return new HtmlResponse($html);
 
 ### Parametreler
 
-Aşağıdaki parametrelerle bir http isteğinin olduğunu varsayalım.
+Aşağıda örnekte birden fazla parametre alan bir http isteği çözümleniyor.
 
 ```php
 http://example.com/test/1
@@ -51,7 +52,7 @@ home:
     handler: App\Controller\DefaultController::index
 ```
 
-Kontrolör dosyası
+Kontrolör dosyası örneği.
 
 ```php
 namespace App\Controller;
@@ -73,7 +74,7 @@ class DefaultController extends Controller
 }
 ```
 
-Yukarıdaki örnekte görüldüğü gibi parametre isimleri parametre değerleri ile doldurulur.
+Yukarıdaki örnekte görüldüğü gibi yönlendirme kurallarına göre gerçekleşen http çözümlemesinden sonra parametre isimleri parametre değerleri ile doldurulur.
 
 
 Çıktı
@@ -87,25 +88,11 @@ test - 1
 
 ### Http yönlendirme
 
-Url kontrolör metodu yönlendirme nesnesine güvenli url değerleri oluşturmayı sağlar.
-
-```php
-use Zend\Diactoros\Response\RedirectResponse;
-
-class DefaultController extends Controller
-{
-    public function index(Request $request, $name, $id) : Response
-    {
-        return new RedirectResponse($this->url('/another/page'));
-    }
-}
-```
+Kontrolör nesnesi içerisindeki `url` yardımcı metodu yönlendirme nesnesini kullanarak güvenli url değerleri oluşturmayı sağlar.
 
 > $this->url($uriOrRouteName = null, $params = []);
 
-Url yardımcı metodu `$router->url()` metodunu çalıştırarak yönlendirme isimleri ile güveli url adresleri oluşturur. Url isimleri oluşturulan url adresleri kullanmak uygulamanızın her zaman daha güvenli olmasını sağlayacaktır.
-
-Eğer url değeri bir yönlendirme ismi değilse girilen url değerine geri döner.
+Url yardımcı metodu `$router->url()` metodunu çalıştırarak yönlendirme isimleri ile güveli url adresleri oluşturur. 
 
 ```php
 use Zend\Diactoros\Response\HtmlResponse;
@@ -119,13 +106,29 @@ class DefaultController extends Controller
 }
 ```
 
+Url isimleri oluşturulan url adresleri kullanmak uygulamanızın her zaman daha güvenli olmasını sağlayacaktır. Eğer url değeri bir yönlendirme ismi değilse girilen url değerine geri döner.
+
+```php
+use Zend\Diactoros\Response\RedirectResponse;
+
+class DefaultController extends Controller
+{
+    public function index(Request $request, $name, $id) : Response
+    {
+        return new RedirectResponse($this->url('/another/page'));
+    }
+}
+```
+
 ### Json
 
-Json yanıtları için http json başlıkları ile `Zend\Diactoros\Response\JsonResponse` kullanılmalıdır.
+Json yanıtları için `Zend\Diactoros\Response\JsonResponse` nesnesi kullanılmalıdır.
 
 ```php
 new JsonResponse($data, $status = 200, array $headers = [], $encodingOptions = self::DEFAULT_JSON_FLAGS);
 ```
+
+Birinci parametere dizi türünde veri, ikinci parametere http durum kodu, üçüncü parametre http json başlıkları ve son parametre kodlama opsiyonları içindir.
 
 ```php
 use Zend\Diactoros\Response\JsonResponse;
@@ -142,11 +145,11 @@ class DefaultController extends Controller
 }
 ```
 
-Bir rest api için örnek;
+Json yanıt için bir tam örnek;
 
 ```php
 return new JsonResponse(
-    ['name' => 'Örnek Veri'],
+    ['name' => 'Example data'],
     200,
     ['cache-control' => 'max-age=3600'],
     JSON_UNESCAPED_UNICODE
@@ -157,7 +160,7 @@ return new JsonResponse(
 
 ```php
 {
-  "name": "Örnek Veri"
+  "name": "Example data"
 }
 ```
 
@@ -177,10 +180,10 @@ Server  Apache/2.4.29 (Ubuntu)
 
 ### Bağımlılıklar 
 
-Eğer kontrolör sınıfı metot parametreleri, konteyner içerisinde bir servis olarak kayıtlı ise otomatik olarak metot içerisine enjekte edilirler.
+Eğer kontrolör sınıfı metot parametreleri, konteyner içerisinde bir servis olarak kayıtlı ise otomatik olarak metot içerisine enjekte edilirler. Aşağıda örnekte birden fazla parametre alan bir http isteği çözümleniyor.
 
 ```php
-http://example.com/test/1
+http://example.com/test/1?foo=bar
 ```
 
 App `/config/routes.yaml` dosyası içeriği
@@ -206,10 +209,15 @@ class DefaultController extends Controller
 {
     public function index(Request $request, Router $router, $name, $id) : Response
     {
-        $html = $router->getMatchedRoute()
+        $routeName = $router->getMatchedRoute()
             ->getName();
 
-        return new HtmlResponse($this->render($html));
+        $html = "Route Name: $routeName<br />";
+        $html.= "Name: $name<br />";
+        $html.= "ID: $id<br />";
+        $html.= "Query params:".print_r($request->getQueryParams(), true);
+
+        return new HtmlResponse($html);
     }
 }
 ```
@@ -217,7 +225,10 @@ class DefaultController extends Controller
 Yukarıdaki örneğin çıktısı:
 
 ```php
-home
+Route Name: home
+Name: test
+ID: 1
+Query params: Array ( [foo] => bar ) 
 ```
 
 ### Proxy yöntemi
@@ -237,10 +248,14 @@ class DefaultController extends Controller
 {
     public function index(Request $request, $name, $id) : Response
     {
-        $html = $this->router->getMatchedRoute()
+        $routeName = $router->getMatchedRoute()
             ->getName();
 
-        return new HtmlResponse($this->render($html));
+        $html = "Route Name: $routeName<br />";
+        $html.= "Name: $name<br />";
+        $html.= "ID: $id<br />";
+
+        return new HtmlResponse($html);
     }
 }
 ```

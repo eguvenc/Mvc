@@ -2,7 +2,7 @@
 
 namespace Obullo\Container;
 
-use Obullo\Exception\DefinedServiceException;
+use Obullo\Container\Exception\DefinedServiceException;
 
 trait ContainerProxyTrait
 {

@@ -1,7 +1,10 @@
 
 ## Hatalar
 
-Uygulamadaki tüm hatalar `error` servisi üzerinden yönetilir.
+Uygulamadaki tüm hatalar `Obullo\Error\ErrorHandler` sınıfı tarafından yönetilir.
+
+> Uygulama içerisindeki php hataları `index.php` dosyası içerisinde <b>set_exception_handler()</b> ve <b>set_error_handler()</b>
+komutları ile `ErrorHandler` sınıfına yönlendirilir.
 
 ### Hata servisi
 
@@ -13,9 +16,9 @@ Hata servisi diğer servisler gibi `index.php` dosyası içerisinden konfigüre 
 
 ### Hata stratejileri
 
-<b>Html</b> ve <b>Json</b> olmak iki tür hata stratejisi vardır. Varsayılan strateji html türüdür.
+`Html` ve `Json` olmak iki tür hata stratejisi vardır. Varsayılan strateji html türüdür.
 
-Uygulama bir hata ile karşılaştığında error servisi üzerinden `templates/error.phtml` görünümünü işleyerek `Obullo\Error\ErrorHandler->handle()` fonksiyonu ile Psr7 `response` nesnesine geri döner.
+> Uygulama bir hata ile karşılaştığında error servisi üzerinden `templates/error.phtml` görünümünü işleyerek `Obullo\Error\ErrorHandler->handle()` fonksiyonu ile `Psr7 Response` nesnesine geri döner.
 
 ```php
 namespace Services;

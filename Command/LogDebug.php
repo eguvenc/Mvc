@@ -20,6 +20,7 @@ class LogDebug extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $file = ROOT.'/var/log/debug.log';
+        
         $size = 0;
         while (true) {
             clearstatcache();

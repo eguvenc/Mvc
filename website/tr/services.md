@@ -66,4 +66,4 @@ Proxy yöntemi sayesinde servisler kontrolör dosyası içerisinden direkt çağ
 $this->session;  // Zend\Session\SessionManager
 ```
 
-Detaylı dökümentasyona  <a href="https://docs.zendframework.com/zend-servicemanager/">https://docs.zendframework.com/zend-servicemanager/</a> bağlantısından ulaşabilirsiniz.
+> Servisler hakkında detaylı dökümentasyona  <a href="https://docs.zendframework.com/zend-servicemanager/">https://docs.zendframework.com/zend-servicemanager/</a> bağlantısından ulaşabilirsiniz.

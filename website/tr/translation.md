@@ -101,9 +101,9 @@ $translator->addTranslationFilePattern($type, $baseDir, $pattern, $textDomain);
 Örnek;
 
 ```php
-$translator->setLocale("tr");
+$translator->setLocale('tr');
 $translator->addTranslationFilePattern('PhpArray', ROOT, '/var/messages/%s/messages.php', 'system');
-echo $translator->translate("Application Error", "system");
+echo $translator->translate('Application Error', 'system');
 
 // Uygulama Hatası
 ```
@@ -135,11 +135,18 @@ return [
 
 Ayrıca, bir veya daha fazla `Zend\I18n\Translator\Loader\FileLoaderInterface` veya `Zend\I18n\Translator\Loader\RemoteLoaderInterface` uygulayarak ve yükleyicinizi Translator örneğinin oluşturulmuş eklenti yöneticisi ile kaydederek özel biçimleri kullanabilirsiniz.
 
+Örnek bir xml yükleyicisi.
+
+```php
+$translator->getPluginManager()->setService('XmlFile', new \App\MyXmlLoader);
+$translator->addTranslationFilePattern('XmlFile', ROOT, '/var/messages/%s/messages.xml');
+```
+
 ### Yerel değişkeni ayarlamak
 
-Varsayılan olarak çevirmen, <b>ext/intl</b> doğal `Locale` sınıfını kullanacaktır. Alternatif bir yerel ayarı açıkça ayarlamak isterseniz, bunu `setLocale()` yöntemi ile yapabilirsiniz.
+Varsayılan olarak çevirmen, <b>ext/intl</b> doğal `Locale` sınıfını kullanacaktır. Alternatif bir yerel ayarı açıkça ayarlamak isterseniz, bunu `$translator->setLocale()` yöntemi ile yapabilirsiniz.
 
-Bir lokasyonda belirli bir mesaj tanımlayıcısı için çeviri olmadığında, mesaj tanımlayıcının kendisi varsayılan olarak geçerli kılınır. Alternatif olarak, bir geri dönüş çeviricisi (fallback locale) kullanmak istiyorsanız bunu `setFallbackLocale()` metodu ile yapabilirsiniz.
+Bir lokasyonda belirli bir mesaj tanımlayıcısı için çeviri olmadığında, mesaj tanımlayıcının kendisi varsayılan olarak geçerli kılınır. Alternatif olarak, bir geri dönüş çeviricisi (fallback locale) kullanmak istiyorsanız bunu `$translator->setFallbackLocale()` metodu ile yapabilirsiniz.
 
 ### Mesajların çevrilmesi
 
@@ -607,4 +614,4 @@ Daha detaylı bilgi için <a href="https://en.wikipedia.org/wiki/Gettext">Gettex
 Bir `Zend\I18n\Translator\Translator` ve bir varsayılan metin alanı ayarlamak için genel yöntemler <a href="https://docs.zendframework.com/zend-i18n/view-helpers/#abstract-translator-helper">AbstractTranslatorHelper</a> öğesinden devralınır.
 
 
-Çeviri fonksiyonları hakkında data geniş bilgiye <a hreg="https://docs.zendframework.com/zend-i18n/view-helpers/">https://docs.zendframework.com/zend-i18n/view-helpers/</a> adresinden ulaşabilirsiniz.
+> Çeviri fonksiyonları hakkında data geniş bilgiye <a hreg="https://docs.zendframework.com/zend-i18n/view-helpers/">https://docs.zendframework.com/zend-i18n/view-helpers/</a> adresinden ulaşabilirsiniz.

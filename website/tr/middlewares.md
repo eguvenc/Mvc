@@ -1,9 +1,9 @@
 
 ## Katmanlar
 
-Katman sınıfı <a href="https://www.php-fig.org/psr/psr-15/">Psr15</a> standartlarına göre tasarlanmıştır ve <a href="http://stack.obullo.com/">Obullo/Stack</a> paketini kullanır.
+Çerçeve içerisinde katman paketi harici olarak kullanılır ve katman işlemleri için <a href="https://www.php-fig.org/psr/psr-15/">Psr15</a> standartlarına göre tasarlanmış olan <a href="http://stack.obullo.com/">Obullo/Stack</a> paketi tercih edilmiştir.
 
-> Http katmanları http çözümlemesinden önce `$request` yada `$response` nesnelerini tek başına yada her ikisini birden etkilemek için kullanılırlar. Uygulamaya eklenen her bir katman uygulamayı sarar ve merkeze doğru ilerledikçe uygulamaya ulaşılır. Merkeze ulaşıldığında `$response` nesnesine dönülerek çıktı ekrana yazdırılır.
+> Http katmanları http çözümlemesinden önce `$request` yada `$response` nesnelerini tek başına yada her ikisini birden etkilemek için kullanılırlar. Uygulamaya eklenen her bir katman uygulamayı sarar ve merkeze doğru ilerledikçe uygulamaya ulaşılır. Merkeze ulaşıldığında `$response` nesnesine dönülerek çıktı ekrana yazdırılır. Böylece eklenen her bir katman sayesinde http çözümleme aşamaları kontrol altına alınmış olur.
 
 Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
 
@@ -33,16 +33,96 @@ foreach ($queue as $value) {
 > En yukarıda ilan edilen bir http katmanı ilk önce, en son ilan edilen ise en son çalışır.
 
 
+### Http method katmanı
+
+Bu katman uygulamanızda varsayılan olarak tanımlıdır ve yönlendirme paketi ile birlikte çalışır.
+
+> Güvenlik unsurları nedeniyle bu katmanı kaldırmamanız tavsiye edilir. Katman kaldırıldığında erişime izin verilmesini istemediğiniz http metotları erişilebilir hale gelecektir.
+
+```php
+public function process(Request $request, RequestHandler $handler) : ResponseInterface
+{
+    $container = $this->getContainer();
+
+    $events = $container->get('events');
+    $router = $container->get('router');
+
+    if ($router->hasMatch()) {
+
+        $methods = $router->getMatchedRoute()
+            ->getMethods();
+
+        if (! in_array($request->getMethod(), $methods)) {
+            
+            $event = new Event;
+            $event->setName('dissallowed.method');
+            $event->setParam('methods', $methods);
+            $message = $events->triggerEvent($event)->last();
+
+            return $handler->process(
+                new Error('405',$message,['Allow' => implode(', ', $methods)])
+            );
+        }
+        $event = new Event;
+        $event->setName('allowed.method');
+        $event->setParam('methods', $methods);
+        $events->triggerEvent($event);
+    }
+    return $handler->handle($request);
+}
+```
+
+Katman içerisinde gerçekleşen olaylar `App\Event\HttpMethodListener` dinleyicisi tarafından izlenebilir.
+
+```php
+namespace App\Event;
+
+use Zend\EventManager\EventInterface;
+use Zend\EventManager\EventManagerInterface;
+use Zend\EventManager\ListenerAggregateTrait;
+use Zend\EventManager\ListenerAggregateInterface;
+use Obullo\Container\{
+    ContainerAwareInterface,
+    ContainerAwareTrait
+};
+class HttpMethodListener implements ListenerAggregateInterface,ContainerAwareInterface
+{
+    use ContainerAwareTrait;
+    use ListenerAggregateTrait;
+
+    public function attach(EventManagerInterface $events, $priority = null)
+    {
+        $this->listeners[] = $events->attach('allowed.method', [$this, 'onAllowedMethod']);
+        $this->listeners[] = $events->attach('disallowed.method', [$this, 'onNotAllowedMethod']);
+    }
+
+    public function onNotAllowedMethod(EventInterface $e) : string
+    {    
+        $methods = $e->getParam('methods');
+        $message = sprintf(
+            'Only Http %s Methods Allowed',
+            implode(', ', $methods)
+        );
+        return $message;
+    }
+
+    public function onAllowedMethod(EventInterface $e)
+    {
+        // $methods = $e->getParam('methods');
+    }
+}
+```
+
 ### Dil katmanı
 
-Eğer uygulamanıza çoklu dil desteği eklemek istiyorsanız bunu `Translation` katmanı ile yapabilirsiniz.
+Dil katmanı uygulamanıza çoklu dil desteği eklemeyi sağlar. Aşağıdaki gibi http istekleri aldığımızı varsayalım.
 
 ```
 http://example.com/en
-http://example.com/en/dummy
+http://example.com/en/test
 ```
 
-`config/routes.yaml` dosyanızı açın ve yönlendirme kurallarınızı aşağıdaki gibi değiştirin.
+İstekleri çözümleyebilmek için `config/routes.yaml` dosyanızı açın ve yönlendirme kurallarınızı aşağıdaki gibi değiştirin.
 
 ```
 home: 
@@ -50,7 +130,7 @@ home:
     handler: App\Controller\DefaultController::index
 
 test:
-    path: /<locale:locale>/test
+    path: /<locale:locale>/<str:name>
     handler: App\Controller\DefaultController::test
 ```
 
@@ -78,26 +158,34 @@ Http isteği
 http://example.com/en/test
 ```
 
-Kontrolör dosyası
+Kontrolör dosyası örneği
 
 ```php
 namespace App\Controller;
 
 use Obullo\Http\Controller;
+use Zend\Diactoros\Response\HtmlResponse;
 use Psr\Http\Message\RequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
 class DefaultController extends Controller
 {
-    public function test(Request $request) : Response
+    public function test(Request $request, $name) : Response
     {
         $locale = $this->translator->getLocale();
 
-        return $this->renderHtml(
-            'locale:'.sprintf('%02s', $locale)
+        return new HtmlResponse(
+            'locale:'.sprintf('%02s', $locale).'<br />name:'.$name
         );
     }
 }
+```
+
+Çıktı:
+
+```
+locale: en
+name: test
 ```
 
 ### Yönlendirme katmanları
@@ -119,7 +207,7 @@ users/:
         - App\Middleware\Guest
     delete:
         path: /<int:id>
-    	handler: App\Controller\UserController::delete
+        handler: App\Controller\UserController::delete
 ```
 
 Yukarıda aşağıdaki bir url adresine yalnızca yetkili kullanıcıların erişebilmesi için bir katman ekledik.
@@ -144,7 +232,6 @@ use Obullo\Container\{
     ContainerAwareInterface
 };
 use Zend\Diactoros\Response\RedirectResponse;
-
 /**
  * Disallow unauthorized users.
  */
@@ -154,12 +241,12 @@ class Guest implements MiddlewareInterface,ContainerAwareInterface
 
     public function process(Request $request, RequestHandler $handler) : ResponseInterface
     {
-        $user = $this->getContainer()
-        	->get('user');
+        $container = $this->getContainer()
+        $user = $container->get('user'); // custom user class which contains auth methods
 
         if ($user->guest()) {
-        	$this->flash->error('This page requires authentication.');
-			return new RedirectResponse('/login');
+            $container->get('flash')->error('This page requires authentication.');
+            return new RedirectResponse('/login');
         }
         return $handler->handle($request);
     }
@@ -174,29 +261,29 @@ Katman yönetimi global olabileceği gibi kontrolör içerisinden yerel olarak d
 namespace App\Controller;
 
 use Zend\Db\TableGateway\TableGateway;
-
 use Obullo\Http\Controller;
+use Zend\Diactoros\Response\HtmlResponse;
 use Psr\Http\Message\RequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
 class UserController extends Controller
 {
-	public function __construct()
-	{
-		$this->middleware
-			->add('Guest')
-			->addMethod('save')
-			->addMethod('delete');
-	}
+    public function __construct()
+    {
+        $this->middleware
+            ->add('Guest')
+            ->addMethod('save')
+            ->addMethod('delete');
+    }
 
     public function index(Request $request) : Response
     {
-        return $this->render('dashboard');
+        return new HtmlResponse($this->render('dashboard'));
     }
 
     public function save()
     {
-    	$users = new TableGateway('users', $this->adapter);
+        $users = new TableGateway('users', $this->adapter);
         $users->insert(['name' => 'username']);
     }
 
@@ -205,18 +292,17 @@ class UserController extends Controller
         $users = new TableGateway('users', $this->adapter);
         $users->delete(['id' => $id]);
 
-		return $this->redirect('home');
+        return new HtmlResponse($this->redirect('home'));
     }
 }
 ```
 
-> Middleware sınıfı `__construct()` metodu içerisinde çalıştırılmak için tasarlanmıştır. Bu tasarımda hedeflenen en tepede sınıf içerisindeki tüm metotları kontrol etmektir.
+> Middleware sınıfı `__construct()` metodu içerisinde çalıştırılmak için tasarlanmıştır. Bu tasarımda hedeflenen en tepede sınıf içerisindeki tüm metotları kontrol edebilmektir.
 
 
 ### Argümanlar
 
 Bir katman kontrolör içerisinden eklenirken varsa argümanları `addArguments()` metodu ile eklenebilir.
-
 
 ```php
 namespace App\Controller;
@@ -235,7 +321,7 @@ class DefaultController extends Controller
 }
 ```
 
-Argümanların gönderilebilmesi için eklenen argüman dizisi `associative` biçiminde olmalıdır ve yukarıdaki örnekte olduğu gibi argüman isimleri ile `__construct()` metodu içerisindeki parametre isimleri eşleşmelidir.
+Argümanların gönderilebilmesi için eklenen argüman dizisi `associative array` biçiminde olmalıdır ve yukarıdaki örnekte olduğu gibi argüman isimleri ile `__construct()` metodu içerisindeki parametre isimleri eşleşmelidir.
 
 ```php
 namespace App\Middleware;
@@ -255,7 +341,7 @@ class Error implements MiddlewareInterface, ContainerAwareInterface
 
 > Yukarıdaki örneği çalıştırdığınızda `404 - Sayfa bulunamadı` hatası alıyor olmalısınız.
 
-### Kontrolör katman yönetimi
+### Katman sınıfı referansı
 
 #### $this->middleware->add(string $name);
 
@@ -275,4 +361,4 @@ Bir kontrolör sınıfına eklenen katmanın silinen metotlar dışındaki metot
 
 #### $this->middleware->getStack() : array;
 
-Middleware yığınına geri döner.
+Katman yığınına geri döner.

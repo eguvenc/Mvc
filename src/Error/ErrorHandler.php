@@ -3,7 +3,7 @@
 namespace Obullo\Error;
 
 use Throwable;
-use RuntimeException;
+use Obullo\Error\Exception\RuntimeException;
 use Psr\Http\Message\ResponseInterface;
 use Obullo\Container\{
     ContainerAwareTrait,

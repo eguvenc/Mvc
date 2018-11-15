@@ -1,7 +1,7 @@
 
 ## Olaylar
 
-Olay sınıfı uygulama içerisinde olaylar ilan edip ve bu olayları önceden belirlediğimiz dinleyici sınıflar içerisinden yönetmemizi sağlar. Çerçeve içerisinde olay paketi harici olarak kullanılır ve bunun için `Zend/EventManager` tercih edilmiştir.
+Olay sınıfı uygulama içerisinde olaylar ilan edip önceden belirlediğimiz dinleyici sınıflar ile bu olayları yönetmemizi sağlar. Çerçeve içerisinde olay paketi harici olarak kullanılır ve bunun için `Zend/EventManager` tercih edilmiştir.
 
 Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
 
@@ -56,7 +56,7 @@ $event->setParam('request', $request);
 $events->triggerEvent($event);
 ```
 
-`trigger()` metodu ise bir nesne yaratmadan olayları <b>başlatmayı</b> ve dinleyicilere <b>veri</b> göndermeyi sağlar.
+`trigger()` metodunun farkı ise <b>nesne yaratmadan</b> olayları başlatmasıdır.
 
 ```php
 $events = $container->get('events');
@@ -71,9 +71,11 @@ $result = $events->triggerEvent($event)->last();
 
 ### Dinleyiciler
 
-> Dinleyiciler uygulamanın çalışması esnasında tetiklenmiş olaylardan gelen verileri kontrol etmeyi sağlarlar.
+Dinleyiciler uygulamanın çalışması esnasında tetiklenmiş olaylardan gelen verileri izlemeyi sağlarlar.
 
-Uygulama dinleyicileri `App\Event` klasöründe yer alır. Aşağıdaki örnekte `ErrorListener` adlı dinleyici sınıfı uygulamadaki hataları yönetmenizi sağlıyor.
+> Uygulama dinleyicileri `App\Event` klasöründe yer alır.
+
+Aşağıdaki örnekte `ErrorListener` adlı dinleyici sınıfı uygulamadaki hataları izlemeyi ve yönetmenizi sağlıyor.
 
 ```php
 namespace App\Event;

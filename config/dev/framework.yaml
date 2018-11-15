@@ -3,14 +3,6 @@
 #    
 
 framework:
-    
-    cookie:
-        domain:
-        path: /
-        secure: false
-        httpOnly: true
-        expire: 0
-
     session:
         name: sessions
         

@@ -14,7 +14,6 @@ composer require zendframework/zend-diactoros
 Request nesnesi diğer servisler gibi `index.php` dosyası içerisinden konfigüre edilir. 
 
 ```php
-$container = new ServiceManager;
 $container->setFactory('request', 'Services\RequestFactory');
 ```
 
@@ -357,7 +356,7 @@ Uri nesnesine http fragment değerini atar.
 
 ### Yardımcı metotlar
 
-Kullanımı kolaylaştırmak amacıyla `http` kütüphanesi `Psr7` sınıfına genişleyerek aşağıdaki metotların tek bir sınıf üzerinden çalıştırılmasına yardımcı olur.
+Kullanımı kolaylaştırmak amacıyla `Obullo\Http\ServerRequest` kütüphanesi `Zend\Diactoros\ServerRequest` sınıfına genişleyerek aşağıdaki metotların tek bir sınıf üzerinden çalıştırılmasına yardımcı olur.
 
 #### $request->isXmlHttpRequest();
 
@@ -403,7 +402,7 @@ Gelen http metodu `OPTIONS` ise `true` aksi durumda `false` değerine geri döne
 
 Gelen http metodu `PROPFIND` ise `true` aksi durumda `false` değerine geri döner.
 
-Detaylı dökümentasyona <a href="https://docs.zendframework.com/zend-diactoros">https://docs.zendframework.com/zend-diactoros</a> bağlantısından ulaşabilirsiniz.
+> Zend Diactoros sınıfı hakkında detaylı dökümentasyona <a href="https://docs.zendframework.com/zend-diactoros">https://docs.zendframework.com/zend-diactoros</a> bağlantısından ulaşabilirsiniz.
 
 
 ### Ip Adresleri

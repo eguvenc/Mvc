@@ -1,7 +1,7 @@
 
 ## Yönlendirmeler
 
-Yönlendirme sınıfı dışarıdan gelen http uri adresini çözümler ve konfigürasyon dosyasındaki eşleşmeye göre uygulamanın çıktı üretmesi için kullanıcıyı ilgli kontrolör dosyasına yönlendirir. Çerçeve içerisinde yönlendirme paketi harici olarak kullanılır ve bunun için <a href="http://router.obullo.com/">Obullo/Router</a> paketi tercih edilmiştir.
+Yönlendirme sınıfı dışarıdan gelen http adresini çözümler ve konfigürasyon dosyasındaki eşleşmeye göre uygulamanın çıktı üretmesi için kullanıcıyı ilgli kontrolör dosyasına yönlendirir. Çerçeve içerisinde yönlendirme paketi harici olarak kullanılır ve bunun için <a href="http://router.obullo.com/">Obullo/Router</a> paketi tercih edilmiştir.
 
 Paket mevcut değil ise aşağıdaki konsol komutu ile yüklenmelidir.
 
@@ -73,7 +73,7 @@ home:
     handler: App\Controller\DefaultController::index
 ```
 
-### Parametreler
+### Mevcut parametreler
 
 Bir yönlendirme konfigürasyonunun alabileceği değerler şeması aşağıdaki gibidir.
 
@@ -87,6 +87,98 @@ name:
       - App\Middleware\Guest
     path: /
     handler: App\Controller\DefaultController::index
+```
+
+### Yönlendirme Türleri
+
+Yönlendirme servisinde tanımlı olan yönlendirme türleri uygulamanızda bulun url adreslerindeki parametreleri belirli türlere zorlar.
+
+```php
+$config = array(
+    'types' => [
+        new IntType('<int:id>'),
+        new StrType('<str:name>'),
+        new StrType('<str:word>'),
+        new AnyType('<any:any>'),
+        new BoolType('<bool:status>'),
+        new IntType('<int:page>'),
+        new FourDigitYearType('<yyyy:year>'),
+        new TwoDigitDayType('<dd:day>'),
+        new TwoDigitMonthType('<mm:month>'),
+        new TranslationType('<locale:locale>'),
+        new SlugType('<slug:slug>'),
+        new SlugType('<slug:slug_>', '(?<%s>[\w-_]+)'), // slug with underscore
+    ]
+);
+```
+
+Uygulamamızın aşağıdaki gibi bir http isteği aldığını varsayalım.
+
+```php
+http://example.com/2018/yoga-festival-india
+```
+
+Bu durumda `<yyyy:year>` ve `<slug:slug>` türlerini kullanmamız gerekir.
+
+```
+news:
+    path: /<yyyy:year>/<slug:slug>
+    handler: App\Controller\NewsController::index
+```
+
+Mevcut türler dışında uygulama içinde kendi türlerinizi de oluşturabilirsiniz. Türler hakkında detaylı bilgiyi <a href="http://router.obullo.com/tr/types.html">http://router.obullo.com/tr/types.html</a> adresinden elde edebilirsiniz.
+
+
+### Çözümleme
+
+Aşağıda örnekte birden fazla parametre alan bir http isteği çözümleniyor.
+
+```php
+http://example.com/test/1?foo=bar
+```
+
+App `/config/routes.yaml` dosyası içeriği
+
+```
+home:
+    path: /<str:name>/<int:id>
+    handler: App\Controller\DefaultController::index
+```
+
+Kontrolör dosyası
+
+```php
+namespace App\Controller;
+
+use Obullo\Router\Router;
+use Zend\Diactoros\Response\HtmlResponse;
+use Psr\Http\Message\RequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
+
+class DefaultController
+{
+    public function index(Request $request, Router $router, $name, $id) : Response
+    {
+        $routeName = $router->getMatchedRoute()
+            ->getName();
+
+        $html = "Route Name: $routeName<br />";
+        $html.= "Name: $name<br />";
+        $html.= "ID: $id<br />";
+        $html.= "Query params:".print_r($request->getQueryParams(), true);
+
+        return new HtmlResponse($html);
+    }
+}
+```
+
+Yukarıdaki örneğin çıktısı:
+
+```php
+Route Name: home
+Name: test
+ID: 1
+Query params: Array ( [foo] => bar ) 
 ```
 
 ### Önbellekteki dosyalar
@@ -116,19 +208,21 @@ $aggregator = new ConfigAggregator(
 
 ### Route olayları
 
-Uygulama routing ile ilgili işlemler için `App/Event/RouteListener` sınıfı dinler.
+Uygulama routing ile ilgili işlemler için `App/Event/RouteListener` sınıfını dinler.
 
 <table>
     <thead>
         <tr>
             <th>Olay</th>
+            <th>Dinleyici</th>
             <th>Açıklama</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td>OnMatch</td>
-            <td>Route eşleşmesinin gerçekleştiği olaydır.Metot eşleşmenin olduğu `Route` nesnesine geri döner böylece bu metot içerisinden özelleştirmeler yapılabilir.</td>
+            <td>route.match</td>
+            <td>onMatch</td>
+            <td>Route eşleşmesinin gerçekleştiği olaydır. Metot eşleşmenin olduğu `Route` nesnesine geri döner böylece bu metot içerisinden özelleştirmeler yapılabilir.</td>
         </tr>
     </tbody>
 </table>
@@ -153,4 +247,4 @@ class RouteListener implements ListenerAggregateInterface,ContainerAwareInterfac
 }
 ```
 
-Detaylı dökümentasyona <a href="http://router.obullo.com/tr/">http://router.obullo.com/tr/</a> bağlantısından ulaşabilirsiniz.
+> Yönlendirme paketi hakkında detaylı dökümentasyona <a href="http://router.obullo.com/tr/">http://router.obullo.com/tr/</a> bağlantısından ulaşabilirsiniz.
