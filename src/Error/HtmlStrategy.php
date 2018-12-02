@@ -3,7 +3,7 @@
 namespace Obullo\Error;
 
 use Throwable;
-use Obullo\View\ViewInterface;
+use Obullo\View\HtmlInterface;
 use Zend\I18n\Translator\{
     TranslatorAwareInterface,
     TranslatorAwareTrait
@@ -18,7 +18,7 @@ class HtmlStrategy implements ErrorStrategyInterface, TranslatorAwareInterface
 {
     use TranslatorAwareTrait;
 
-    protected $view;
+    protected $html;
     protected $status;
 
     /**
@@ -26,9 +26,9 @@ class HtmlStrategy implements ErrorStrategyInterface, TranslatorAwareInterface
      * 
      * @param ViewInterface $view template engine
      */
-    public function __construct(ViewInterface $view)
+    public function __construct(HtmlInterface $html)
     {
-        $this->view = $view;
+        $this->html = $html;
     }
 
     /**
@@ -68,9 +68,9 @@ class HtmlStrategy implements ErrorStrategyInterface, TranslatorAwareInterface
         $data['translator'] = $translator;
         $data['e'] = $exception;
         if ($this->getStatusCode() == '404') {
-            return $this->view->render('templates::404', $data);
+            return $this->html->render('View::_404.phtml', $data);
         }
-        return $this->view->render('templates::error', $data);
+        return $this->html->render('View::_Error.phtml', $data);
     }
 
     /**

@@ -1,0 +1,15 @@
+
+# 
+# Views can also be create with ajax requests
+# 
+# name:
+#    path: /header
+#    handler: View\Controller\ViewController::header
+
+header:
+    path: /header
+    handler: View\Controller\ViewController::header
+
+footer:
+    path: /footer
+    handler: View\Controller\ViewController::footer

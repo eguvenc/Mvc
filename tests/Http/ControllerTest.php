@@ -12,6 +12,8 @@ use Obullo\Router\Types\{
     TranslationType
 };
 use Obullo\Http\Controller;
+use Zend\Diactoros\Response\HtmlResponse;
+use Zend\Diactoros\Response\RedirectResponse;
 use Zend\ServiceManager\ServiceManager;
 
 class ControllerTest extends PHPUnit_Framework_TestCase
@@ -67,31 +69,18 @@ class ControllerTest extends PHPUnit_Framework_TestCase
 
     public function testRender() 
     {
-        $response = $this->controller->render('test');
+        $html = $this->controller->render('test');
+        $response = new HtmlResponse($html);
         $this->assertEquals('test', (string)$response->getBody());
     }
-
-    public function testRenderHtml() 
+    
+    public function testUrl() 
     {
-        $response = $this->controller->renderHtml('<b>test</b>');
-        $this->assertEquals('<b>test</b>', (string)$response->getBody());
-    }
-
-    public function testRedirect() 
-    {
-        $response = $this->controller->redirect('/');
+        $url = $this->controller->url('/');
+        $response = new RedirectResponse($url);
         $headers  = $response->getHeaders();
 
         $this->assertEquals('/', $headers['location'][0]);
         $this->assertEquals('302', $response->getStatusCode());
-    }
-
-    public function testJson()
-    {
-        $response = $this->controller->json(array('test' => '123'));
-        $headers  = $response->getHeaders();
-
-        $this->assertEquals($headers['content-type'][0], 'application/json');
-        $this->assertEquals('{"test":"123"}', $response->getBody());
     }
 }

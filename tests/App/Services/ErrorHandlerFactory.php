@@ -24,7 +24,7 @@ class ErrorHandlerFactory implements FactoryInterface
 		$error = new ErrorHandler;
 		$error->setContainer($container);
 
-        $strategy = new HtmlStrategy($container->get('view'));
+        $strategy = new HtmlStrategy($container->get('html'));
         $strategy->setTranslator($container->get('translator'));
 		$error->setResponseStrategy($strategy);
 

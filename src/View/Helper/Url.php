@@ -2,8 +2,6 @@
 
 namespace Obullo\View\Helper;
 
-use Obullo\Router\Router;
-
 /**
  * Url helper
  */
@@ -12,17 +10,13 @@ class Url
 	protected $router;
 
 	/**
-	 * Router
+	 * Constructor
 	 * 
-	 * @param Router $router object
-	 * 
-	 * @return object self
+	 * @param ContainerInterface $container container
 	 */
-	public function setRouter(Router $router)
+	public function setRouter($router)
 	{
 		$this->router = $router;
-
-		return $this;
 	}
 
 	/**

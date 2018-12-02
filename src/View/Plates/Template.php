@@ -4,7 +4,6 @@ namespace Obullo\View\Plates;
 
 use Obullo\Container\{
     ContainerAwareTrait,
-    ContainerProxyTrait,
     ContainerAwareInterface
 };
 use League\Plates\Template\Template as PlatesTemplate;
@@ -18,7 +17,6 @@ use League\Plates\Template\Template as PlatesTemplate;
 class Template extends PlatesTemplate implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
-    use ContainerProxyTrait;
 
     /**
      * Returns to instance of helper class
@@ -55,6 +53,6 @@ class Template extends PlatesTemplate implements ContainerAwareInterface
      */
     public function __get(string $key)
     {
-        return $this->container->get($key);
+        return $this->getContainer()->get($key);
     }
 }

@@ -50,9 +50,9 @@ class ControllerResolverTest extends PHPUnit_Framework_TestCase
         $this->controllerResolver->dispatch();
 	}
 
-	public function testGetFirstNamespace()
+	public function testGetBundleName()
 	{
-		$this->assertEquals('Tests', $this->controllerResolver->getFirstNamespace());
+		$this->assertEquals('Tests', $this->controllerResolver->getBundleName());
 	}
 
     public function testGetClassIsCallable()

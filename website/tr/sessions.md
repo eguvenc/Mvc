@@ -38,18 +38,14 @@ class SessionFactory implements FactoryInterface
 	 */
 	public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
 	{
-		$framework = $container->get('loader')
-			->load(ROOT, '/config/%s/framework.yaml', true)
-			->framework;
+        $application = $container->get('config')->application;
 
 		$manager = new SessionManager();
 		$manager->setStorage(new SessionArrayStorage());
 		$manager->getValidatorChain()
 			->attach('session.validate', [new HttpUserAgent(), 'isValid']);
-			
-		if (false == defined('STDIN')) {
-			$manager->setName($framework->session->name);
-		}
+		$manager->setName($application->session->name);
+		
 		return $manager;
 	}
 }
@@ -57,28 +53,50 @@ class SessionFactory implements FactoryInterface
 
 ### Oturumları başlatmak
 
-Uygulama içinde oturumlar `index.php` içerisinde `$session` servisi ile başlatılır.
-
+Uygulama içinde oturumlar `BundleListener` sınıfı içerisinde `$session` servisi ile başlatılır.
 
 ```php
-// -------------------------------------------------------------------
-// Initialize
-// -------------------------------------------------------------------
-//
-$events  = $container->get('events');
-$request = $container->get('request');
-$session = $container->get('session');
+namespace App\Event;
 
-// -------------------------------------------------------------------
-// Sessions
-// -------------------------------------------------------------------
-// 
-$session->start();
+use Zend\EventManager\EventInterface;
+use Zend\EventManager\EventManagerInterface;
+use Zend\EventManager\ListenerAggregateTrait;
+use Zend\EventManager\ListenerAggregateInterface;
+use Zend\I18n\Translator\TranslatorAwareInterface;
+use Obullo\Container\{
+    ContainerAwareTrait,
+    ContainerAwareInterface
+};
+class BundleListener implements ListenerAggregateInterface,ContainerAwareInterface
+{
+    use ContainerAwareTrait;
+    use ListenerAggregateTrait;
+
+    public function attach(EventManagerInterface $events, $priority = null)
+    {
+        $this->listeners[] = $events->attach('bundle.bootstrap', [$this, 'onBootstrap']);
+    }
+
+    public function onBootstrap(EventInterface $e)
+    {
+        $container = $this->getContainer();
+        $container->configure(
+            [
+                 'factories' => [
+                     \App\Controller\DefaultController::class => \ServiceManager\LazyControllerFactory::class
+                 ]
+            ]
+        );
+        $session = $container->get('session');
+        $session->start();
+    }
+}
 ```
 
-Eğer uygulamanız session sınıfını her defasında kullanmayı gerektirmiyorsa oturumları global başlatmayı aşağıdaki gibi kapatın.
+Eğer uygulamanız session sınıfını kullanmayı gerektirmiyorsa oturumları başlatmayı aşağıdaki gibi kapatın.
 
 ```php
+// $session = $container->get('session');
 // $session->start();
 ```
 
@@ -88,19 +106,20 @@ Bu işlemden sonra artık oturumları kontrolör `__construct()` metodu içerisi
 namespace App\Controller;
 
 use Obullo\Http\Controller;
+use Zend\Session\SessionManager as Session;
 use Psr\Http\Message\RequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
 class DefaultController extends Controller
 {
-	public function __construct()
+	public function __construct(Session $session)
 	{
-		$this->session->start();
+		$session->start();
 	}
 }
 ```
 
-`$sessions->start()` komutu php `session_start()` komutu ile eşdeğerdir.
+`$session->start()` komutu php `session_start()` komutu ile eşdeğerdir.
 
 ### Oturum değerleri
 

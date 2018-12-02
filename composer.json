@@ -1,11 +1,12 @@
 {
     "name": "obullo/framework",
     "type": "library",
-    "description": "Create your mvc framework with Obullo and Zend components.",
+    "description": "Create mvc applications with Obullo and Zend components.",
     "keywords": [
         "obullo",
-        "mvc",
+        "framework",
         "psr-7",
+        "psr-11",
         "psr-15"
     ],
     "homepage": "http://framework.obullo.com",
@@ -19,23 +20,22 @@
     ],
     "autoload": {
         "psr-4": {
+            "" : "classes",
+            "App\\": "bundle/App/src/",
+            "View\\": "bundle/View/src/",
             "Obullo\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": { 
-            "": ""
         }
     },
     "require": {
         "php": "^7.0",
         "zendframework/zend-view": "^2.10",
         "zendframework/zend-validator": "^2.10",
-        "zendframework/zend-http": "^2.8"
+        "zendframework/zend-http": "^2.8",
+        "zendframework/zend-servicemanager-di": "^1.2",
+        "zendframework/zend-config-aggregator": "^1.1"
     },
     "require-dev": {
         "obullo/stack": "^1.1",
-        "obullo/config": "^1.0",
         "obullo/router": "^1.0",
         "league/plates": "^3.3",
         "zendframework/zend-db": "^2.9",

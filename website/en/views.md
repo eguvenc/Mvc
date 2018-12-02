@@ -14,7 +14,7 @@ composer require league/plates
 `View` nesnesi diğer servisler gibi `index.php` dosyası içerisinden konfigüre edilir. 
 
 ```php
-$container->setFactory('view', 'Services\ViewPlatesFactory');
+$container->setFactory('html', 'Services\ViewPlatesFactory');
 ```
 
 Görünüm servisi `Obullo\View\PlatesPhp` nesnesine geri döner ve bu nesne içerisindeki `render()` metodu `League\Plates\Template\Template` sınıfı render metodunu çağırır.
@@ -35,8 +35,7 @@ class ViewPlatesFactory implements FactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $engine = new Engine(ROOT.'/'.APP.'/View');
-        $engine->setFileExtension('phtml');
-        $engine->addFolder('templates', ROOT.'/templates');
+        $engine->addFolder('Templates', ROOT.'/templates');
         $engine->loadExtension(new Asset(ROOT.'/public/'.strtolower(APP).'/', false));
 
         // -------------------------------------------------------------------
@@ -66,25 +65,25 @@ class ViewPlatesFactory implements FactoryInterface
 Kontrolör sınıfı içerisindeki `render()` metodu html çıktısı oluşturur.
 
 ```php
-$html = $this->render('welcome');
+$html = $this->render('Welcome.phtml');
 ```
 
 Bu fonksiyon kontrolör sınıfı içerisinden görünüm sınıfı `render()` metodunu çağırır.
 
 ```php
-$html = $this->view->render('welcome');
+$html = $this->html->render('Welcome.phtml');
 ```
 
 Elde edilen string türündeki html görünümü kontrolör sınıfı içerisinde `\Zend\Diactoros\Response\HtmlResponse` nesnesine aktarılmalıdır.
 
 ```php
-return new HtmlResponse($this->render('welcome'));
+return new HtmlResponse($this->render('Welcome.phtml'));
 ```
 
 Görünüm dosyasına veri göndermek için render metodu ikinci parametresi kullanılır. Böylece bu veriler görünüm dosyası içerisinde yerel olarak erişilebilir hale gelir.
 
 ```php
-$this->render('welcome', ['foo' => 'bar']);
+$this->render('Welcome.phtml', ['foo' => 'bar']);
 ```
 
 Örnek.
@@ -101,7 +100,7 @@ class DefaultController extends Controller
 {
     public function index(Request $request) : Response
     {
-        return new HtmlResponse($this->render('welcome'));
+        return new HtmlResponse($this->render('Welcome.phtml'));
     }
 }
 ```
@@ -111,20 +110,19 @@ class DefaultController extends Controller
 Eğer `App/View/users/` adlı klasörünüz var ise `/` bölü işareti ile  ilgili görünümü ilgili klasör altından çağırabilirsiniz.
 
 ```php
-
-return new HtmlResponse($this->render('users/dashboard'));
+return new HtmlResponse($this->render('Users/Dashboard.phtml'));
 ```
 
 Eğer görünüm servisi içerisinde bir klasör `addFolder()` metodu ile önceden aşağıdaki gibi başka bir dizine tanımlı ise,
 
 ```php
-$engine->addFolder('templates', ROOT.'/templates');
+$engine->addFolder('View', ROOT.'/App/View/Shared');
 ```
 
 klasör ismi ardından `::` karakteri ile tanımlı klasör yolu içerisindeki görünüm dosyalarınızı çağırabilirsiniz.
 
 ```php
-return new HtmlResponse($this->render('templates::error', $data));
+return new HtmlResponse($this->renderView('View::_Error.phtml', $data));
 ```
 
 ### Şablonlar
@@ -132,14 +130,14 @@ return new HtmlResponse($this->render('templates::error', $data));
 Şablon yüklemek için tipik olarak dosyanın en üstünde `layout` metodu çağırılır.
 
 ```php
-<?php $this->layout('template') ?>
+<?php $this->layout('Template.phtml') ?>
 
 <h1>User Profile</h1>
 <p>Hello, <?php echo $this->escape($name)?></p>
 
 // Bu fonksiyon klasör grupları için de aynı işleve sahiptir.
 
-<?php $this->layout('shared::template') ?>
+<?php $this->layout('View::_Example.phtml') ?>
 ```
 
 ### Veri atamak
@@ -147,7 +145,7 @@ return new HtmlResponse($this->render('templates::error', $data));
 Bir görünüme veri atamak için `layout` fonksiyonu ikinci parametresi kullanılır.
 
 ```php
-<?php $this->layout('template', ['title' => 'User Profile']) ?>
+<?php $this->layout('Template.phtml', ['title' => 'User Profile']) ?>
 ```
 
 ### İçeriğe erişmek

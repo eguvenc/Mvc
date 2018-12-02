@@ -2,11 +2,11 @@
 
 namespace Obullo\Http;
 
+use Psr\Container\ContainerInterface;
 use Obullo\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };
-use ReflectionClass;
 use Obullo\Router\Router;
 
 /**
@@ -15,7 +15,7 @@ use Obullo\Router\Router;
  * @copyright Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class ControllerResolver implements ContainerAwareInterface
+class ControllerResolver
 {
     use ContainerAwareTrait;
 
@@ -24,8 +24,18 @@ class ControllerResolver implements ContainerAwareInterface
     protected $router;
     protected $method;
     protected $classInstance;
-    protected $argumentResolver;
     protected $isCallable = false;
+
+    /**
+     * Set a container.
+     *
+     * @param  \Psr\Container\ContainerInterface $container
+     * @return $this
+     */
+    public function __construct(ContainerInterface $container)
+    {
+        $this->setContainer($container);
+    }
 
     /**
      * Constructor
@@ -35,97 +45,33 @@ class ControllerResolver implements ContainerAwareInterface
     public function setRouter(Router $router)
     {
         $this->router = $router;
-        $this->name = 'App';
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param ArgumentResolver $argumentResolver 
-     */
-    public function setArgumentResolver($argumentResolver)
-    {
-        $this->argumentResolver = $argumentResolver;
-    }
-
-    /**
-     * Dispatch request
-     * 
-     * @return void
-     */
-    public function dispatch()
-    {
-        if (false == $this->router->hasMatch()) {
-            return;
-        }
-        $handler = $this->router->getMatchedRoute()
-            ->getHandler();
-
-        if (is_callable($handler)) {
-            $this->isCallable = true;
-            $this->resolveHandler($handler);
-        }
     }
 
     /**
      * Resolve handler
      * 
-     * @param  string $handler handler
      * @return void
      */
-    protected function resolveHandler(string $handler)
-    {        
+    public function resolve(string $handler)
+    {
         $container = $this->getContainer();
         $explodeMethod = explode('::', $handler);
         $this->class  = $explodeMethod[0];
         $this->method = $explodeMethod[1];
         $explode  = explode('\\', $this->class);
         $this->name = (string)$explode[0];
-        $reflection = new ReflectionClass($this->class);
 
-        $container->setFactory('middleware', function(){
-            return new Middleware($this);
-        });
-        if ($reflection->hasMethod('__construct')) {
-            $this->argumentResolver->clear();
-            $this->argumentResolver->setReflectionClass($reflection);
-            $this->argumentResolver->setContainer($this->getContainer());
-
-            $injectedParameters = $this->argumentResolver->resolve('__construct');
-            $this->classInstance = $reflection->newInstanceWithoutConstructor();
-            $this->classInstance->setContainer($container);
-            
-            call_user_func_array(
-                array(
-                    $this->classInstance,
-                    '__construct'
-                ),
-                $injectedParameters
-            );
-        } else {
-            $this->classInstance = $reflection->newInstanceWithoutConstructor();
-            $this->classInstance->setContainer($container);
-        }
+        $this->classInstance = $container->build($this->class, ['method' => $this->method]);
     }
-
+    
     /**
      * Returns to first namespace e.g. 'App'.
      * 
      * @return string
      */
-    public function getFirstNamespace() : string
+    public function getBundleName() : string
     {
         return $this->name;
-    }
-
-    /**
-     * Returns to is callable
-     * 
-     * @return string
-     */
-    public function getClassIsCallable() : bool
-    {
-        return $this->isCallable;
     }
 
     /**
@@ -167,4 +113,4 @@ class ControllerResolver implements ContainerAwareInterface
     {
         return $this->router;
     }
-}
+ }

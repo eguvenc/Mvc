@@ -25,7 +25,7 @@ $env = $input->getParameterOption(['--env', '-e'], $_SERVER['APP_ENV'] ?? 'dev',
 // -------------------------------------------------------------------
 //
 $container = new ServiceManager;
-$container->setFactory('loader', 'Services\LoaderFactory');
+$container->setFactory('config', 'Services\ConfigFactory');
 $container->setFactory('logger', 'Services\LoggerFactory');
 
 use Symfony\Component\Console\Application;

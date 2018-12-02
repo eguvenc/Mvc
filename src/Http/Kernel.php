@@ -7,30 +7,26 @@ use Psr\{
     Http\Message\ServerRequestInterface as Request,
     Http\Message\ResponseInterface as Response
 };
-use Obullo\Container\{
-    ContainerAwareTrait,
-    ContainerAwareInterface
-};
 use Obullo\Router\{
     Router
 };
 use ReflectionClass;
+use Zend\Diactoros\Response\EmptyResponse;
 use Obullo\Http\Exception\RuntimeException;
+use Obullo\Http\SubRequestInterface as SubRequest;
 
 /**
  * Kernel
  *
- * @copyright 2018 Obullo
+ * @copyright 2019 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class Kernel
+class Kernel implements HttpKernelInterface
 {
-    use ContainerAwareTrait;
-
-    protected $stack;
+    protected $queue = array();
     protected $router;
     protected $events;
-    protected $argumentResolver;
+    protected $container;
     protected $controllerResolver;
 
     /**
@@ -39,105 +35,147 @@ class Kernel
      * @param object $events             EventManager
      * @param object $router             Router
      * @param object $controllerResolver ControllerResolver
-     * @param object $stack              Stack
-     * @param object $argumentResolver   ArgumentResolver
+     * @param object $queue              Stack queue (optional)
      */
-    public function __construct($events, Router $router, $controllerResolver, $stack, $argumentResolver)
+    public function __construct($events, Router $router, $controllerResolver, $queue = array())
     {
-        $this->stack = $stack;
+        $this->queue  = $queue;
         $this->router = $router;
         $this->events = $events;
-        $this->argumentResolver = $argumentResolver;
+        $this->container = $controllerResolver->getContainer();
         $this->controllerResolver = $controllerResolver;
+        $this->controllerResolver->setRouter($router);
     }
 
     /**
-     * Start application process
+     * Handle request & http process
      * 
      * @param Request $request request
      * 
-     * @return void
+     * @return object
      */
-    public function handle(Request $request) : Response
+    public function handleRequest(Request $request) : Response
     {
-        $container = $this->getContainer();
-
+        $params = array();
+        $handler = null;
         if ($route = $this->router->matchRequest()) {
-            $this->events->trigger('route.match', $this, ['route' => $route]);
+            $params  = $route->getArguments();
+            $handler = $route->getHandler();
+            $this->events->trigger('route.match', null, ['route' => $route]);
         }
-        $this->controllerResolver->setRouter($this->router);
-        $this->controllerResolver->setArgumentResolver($this->argumentResolver);
-        $this->controllerResolver->setContainer($container);
-        $this->controllerResolver->dispatch();
-
-        $queue = $this->getQueue();  // Merge application queue
-        if (! empty($queue)) {
-            foreach ($queue as $value) {
-                $this->stack = $this->stack->withMiddleware($value);
-            }
-        }
-        $this->stack = $this->stack->withMiddleware(new SendResponse($this)); // Final response
-
-        return $this->stack->process($request);
+        $response = $this->dispatch($handler, $request, $params);
+        return $response;
     }
 
     /**
-     * Dispatch application process from SendResponse middleware
+     * Handle SubRequest & hmvc process
      * 
-     * @param Request $request Psr7 Request
+     * @param  SubRequest $request subrequest
      * 
-     * @return null|Response
+     * @return object
      */
-    public function dispatch(Request $request)
+    public function handleSubRequest(SubRequest $request) : Response
     {
-        $response = null;
-        if ($this->controllerResolver->getClassIsCallable()) {
+        $this->container->setAllowOverride(true);  // allow override for every request
+        $this->container->setService('subRequest', $request);
+        $this->container->setAllowOverride(false); // restore default functionality
 
+        $params  = $request->getAttribute('params');
+        $handler = $request->getAttribute('handler');
+        
+        $response = $this->dispatch($handler, $request, $params);
+        return $response;
+    }
+
+    /**
+     * Create bundle event
+     * 
+     * @param  string $handler handler
+     * @return void
+     */
+    protected function createBundleEvent($handler)
+    {
+        list($bundleName) = explode('\\', $handler);
+        $bundleListener = '\\'.$bundleName.'\Event\BundleListener';
+
+        $object = new $bundleListener;
+        $object->setContainer($this->container);
+        $object->attach($this->events);
+
+        $this->events->trigger($bundleName.'.bootstrap'); // creates bootstrap event foreach bundles.
+    }
+
+    /**
+     * Dispatch application process
+     * 
+     * @param  Request $request   Psr7 Request / Sub Request 
+     * @param  array   $arguments arguments
+     * 
+     * @return Response
+     */
+    public function dispatch($handler, Request $request, $arguments = array()) : Response
+    {
+        if (is_callable($handler)) {
+            $this->createBundleEvent($handler);
+            $this->controllerResolver->resolve($handler);
+            $args = array();
             $class  = $this->controllerResolver->getClassInstance();
             $method = $this->controllerResolver->getClassMethod();
 
             $reflection = new ReflectionClass($class);
-            $this->argumentResolver->setReflectionClass($reflection);
-            $this->argumentResolver->setContainer($this->getContainer());
-            $this->argumentResolver->setArguments($this->router->getMatchedRoute()->getArguments());
-
-            $injectedParameters = $this->argumentResolver->resolve($method);
+            $parameters = $reflection->getMethod($method)->getParameters();
+            foreach ($parameters as $param) {
+                $name = $param->getName();
+                if (isset($arguments[$name])) {
+                    $args[] = $arguments[$name];
+                }
+            }      
             $response = call_user_func_array(
                 array(
                     $class,
                     $method
                 ),
-                $injectedParameters
+                $args
             );
+            return $response;
         }
-        return $response;
+        return new EmptyResponse;
     }
 
     /**
-     * Build route middlewares with dependencies
+     * Build application middlewares with dependencies
      * 
      * @return handler
      */
-    protected function getQueue() : array
+    public function getQueue() : array
     {
-        $container = $this->getContainer();
         $middlewares = array();
-        if ($container->has('middleware')) {
-            $middlewares = $container->get('middleware')
-                ->getStack();
+        $instance = $this->controllerResolver->getClassInstance();
+        if (is_object($instance) && $instance->middlewareManager !== null) {
+            $middlewares = $instance->middlewareManager->getStack();
         }
-        $middlewares = array_merge($this->router->getStack(), $middlewares);
-        return $this->resolveMiddlewareArguments($middlewares);
+        /**
+         * Middleware order
+         * 
+         * 1 - Global (index.php) middlewares
+         * 2 - Route middlewares
+         * 3 - Controller middlewares
+         */
+        $queue = $this->queue;
+        $queue = array_merge($queue, $this->router->getStack());
+        $queue = array_merge($queue, $middlewares);
+        $queue = $this->resolveDependencies($queue);
+        return $queue;
     }
 
     /**
-     * Resolve middlewares
+     * Resolve middleware dependencies
      * 
      * @param array $middlewares middlewares
      * 
      * @return array
      */
-    protected function resolveMiddlewareArguments(array $middlewares)
+    protected function resolveDependencies(array $middlewares)
     {
         $resolvedMiddlewares = array();
         foreach ($middlewares as $data) {
@@ -148,21 +186,10 @@ class Kernel
                 $arguments = $data['arguments'];
                 $data = $class;
             }
-            $reflection = new ReflectionClass($class);
-            $this->argumentResolver->clear();
-            $this->argumentResolver->setReflectionClass($reflection);
-            $this->argumentResolver->setArguments($arguments);
-            $this->argumentResolver->setContainer($this->getContainer());
-            $args = array();
-            if ($reflection->hasMethod('__construct')) {
-                $args = $this->argumentResolver->resolve('__construct');
-            }
-            $object = $reflection->newInstanceArgs($args);
-            $resolvedMiddlewares[] = $object;
+            $resolvedMiddlewares[] = new $class(...$arguments);
         }
         return $resolvedMiddlewares;
     }
-
 
     /**
      * Emit response

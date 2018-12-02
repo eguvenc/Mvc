@@ -1,0 +1,13 @@
+
+# name:
+#    path: /
+#    handler: App\Controller\DefaultController::index
+#    middleware: Middleware\Name
+
+home: 
+    path: /
+    handler: App\Controller\DefaultController::index
+
+dummy:
+    path: /dummy
+    handler: App\Controller\DefaultController::dummy

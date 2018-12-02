@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title><?php echo $this->escape($title)?></title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="<?php echo $this->asset('/css/bootstrap.css') ?>">
+        <link rel="stylesheet" type="text/css" href="<?php echo $this->asset('/css/welcome.css') ?>">
+    </head>
+    <body>
+        <?php echo $header ?>
+
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+
+        <div class="container">
+            <?php echo $this->section('content') ?>
+        </div>
+
+        <?php echo $footer ?>
+    </body>
+</html>

@@ -2,6 +2,7 @@
 
 namespace Obullo\Http;
 
+use Obullo\Http\HttpControllerInterface;
 use Obullo\Container\{
     ContainerAwareTrait,
     ContainerProxyTrait,
@@ -15,10 +16,22 @@ use Psr\Http\Message\ResponseInterface;
  * @copyright Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class Controller implements ContainerAwareInterface
+class Controller implements HttpControllerInterface, ContainerAwareInterface
 {
     use ContainerAwareTrait;
-    use ContainerProxyTrait;
+
+    public $middlewareManager;
+
+    /**
+     * Returns to new middleware manager
+     * 
+     * @return object
+     */
+    public function getMiddlewareManager()
+    {
+    	$this->middlewareManager = new MiddlewareManager($this);
+    	return $this->middlewareManager;
+    }
 
 	/**
 	 * Render view
@@ -28,9 +41,11 @@ class Controller implements ContainerAwareInterface
 	 * 
 	 * @return object
 	 */
-	public function render($nameOrModal, $data = null)
+	public function renderView($nameOrModal, $data = null)
 	{
-		return $this->view->render($nameOrModal, $data);
+		$html = $this->getContainer()->get('html');
+
+		return $html->render($nameOrModal, $data);
 	}
 
 	/**
@@ -44,10 +59,11 @@ class Controller implements ContainerAwareInterface
 	 */
 	public function url($uriOrRouteName = null, $params = [])
 	{
-		$collection = $this->router->getCollection();
+		$router = $this->getContainer()->get('router');
+		$collection = $router->getCollection();
 		
 		if ($collection->get($uriOrRouteName)) {
-			$uriOrRouteName = $this->router->url($uriOrRouteName, $params);
+			$uriOrRouteName = $router->url($uriOrRouteName, $params);
 		}
 		return $uriOrRouteName;
 	}

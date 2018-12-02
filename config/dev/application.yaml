@@ -1,0 +1,9 @@
+
+# application
+#    
+
+application:
+    session:
+        name: sessions
+    translator:
+        default_locale: 'en'

@@ -3,17 +3,14 @@
 require '../vendor/autoload.php';
 
 define('ROOT', dirname(__DIR__));
-define('APP', 'App');
 
 use Obullo\Http\{
     ControllerResolver,
-    ArgumentResolver,
     Kernel
-};
+}; 
 use Obullo\Stack\Builder as Stack;
-use Obullo\Container\ContainerAwareInterface;
+use ServiceManager\SharedInitializer;
 use Zend\ServiceManager\ServiceManager;
-use Zend\EventManager\Event;
 use Dotenv\Dotenv;
 
 // -------------------------------------------------------------------
@@ -34,33 +31,31 @@ if ('prod' !== $env) {
 // Service Manager
 // -------------------------------------------------------------------
 //
-$container = new ServiceManager;
+$container = new ServiceManager();
 $container->setFactory('request', 'Services\RequestFactory');
-$container->setFactory('loader', 'Services\LoaderFactory');
+$container->setFactory('config', 'Services\ConfigFactory');
 $container->setFactory('router', 'Services\RouterFactory');
 $container->setFactory('translator', 'Services\TranslatorFactory');
 $container->setFactory('events', 'Services\EventManagerFactory');
 $container->setFactory('session', 'Services\SessionFactory');
 $container->setFactory('adapter', 'Services\ZendDbFactory');
-$container->setFactory('view', 'Services\ViewPlatesFactory');
 $container->setFactory('logger', 'Services\LoggerFactory');
 $container->setFactory('flash', 'Services\FlashMessengerFactory');
-$container->setFactory('error', 'Services\ErrorHandlerFactory');
 $container->setFactory('escaper', 'Services\EscaperFactory');
+$container->setFactory('html', 'Services\ViewFactory');
+$container->setFactory('error', 'Services\ErrorHandlerFactory');
 
 // -------------------------------------------------------------------
-// Initialize
+// Service Manager Initializers
 // -------------------------------------------------------------------
-// 
-$events  = $container->get('events');
+//
+$container->addInitializer(new SharedInitializer);
+
+// -------------------------------------------------------------------
+// Initialize Packages
+// -------------------------------------------------------------------
+//
 $request = $container->get('request');
-$session = $container->get('session');
-
-// -------------------------------------------------------------------
-// Sessions
-// -------------------------------------------------------------------
-// 
-$session->start();
 
 // -------------------------------------------------------------------
 // Exception Handler
@@ -75,41 +70,19 @@ set_exception_handler(array($container->get('error'), 'handle'));
 set_error_handler(function($errno, $errstr, $errfile, $errline) {      
     throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 });
-// -------------------------------------------------------------------
-// Event Listeners
-// -------------------------------------------------------------------
-//
-$listeners = [
-    'App\Event\ErrorListener',
-    'App\Event\RouteListener',
-    'App\Event\HttpMethodListener',
-    'App\Event\SendResponseListener',
-];
-foreach ($listeners as $listener) { // Create listeners
-    $object = new $listener;
-    if ($object instanceof ContainerAwareInterface) {
-        $object->setContainer($container);
-    }
-    $object->attach($events);
-}
+
 // -------------------------------------------------------------------
 // Stack Queue
 // -------------------------------------------------------------------
 //
 $queue = [
-    new App\Middleware\HttpMethod
+    new Middleware\HttpMethod
 ];
-$stack = new Stack;
-$stack->setContainer($container);
-foreach ($queue as $value) {
-    $stack = $stack->withMiddleware($value);
-}
 // -------------------------------------------------------------------
 // Http Kernel
 // -------------------------------------------------------------------
 //
-$kernel = new Kernel($events, $container->get('router'), new ControllerResolver, $stack, new ArgumentResolver);
-$kernel->setContainer($container);
+$kernel = new Kernel($container->get('events'), $container->get('router'), new ControllerResolver($container), $queue);
 
 // -------------------------------------------------------------------
 // Handle Process
@@ -118,7 +91,19 @@ $kernel->setContainer($container);
 // Execute the kernel, which turns the request into a response 
 // by dispatching route, calling a controller, and returning the response
 // 
-$response = $kernel->handle($request);
+$response = $kernel->handleRequest($request);
+
+
+// -------------------------------------------------------------------
+// Stack Builder
+// -------------------------------------------------------------------
+//
+$stack = new Stack($container);
+foreach ($kernel->getQueue() as $value) {
+    $stack = $stack->withMiddleware($value);
+}
+$stack = $stack->withMiddleware(new Middleware\SendResponse($response));
+$response = $stack->process($request);
 
 // -------------------------------------------------------------------
 // Send Response

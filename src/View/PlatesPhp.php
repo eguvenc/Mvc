@@ -15,7 +15,7 @@ use Obullo\View\Plates\Template;
  * @copyright Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
-class PlatesPhp implements ContainerAwareInterface, ViewInterface
+class PlatesPhp implements ContainerAwareInterface, HtmlInterface
 {
     use ContainerAwareTrait;
 

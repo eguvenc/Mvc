@@ -1,0 +1,19 @@
+<?php
+$this->layout(
+  'View::_Template.phtml', 
+    [
+        'title' => 'Welcome to Obullo Php Framework',
+        'header' => $this->renderSubView('View\Controller\ViewController::header'), // $this->renderView('View::_HeaderNavbar.phtml'),
+        'footer' => $this->renderSubView('View\Controller\ViewController::footer'),
+    ]
+);
+?>
+<div class="welcome">
+    <div class="header clearfix text-center">
+      <p><a href=""><img src="<?php echo $this->asset('/images/logo.png') ?>"></a></p>
+
+      <h4>Welcome to Obullo Php Framework.</h4>
+    </div>
+  <p class="lead">If you are new to use <kbd>Obullo/Framework</kbd> please click below.</p>
+  <p><a class="btn btn-lg btn-default" href="http://framework.obullo.com/" role="button" target="_blank">Documentation</a></p>
+</div>

@@ -1,7 +1,7 @@
 
 ## Kontrolör
 
-`Obullo\Http` kontrolör sınıfı http isteklerini kontrol ederek içerdiği yardımcı metotlar ile istenen http yanıtlarına dönmeniz için ortak bir arayüz sağlar.
+`Obullo\Http` kontrolör sınıfı http isteklerini kontrol ederek içerdiği yardımcı metotlar ile istenen http yanıtlarına dönmenizi sağlar.
 
 ```php
 namespace App\Controller;
@@ -13,24 +13,24 @@ use Psr\Http\Message\ResponseInterface as Response;
 
 class DefaultController extends Controller
 {
-    public function index(Request $request) : Response
+    public function index() : Response
     {
-        return new HtmlResponse($this->render('welcome'));
+        return new HtmlResponse($this->renderView('Welcome.phtml'));
     }
 }
 ```
 
-> $this->render($name, $data = null);
+> $this->renderView($name, $data = array());
 
-Render metodu `view` nesnesi kullanarak html çıktısına döner.
+RenderView metodu `view` nesnesi kullanarak html çıktısına döner.
 
 
 ```php
-$html = $this->render('welcome');
-$html = $this->view->render('welcome'); 
+$html = $this->renderView('Welcome.phtml');
+$html = $this->getContainer('html')->render('Welcome.phtml'); 
 ```
 
-Yukarıdaki iki fonksiyon aynı işlevi görür ve işlenmiş görünüm string türünde HtmlResponse nesnesine aktarılır.
+Yukarıdaki iki fonksiyon aynı işlevi görür. İşlenmiş görünüm string türünde elde edildikten sonra`HtmlResponse` nesnesine aktarılmalıdır.
 
 ```php
 return new HtmlResponse($html);
@@ -64,7 +64,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 
 class DefaultController extends Controller
 {
-    public function index(Request $request, $name, $id) : Response
+    public function index($name, $id) : Response
     {
         $string = $name.'-';
         $string.= $id;
@@ -74,7 +74,7 @@ class DefaultController extends Controller
 }
 ```
 
-Yukarıdaki örnekte görüldüğü gibi yönlendirme kurallarına göre gerçekleşen http çözümlemesinden sonra parametre isimleri parametre değerleri ile doldurulur.
+Yukarıdaki örnekte görüldüğü gibi yönlendirme kurallarına göre gerçekleşen http çözümlemesinden sonra parametre isimleri parametre değerleri ile dolduruldu.
 
 
 Çıktı
@@ -92,14 +92,14 @@ Kontrolör nesnesi içerisindeki `url` yardımcı metodu yönlendirme nesnesini 
 
 > $this->url($uriOrRouteName = null, $params = []);
 
-Url yardımcı metodu `$router->url()` metodunu çalıştırarak yönlendirme isimleri ile güveli url adresleri oluşturur. 
+Url yardımcı metodu `$router->url()` metodunu çalıştırır.
 
 ```php
 use Zend\Diactoros\Response\HtmlResponse;
 
 class DefaultController extends Controller
 {
-    public function index(Request $request, $name, $id) : Response
+    public function index($name, $id) : Response
     {
         return new RedirectResponse($this->url('home', ['name' => $name, 'id' => $id]));
     }
@@ -113,7 +113,7 @@ use Zend\Diactoros\Response\RedirectResponse;
 
 class DefaultController extends Controller
 {
-    public function index(Request $request, $name, $id) : Response
+    public function index($name, $id) : Response
     {
         return new RedirectResponse($this->url('/another/page'));
     }
@@ -135,7 +135,7 @@ use Zend\Diactoros\Response\JsonResponse;
 
 class DefaultController extends Controller
 {
-    public function index(Request $request, $name, $id) : Response
+    public function index($name, $id) : Response
     {
     	$data = [
     		'foo' => 'bar'
@@ -180,7 +180,7 @@ Server  Apache/2.4.29 (Ubuntu)
 
 ### Bağımlılıklar 
 
-Eğer kontrolör sınıfı metot parametreleri, konteyner içerisinde bir servis olarak kayıtlı ise otomatik olarak metot içerisine enjekte edilirler. Aşağıda örnekte birden fazla parametre alan bir http isteği çözümleniyor.
+Eğer kontrolör sınıfı `__construct()` metodu parametreleri, konteyner içerisinde bir servis olarak kayıtlı ise otomatik olarak metot içerisine enjekte edilirler. Aşağıda örnekte birden fazla parametre alan bir http isteği çözümleniyor.
 
 ```php
 http://example.com/test/1?foo=bar
@@ -207,15 +207,21 @@ use Psr\Http\Message\ResponseInterface as Response;
 
 class DefaultController extends Controller
 {
-    public function index(Request $request, Router $router, $name, $id) : Response
+    public function __construct(Request $request, Router $router)
     {
-        $routeName = $router->getMatchedRoute()
+        $this->router = $router;
+        $this->request = $request;
+    }
+
+    public function index($name, $id) : Response
+    {
+        $routeName = $this->router->getMatchedRoute()
             ->getName();
 
         $html = "Route Name: $routeName<br />";
         $html.= "Name: $name<br />";
         $html.= "ID: $id<br />";
-        $html.= "Query params:".print_r($request->getQueryParams(), true);
+        $html.= "Query params:".print_r($this->request->getQueryParams(), true);
 
         return new HtmlResponse($html);
     }
@@ -231,31 +237,118 @@ ID: 1
 Query params: Array ( [foo] => bar ) 
 ```
 
-### Proxy yöntemi
+### LazyControllerFactory
 
-Eğer parametre alanları işgal edilmek istenmiyorsa bağımlı olunan nesnelere proxy yöntemi ile içeriden de ulaşılabilir.
-
+Kontrolör sınıfı `__construct()` metodu parametrelerinin enjeksiyonu `classes\ServiceManager\LazyControllerFactory` sınıfı tarafından gerçekleştirilir. Bu sınıf isteklerinize göre özelleştirebilir olduğu için bağımlılık enjeksiyonu daha esnek hale getirir.
 
 ```php
-namespace App\Controller;
+namespace ServiceManager;
 
-use Obullo\Http\Controller;
-use Zend\Diactoros\Response\HtmlResponse;
-use Psr\Http\Message\RequestInterface as Request;
-use Psr\Http\Message\ResponseInterface as Response;
+use ReflectionClass;
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 
-class DefaultController extends Controller
+class LazyControllerFactory implements AbstractFactoryInterface
 {
-    public function index(Request $request, $name, $id) : Response
+    /**
+     * Determine if we can create a service with name
+     *
+     * @param Container $container
+     * @param $name
+     * @param $requestedName
+     *
+     * @return bool
+     */
+    public function canCreate(ContainerInterface $container, $requestedName)
     {
-        $routeName = $router->getMatchedRoute()
-            ->getName();
+        list($bundleName) = explode('\\', __NAMESPACE__, 2);
+        return strstr($requestedName, $bundleName . '\Controller') !== false;
+    }
 
-        $html = "Route Name: $routeName<br />";
-        $html.= "Name: $name<br />";
-        $html.= "ID: $id<br />";
+    /**
+     * These aliases work to substitute class names with Service Manager types that are buried in framework
+     * 
+     * @var array
+     */
+    protected $aliases = [
+        'Obullo\Router\Router' => 'router',
+        'Psr\Http\Message\RequestInterface' => 'request',
+        'Obullo\Http\SubRequestInterface' => 'subRequest',
+        'Zend\Form\FormElementManager' => 'formElement',
+        'Zend\Validator\ValidatorPluginManager' => 'validatorManager',
+        'Zend\Mvc\I18n\Translator' => 'translator',
+    ];
 
-        return new HtmlResponse($html);
+    /**
+     * Create service with name
+     *
+     * @param Container $container
+     * @param $requestedName
+     *
+     * @return mixed
+     */
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    {
+        $class = new ReflectionClass($requestedName);
+
+        $injectedParameters = array();
+        if ($constructor = $class->getConstructor()) {
+            if ($params = $constructor->getParameters()) {
+                foreach($params as $param) {
+                    if ($param->getClass()) {
+                        $name = $param->getClass()->getName();
+                        if (array_key_exists($name, $this->aliases)) {
+                            $name = $this->aliases[$name];
+                        }
+                        if ($container->has($name)) {
+                            $injectedParameters[] = $container->get($name);
+                        }
+                    }
+                }
+            }
+        }
+        return new $requestedName(...$injectedParameters);
+    }
+}
+```
+
+### Kontrolör bağımlılık yönetimi
+
+`LazyControllerFactory` sınıfının kontrölör dosyalarınızdaki bağımlılık enjeksiyonunu yönetebilmesi için her modül içerisindeki `BundleListener` dinleyicisi içerisinde ihtiyaç duyulan kontrolörlerin aşağıdaki gibi konfigüre edilmesi gerekir.
+
+```php
+namespace App\Event;
+
+use Zend\EventManager\EventInterface;
+use Zend\EventManager\EventManagerInterface;
+use Zend\EventManager\ListenerAggregateTrait;
+use Zend\EventManager\ListenerAggregateInterface;
+use Zend\I18n\Translator\TranslatorAwareInterface;
+use Obullo\Container\{
+    ContainerAwareTrait,
+    ContainerAwareInterface
+};
+class BundleListener implements ListenerAggregateInterface,ContainerAwareInterface
+{
+    use ContainerAwareTrait;
+    use ListenerAggregateTrait;
+
+    public function attach(EventManagerInterface $events, $priority = null)
+    {
+        $this->listeners[] = $events->attach('App.bootstrap', [$this, 'onBootstrap']);
+    }
+
+    public function onBootstrap(EventInterface $e)
+    {
+        $container = $this->getContainer();
+        $container->configure(
+            [
+                 'factories' => [
+                     \App\Controller\DefaultController::class => \ServiceManager\LazyControllerFactory::class
+                 ]
+            ]
+        );
     }
 }
 ```

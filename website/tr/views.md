@@ -34,20 +34,13 @@ class ViewPlatesFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $engine = new Engine(ROOT.'/'.APP.'/View');
-        $engine->setFileExtension('phtml');
-        $engine->addFolder('templates', ROOT.'/templates');
-        $engine->loadExtension(new Asset(ROOT.'/public/'.strtolower(APP).'/', false));
+        $engine = new Engine(ROOT.'/bundle/View'); // Default folder
+        $engine->setFileExtension(null);
+        
+        $engine->addFolder('App', ROOT.'/bundle/App/src/View');
+        $engine->addFolder('View', ROOT.'/bundle/View');
 
-        // -------------------------------------------------------------------
-        // View helpers
-        // -------------------------------------------------------------------
-        //
-        $engine->registerFunction('url', (new Url)->setRouter($container->get('router')));
-        $engine->registerFunction('translate', (new Translate)->setTranslator($container->get('translator')));
-        $engine->registerFunction('escapeHtml', new EscapeHtml);
-        $engine->registerFunction('escapeHtmlAttr', new EscapeHtmlAttr);
-        $engine->registerFunction('escapeUrl', new EscapeUrl);
+        $engine->loadExtension(new Asset(ROOT.'/public/', false));
 
         $template = new PlatesPhp($engine);
         $template->setContainer($container);
@@ -59,32 +52,54 @@ class ViewPlatesFactory implements FactoryInterface
 
 > Görünüm yardımcı metotlarına geçerli görünüm dosyası içerisinden `$this->method()` yöntemi ile ulaşılabilir.
  
-### Görünüm işleyici
 
-#### $this->render($name, $data = null);
+### Klasörler
 
-Kontrolör sınıfı içerisindeki `render()` metodu html çıktısı oluşturur.
+Eğer görünüm servisi içerisinde bir klasör `addFolder()` metodu ile önceden aşağıdaki gibi başka bir dizine tanımlı ise,
 
 ```php
-$html = $this->render('welcome');
+$engine->addFolder('View', ROOT.'/bundle/View');
 ```
 
-Bu fonksiyon kontrolör sınıfı içerisinden görünüm sınıfı `render()` metodunu çağırır.
+klasör ismi ardından `::` karakteri ile tanımlı klasör yolu içerisindeki görünüm dosyalarınızı çağırabilirsiniz.
 
 ```php
-$html = $this->view->render('welcome');
+return new HtmlResponse($this->renderView('View::_Error.phtml', $data));
+```
+
+Eğer `bundle/App/src/View/` dizini altında `Users/` klasörünüz var ise `/` bölü işareti ile  ilgili görünümü ilgili klasör altından çağırabilirsiniz.
+
+```php
+
+return new HtmlResponse($this->renderView('App::Users/Dashboard.phtml'));
+```
+
+### Görünüm işleyiciler
+
+#### $this->renderView($name, $data = array());
+
+Kontrolör sınıfı içerisindeki `renderView()` metodu html çıktısı oluşturur.
+
+```php
+$html = $this->renderView('App::Welcome.phtml');
+```
+
+Bu fonksiyon kontrolör sınıfı içerisinden html sınıfı `render()` metodunu çağırır.
+
+```php
+$html = $this->html->renderView('App::Welcome.phtml');
 ```
 
 Elde edilen string türündeki html görünümü kontrolör sınıfı içerisinde `\Zend\Diactoros\Response\HtmlResponse` nesnesine aktarılmalıdır.
 
 ```php
-return new HtmlResponse($this->render('welcome'));
+return new HtmlResponse($this->renderView('App::Welcome.phtml'));
 ```
 
 Görünüm dosyasına veri göndermek için render metodu ikinci parametresi kullanılır. Böylece bu veriler görünüm dosyası içerisinde yerel olarak erişilebilir hale gelir.
 
 ```php
-$this->render('welcome', ['foo' => 'bar']);
+$this->renderView('App::Welcome.phtml', ['foo' => 'bar']);
 ```
 
 Örnek.
@@ -101,45 +116,114 @@ class DefaultController extends Controller
 {
     public function index(Request $request) : Response
     {
-        return new HtmlResponse($this->render('welcome'));
+        return new HtmlResponse($this->renderView('App::Welcome.phtml'));
     }
 }
 ```
 
-### Klasörler
+#### $this->renderSubView($callable, $params = array());
 
-Eğer `App/View/users/` adlı klasörünüz var ise `/` bölü işareti ile  ilgili görünümü ilgili klasör altından çağırabilirsiniz.
-
-```php
-
-return new HtmlResponse($this->render('users/dashboard'));
-```
-
-Eğer görünüm servisi içerisinde bir klasör `addFolder()` metodu ile önceden aşağıdaki gibi başka bir dizine tanımlı ise,
+Bir görünüm dosyası içerisinden bir kontrolör dosyasını çağırır.
 
 ```php
-$engine->addFolder('templates', ROOT.'/templates');
+$this->layout(
+  'View::_Template.phtml', 
+    [
+        'title' => 'Welcome to Obullo Php Framework',
+        'header' => $this->renderSubView('View\Controller\ViewController::header'),
+        'footer' => $this->renderSubView('View\Controller\ViewController::footer'),
+    ]
+);
 ```
 
-klasör ismi ardından `::` karakteri ile tanımlı klasör yolu içerisindeki görünüm dosyalarınızı çağırabilirsiniz.
+#### Görünüm yönlendirme dosyaları
+
+Aşağıda `bundle/View/config/` dizini altındaki bir konfigürasyon dosyası görülüyor.
+
+```yaml
+# 
+# Views can also be create with ajax requests
+# 
+# name:
+#    path: /header
+#    handler: View\Controller\ViewController::header
+
+header:
+    path: /header
+    handler: View\Controller\ViewController::header
+
+footer:
+    path: /footer
+    handler: View\Controller\ViewController::footer
+```
+
+`View/Controller` dizini altına oluşturulmuş görünüm kontrolör dosyaları eğer yukarıdaki gibi `routes.yaml` konfigürasyon dosyası içeriyorsa dışarıdan `ajax` request ile çalıştırılabilirler.
+
 
 ```php
-return new HtmlResponse($this->render('templates::error', $data));
+namespace View\Controller;
+
+use Obullo\Http\{
+    Controller,
+    SubRequestInterface as SubRequest
+};
+use Zend\Diactoros\Response\HtmlResponse;
+use Psr\Http\Message\RequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
+
+class ViewController extends Controller
+{
+    public function __construct(Request $request, SubRequest $subRequest = null)
+    {
+        $this->request = $request;
+        $this->subRequest = $subRequest;
+    }
+
+    public function header() : Response
+    {
+        return new HtmlResponse($this->renderView('_HeaderNavbar.phtml'));
+    }
+
+    public function footer() : Response
+    {
+        return new HtmlResponse('<footer class="footer">
+            <div class="container">
+              <p>&nbsp;&nbsp;</p>
+            </div>
+        </footer>');
+    }
+}
 ```
+
+Sonuç olarak oluşturulan görünüm kontrolör dosyaları uygulama içerisinden `Obullo\Http\SubRequest` nesnesi ile,
+
+```php
+$this->renderSubView('View\Controller\ViewController::header')
+```
+
+Uygulama dışından ise http yada ajax istekleri çağırılabilir hale gelirler.
+
+```php
+http://example.com/header
+http://example.com/footer
+```
+
+> Hmvc tasarım deseni hakında daha geniş bilgi için  <a href="https://medium.com/@ersin.guvenc/hmvc-tasarim-deseni-ile-mantiksal-uygulamalar-gelistirmek">Hmvc tasarım deseni ile mantıksal uygulamalar geliştirmek</a> adlı makaleye gözatabilirsiniz.
+
 
 ### Şablonlar
 
 Şablon yüklemek için tipik olarak dosyanın en üstünde `layout` metodu çağırılır.
 
 ```php
-<?php $this->layout('template') ?>
+<?php $this->layout('_Template.phtml') ?>
 
 <h1>User Profile</h1>
 <p>Hello, <?php echo $this->escape($name)?></p>
 
 // Bu fonksiyon klasör grupları için de aynı işleve sahiptir.
 
-<?php $this->layout('shared::template') ?>
+<?php $this->layout('View::_Template.phtml') ?>
 ```
 
 ### Veri atamak
@@ -147,7 +231,7 @@ return new HtmlResponse($this->render('templates::error', $data));
 Bir görünüme veri atamak için `layout` fonksiyonu ikinci parametresi kullanılır.
 
 ```php
-<?php $this->layout('template', ['title' => 'User Profile']) ?>
+<?php $this->layout('View::_Template.phtml', ['title' => 'User Profile']) ?>
 ```
 
 ### İçeriğe erişmek
@@ -172,7 +256,7 @@ Bir şablon içerisinden işlenmiş bir görünüme ulaşmak için `section()` m
 Bölümler (sections) oluşturmak için `start()` metodu kullanılır. Bölümü kapatmak için ise `stop()` fonksiyonu ile bölüm kapatılmalıdır.
 
 ```php
-<?php $this->start('welcome') ?>
+<?php $this->start('App::Welcome.phtml') ?>
 
     <h1>Welcome!</h1>
     <p>Hello <?php echo $this->escape($name)?></p>
