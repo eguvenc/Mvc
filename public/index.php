@@ -57,19 +57,15 @@ $container->addInitializer(new SharedInitializer);
 //
 $request = $container->get('request');
 
-// -------------------------------------------------------------------
-// Exception Handler
-// -------------------------------------------------------------------
-//
-set_exception_handler(array($container->get('error'), 'handle'));
-
-// -------------------------------------------------------------------
-// Error Handler
-// -------------------------------------------------------------------
-//
-set_error_handler(function($errno, $errstr, $errfile, $errline) {      
-    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
-});
+/**
+* Bu class olmalı. (SharedErrorHandler)
+*/
+$errorHandler = function ($bundleName) {
+    set_exception_handler(array($container->get($bundleName.'\ErrorHandler.php'), 'handle'));
+    set_error_handler(function($errno, $errstr, $errfile, $errline) {      
+        throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+    });
+};
 
 // -------------------------------------------------------------------
 // Stack Queue
@@ -83,6 +79,7 @@ $queue = [
 // -------------------------------------------------------------------
 //
 $kernel = new Kernel($container->get('events'), $container->get('router'), new ControllerResolver($container), $queue);
+$kernel->setErrorHandler($errorCallable);
 
 // -------------------------------------------------------------------
 // Handle Process
@@ -92,7 +89,6 @@ $kernel = new Kernel($container->get('events'), $container->get('router'), new C
 // by dispatching route, calling a controller, and returning the response
 // 
 $response = $kernel->handleRequest($request);
-
 
 // -------------------------------------------------------------------
 // Stack Builder
