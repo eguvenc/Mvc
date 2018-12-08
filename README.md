@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/obullo/Framework.svg?branch=master)](https://travis-ci.org/obullo/Framework)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 
-> Create your mvc framework with Obullo and Zend components.
+> Create your micro mvc framework with Obullo and Zend components.
 
 ## Install
 

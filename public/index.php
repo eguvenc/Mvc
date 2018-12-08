@@ -77,6 +77,7 @@ $queue = [
 // -------------------------------------------------------------------
 //
 $kernel = new Kernel($container->get('events'), $container->get('router'), new ControllerResolver($container), $queue);
+$kernel->setErrorHandler($errorCallable);
 
 // -------------------------------------------------------------------
 // Handle Process
@@ -86,7 +87,6 @@ $kernel = new Kernel($container->get('events'), $container->get('router'), new C
 // by dispatching route, calling a controller, and returning the response
 // 
 $response = $kernel->handleRequest($request);
-
 
 // -------------------------------------------------------------------
 // Stack Builder
