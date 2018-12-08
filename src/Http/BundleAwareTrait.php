@@ -2,7 +2,7 @@
 
 namespace Obullo\Http;
 
-class Bundle
+trait BundleAwareTrait
 {
     /**
      * Bundle name
@@ -12,13 +12,12 @@ class Bundle
     protected $bundle;
 
     /**
-     * Set bundle namespace
+     * Set bundle object
      * 
-     * @param string $namespace current bundle __namespace__
+     * @param Bundle $bundle object
      */
-    public function __construct(string $namespace)
+    public function setBundle(Bundle $bundle)
     {
-        list($bundle) = explode('\\', $namespace);
         $this->bundle = $bundle;
     }
 
@@ -27,7 +26,7 @@ class Bundle
      * 
      * @return string
      */
-    public function getName() : string
+    public function getBundle() : Bundle
     {
         return $this->bundle;
     }

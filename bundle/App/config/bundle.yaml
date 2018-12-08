@@ -1,0 +1,9 @@
+
+# bundle configuration
+#
+
+App:
+    view:
+        404_template: View::_404.phtml
+        error_template: View::_Error.phtml
+        error_handler: App\Error\ErrorHandler::handle

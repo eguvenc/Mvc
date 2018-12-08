@@ -48,10 +48,18 @@ class Error implements MiddlewareInterface, ContainerAwareInterface
     public function process(Request $request, RequestHandler $handler) : ResponseInterface
     {
         $container = $this->getContainer();
+        $params = $this->container->get('config')
+                ->App
+                ->view;
 
-        $response = $container->get('error')
-            ->render($this->message, $this->code, $this->headers);
-
+        $errorHandler = $container->build('error', // create a error handler
+            [
+                'error_handler' => $params['error_handler'],
+                'error_template' => $params['error_template'],
+                '404_template' => $params['404_template']
+            ]
+        );
+        $response = $errorHandler->render($this->message, $this->code, $this->headers);
         return $response;
     }
 }

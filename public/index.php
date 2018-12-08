@@ -77,7 +77,6 @@ $queue = [
 // -------------------------------------------------------------------
 //
 $kernel = new Kernel($container->get('events'), $container->get('router'), new ControllerResolver($container), $queue);
-$kernel->setErrorHandler($errorCallable);
 
 // -------------------------------------------------------------------
 // Handle Process

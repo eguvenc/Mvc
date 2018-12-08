@@ -17,7 +17,6 @@ if (false == isset($_SERVER['APP_ENV'])) {
     (new Dotenv(ROOT))->load();
 }
 $input = new ArgvInput();
-
 $env = $input->getParameterOption(['--env', '-e'], $_SERVER['APP_ENV'] ?? 'dev', true);
 
 // -------------------------------------------------------------------

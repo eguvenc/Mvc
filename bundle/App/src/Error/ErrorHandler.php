@@ -3,7 +3,6 @@
 namespace App\Error;
 
 use Throwable;
-use RuntimeException;
 use Psr\Http\Message\ResponseInterface;
 use Obullo\Container\{
     ContainerAwareTrait,
@@ -24,19 +23,28 @@ class ErrorHandler implements ContainerAwareInterface, TranslatorAwareInterface
     use TranslatorAwareTrait;
 
     protected $view;
+    protected $handler;
     protected $bundle;
     protected $events;
     protected $errorTemplate;
     protected $notFoundTemplate;
 
     /**
-     * Set bundle
-     * 
-     * @param object $bundle bundle
+     * Constructor
      */
-    public function setBundle(Bundle $bundle)
+    public function __construct()
     {
-        $this->bundle = $bundle;
+        $this->bundle = new Bundle(__NAMESPACE__);
+    }
+
+    /**
+     * Set handler method
+     * 
+     * @param string $handler function name
+     */
+    public function setHandler(string $handler)
+    {
+        $this->handler = $handler;
     }
 
     /**
@@ -74,7 +82,7 @@ class ErrorHandler implements ContainerAwareInterface, TranslatorAwareInterface
      */
     public function setExceptionHandler()
     {
-        set_exception_handler(array($this, 'handle'));
+        set_exception_handler(array($this, $this->handler));
     }
 
     /**
@@ -142,12 +150,10 @@ class ErrorHandler implements ContainerAwareInterface, TranslatorAwareInterface
     protected function handleError(Throwable $exception)
     {        
         $events = $this->getEvents();
-
         $event = new Event;
         $event->setName($this->bundle->getName().'.error.handler'); // Create event for Error Listener
         $event->setParam('exception', $exception);
         $event->setTarget($this);
-
         $events->triggerEvent($event);
 
         return $this->render(
@@ -170,16 +176,17 @@ class ErrorHandler implements ContainerAwareInterface, TranslatorAwareInterface
     public function render($message = null, $status, $headers = array(), Throwable $exception = null) : ResponseInterface
     {
         $translator = $this->getTranslator();
-    
         $data = array();
         $data['message'] = $message;
         $data['translator'] = $translator;
         $data['e'] = $exception;
 
         if ($status == '404') {
-            return new HtmlResponse($this->view->render($this->get404Template(), $data), $status, $headers);
+            $template = $this->view->render($this->get404Template(), $data);
+            return new HtmlResponse($template, $status, $headers);
         }
-        return new HtmlResponse($this->view->render($this->getErrorTemplate(), $data), $status, $headers);
+        $template = $this->view->render($this->getErrorTemplate(), $data);
+        return new HtmlResponse($template, $status, $headers);
     }
 
     /**
@@ -189,12 +196,6 @@ class ErrorHandler implements ContainerAwareInterface, TranslatorAwareInterface
      */
     public function send(ResponseInterface $response)
     {
-        if (headers_sent()) {
-            throw new RuntimeException('Unable to emit response; headers already sent');
-        }
-        if (ob_get_level() > 0 && ob_get_length() > 0) {
-            throw new RuntimeException('Output has been emitted previously; cannot emit response');
-        }
         $this->emitHeaders($response);
         $this->emitBody($response);
     }

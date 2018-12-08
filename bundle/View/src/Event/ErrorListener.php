@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Event;
+namespace View\Event;
 
 use Zend\EventManager\EventInterface;
 use Zend\EventManager\EventManagerInterface;

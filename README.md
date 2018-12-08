@@ -1,15 +1,15 @@
 
-# Obullo / Framework
+# Obullo / Mvc
 
-[![Build Status](https://travis-ci.org/obullo/Framework.svg?branch=master)](https://travis-ci.org/obullo/Framework)
+[![Build Status](https://travis-ci.org/obullo/Mvc.svg?branch=master)](https://travis-ci.org/obullo/Mvc)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 
-> Create your micro mvc framework with Obullo and Zend components.
+> Create micro mvc applications with Obullo and Zend components.
 
 ## Install
 
 ``` bash
-$ composer require obullo/framework
+$ composer require obullo/mvc
 ```
 
 ## Requirements
@@ -28,4 +28,4 @@ $ vendor/bin/phpunit
 
 ## Documentation
 
-Documents are available at <a href="http://framework.obullo.com/">http://framework.obullo.com/</a>
+Documents are available at <a href="http://framework.obullo.com/">http://mvc.obullo.com/</a>

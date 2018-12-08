@@ -13,9 +13,12 @@ use Obullo\Router\{
 use ReflectionClass;
 use Zend\EventManager\Event;
 use Zend\Diactoros\Response\EmptyResponse;
-use Obullo\Http\Exception\RuntimeException;
-use Obullo\Http\SubRequestInterface as SubRequest;
 
+use Obullo\Http\{
+    Bundle,
+    Exception\RuntimeException,
+    SubRequestInterface as SubRequest
+};
 /**
  * Kernel of micro mvc
  *
@@ -96,24 +99,36 @@ class Kernel implements HttpKernelInterface
      */
     protected function createBundleEvents($handler, $request)
     {
-        list($bundle) = explode('\\', $handler);
-
-        $errorListener  = '\\'.$bundle.'\Event\ErrorListener';
-        $bundleListener = '\\'.$bundle.'\Event\BundleListener';
+        $bundle = new Bundle($handler);
+        $bundleName = $bundle->getName();
+        $bundleListener = '\\'.$bundleName.'\Event\BundleListener';
 
         $object = new $bundleListener;
+        $object->setBundle($bundle);
         $object->setContainer($this->container);
         $object->attach($this->events);
 
         $event = new Event;
-        $event->setName($bundle.'.bootstrap');
+        $event->setName($bundleName.'.bootstrap');
         $event->setTarget($this); 
-        $this->events->triggerEvent($event); // creates bootstrap event foreach bundles.
+        $this->events->triggerEvent($event); // create bootstrap event foreach bundles.
 
         if (false == $request instanceof SubRequest) {  // set error listeners only for master requests.
+            $errorListener  = '\\'.$bundleName.'\Event\ErrorListener';
             $object = new $errorListener;
+            $object->setBundle($bundle);
             $object->setContainer($this->container);
             $object->attach($this->events);
+            $params = $this->container->get('config')
+                ->{$bundleName}
+                ->view;
+            $this->container->build('error', // create error handler foreach bundles.
+                [
+                    'error_handler' => $params['error_handler'],
+                    'error_template' => $params['error_template'],
+                    '404_template' => $params['404_template'],
+                ]
+            );
         }
     }
 

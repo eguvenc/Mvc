@@ -7,19 +7,20 @@ use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateTrait;
 use Zend\EventManager\ListenerAggregateInterface;
 use Zend\I18n\Translator\TranslatorAwareInterface;
-use Obullo\Http\Bundle;
+use Obullo\Http\BundleAwareTrait;
 use Obullo\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
 };
 class BundleListener implements ListenerAggregateInterface,ContainerAwareInterface
 {
+    use BundleAwareTrait;
     use ContainerAwareTrait;
     use ListenerAggregateTrait;
 
     public function attach(EventManagerInterface $events, $priority = null)
     {
-        $this->bundle = new Bundle(__NAMESPACE__);
+        $this->bundle = $this->getBundle();
         $this->listeners[] = $events->attach($this->bundle->getName().'.bootstrap', [$this, 'onBootstrap']);
     }
 
@@ -27,11 +28,11 @@ class BundleListener implements ListenerAggregateInterface,ContainerAwareInterfa
     {
         $container = $this->getContainer();
 
-        // Auto wire controllers
+        // Configure container to auto wire controllers
         //
         $routes = $container->get('config')->routes;
         foreach ($routes as $route) {
-            $factories['\\'.strstr($route->handler, '::', true)] = '\\'.$this->bundle->getName().'\Service\LazyControllerFactory';
+            $factories[strstr($route->handler, '::', true)] = '\\'.$this->bundle->getName().'\Service\LazyControllerFactory';
         }
         $container->configure(
             [

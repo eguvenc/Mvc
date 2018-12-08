@@ -43,7 +43,7 @@ class RouterFactory implements FactoryInterface
         $builder = new Builder($collection);
         $config = $container->get('config')->toArray();
         $collection = $builder->build($config['routes']);
-
+        
         return new Router($collection);
     }
 }

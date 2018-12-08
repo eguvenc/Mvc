@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace View\Service;
 
 use ReflectionClass;
 use Obullo\Http\Bundle;

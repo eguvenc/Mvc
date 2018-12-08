@@ -19,6 +19,7 @@ class DefaultController extends Controller
 	{
         $this->request = $request;
 
+
         // $this->logger->info('My logger is now ready');
         
         // echo $this->translator->translate('Application Error', 'default', 'tr');   
