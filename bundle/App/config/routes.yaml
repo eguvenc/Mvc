@@ -11,3 +11,4 @@ home:
 dummy:
     path: /dummy
     handler: App\Controller\DefaultController::dummy
+    

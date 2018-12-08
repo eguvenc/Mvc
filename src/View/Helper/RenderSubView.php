@@ -5,6 +5,7 @@ namespace Obullo\View\Helper;
 use Psr\Container\ContainerInterface;
 use Obullo\Http\{
     Kernel,
+	Bundle,
     SubRequest,
     ControllerResolver
 };

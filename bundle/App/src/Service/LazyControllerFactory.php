@@ -1,8 +1,9 @@
 <?php
 
-namespace ServiceManager;
+namespace App\Service;
 
 use ReflectionClass;
+use Obullo\Http\Bundle;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\ServiceManager\Factory\AbstractFactoryInterface;
@@ -20,8 +21,8 @@ class LazyControllerFactory implements AbstractFactoryInterface
      */
     public function canCreate(ContainerInterface $container, $requestedName)
     {
-        list($bundleName) = explode('\\', __NAMESPACE__, 2);
-        return strstr($requestedName, $bundleName . '\Controller') !== false;
+        $this->bundle = new Bundle(__NAMESPACE__);
+        return strstr($requestedName, $this->bundle->getName() . '\Controller') !== false;
     }
 
     /**

@@ -11,12 +11,13 @@ use Obullo\Router\{
     Router
 };
 use ReflectionClass;
+use Zend\EventManager\Event;
 use Zend\Diactoros\Response\EmptyResponse;
 use Obullo\Http\Exception\RuntimeException;
 use Obullo\Http\SubRequestInterface as SubRequest;
 
 /**
- * Kernel
+ * Kernel of micro mvc
  *
  * @copyright 2019 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
@@ -93,16 +94,27 @@ class Kernel implements HttpKernelInterface
      * @param  string $handler handler
      * @return void
      */
-    protected function createBundleEvent($handler)
+    protected function createBundleEvents($handler, $request)
     {
-        list($bundleName) = explode('\\', $handler);
-        $bundleListener = '\\'.$bundleName.'\Event\BundleListener';
+        list($bundle) = explode('\\', $handler);
+
+        $errorListener  = '\\'.$bundle.'\Event\ErrorListener';
+        $bundleListener = '\\'.$bundle.'\Event\BundleListener';
 
         $object = new $bundleListener;
         $object->setContainer($this->container);
         $object->attach($this->events);
 
-        $this->events->trigger($bundleName.'.bootstrap'); // creates bootstrap event foreach bundles.
+        $event = new Event;
+        $event->setName($bundle.'.bootstrap');
+        $event->setTarget($this); 
+        $this->events->triggerEvent($event); // creates bootstrap event foreach bundles.
+
+        if (false == $request instanceof SubRequest) {  // set error listeners only for master requests.
+            $object = new $errorListener;
+            $object->setContainer($this->container);
+            $object->attach($this->events);
+        }
     }
 
     /**
@@ -116,7 +128,7 @@ class Kernel implements HttpKernelInterface
     public function dispatch($handler, Request $request, $arguments = array()) : Response
     {
         if (is_callable($handler)) {
-            $this->createBundleEvent($handler);
+            $this->createBundleEvents($handler, $request);
             $this->controllerResolver->resolve($handler);
             $args = array();
             $class  = $this->controllerResolver->getClassInstance();
@@ -139,7 +151,7 @@ class Kernel implements HttpKernelInterface
             );
             return $response;
         }
-        return new EmptyResponse;
+        return new EmptyResponse(404);
     }
 
     /**
@@ -147,7 +159,7 @@ class Kernel implements HttpKernelInterface
      * 
      * @return handler
      */
-    public function getQueue() : array
+    public function getMiddlewares() : array
     {
         $middlewares = array();
         $instance = $this->controllerResolver->getClassInstance();

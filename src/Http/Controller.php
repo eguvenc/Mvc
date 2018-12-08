@@ -43,7 +43,7 @@ class Controller implements HttpControllerInterface, ContainerAwareInterface
 	 */
 	public function renderView($nameOrModal, $data = null)
 	{
-		$html = $this->getContainer()->get('html');
+		$html = $this->getContainer()->get('view');
 
 		return $html->render($nameOrModal, $data);
 	}

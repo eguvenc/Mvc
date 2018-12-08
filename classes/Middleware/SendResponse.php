@@ -42,10 +42,7 @@ class SendResponse implements MiddlewareInterface,ContainerAwareInterface
      */
     public function process(Request $request, RequestHandler $handler) : Response
     {
-        $container = $this->getContainer();
-        $router = $container->get('router');
-
-        if ($this->response instanceof EmptyResponse) {
+        if ($this->response->getStatusCode() == 404) {
             return $handler->process(new Error('404'));
         }
         return $this->response;

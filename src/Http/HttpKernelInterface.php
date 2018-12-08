@@ -33,4 +33,11 @@ interface HttpKernelInterface
      * @return object
      */
     public function handleSubRequest(SubRequest $request) : Response;
+
+    /**
+     * Returns to application middlewares
+     * 
+     * @return array
+     */
+    public function getMiddlewares(): array;
 }

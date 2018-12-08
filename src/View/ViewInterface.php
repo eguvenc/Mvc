@@ -4,7 +4,7 @@ namespace Obullo\View;
 
 use Psr\Http\Message\ResponseInterface as Response;
 
-interface HtmlInterface
+interface ViewInterface
 {
     /**
      * Render view as string

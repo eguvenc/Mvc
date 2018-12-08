@@ -14,6 +14,14 @@ use Zend\ServiceManager\ServiceManager;
 use Dotenv\Dotenv;
 
 // -------------------------------------------------------------------
+// Convert Errors to Exceptions
+// -------------------------------------------------------------------
+//
+set_error_handler(function($errno, $errstr, $errfile, $errline) {      
+    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+});
+
+// -------------------------------------------------------------------
 // Environment Manager
 // -------------------------------------------------------------------
 //
@@ -42,7 +50,7 @@ $container->setFactory('adapter', 'Services\ZendDbFactory');
 $container->setFactory('logger', 'Services\LoggerFactory');
 $container->setFactory('flash', 'Services\FlashMessengerFactory');
 $container->setFactory('escaper', 'Services\EscaperFactory');
-$container->setFactory('html', 'Services\ViewFactory');
+$container->setFactory('view', 'Services\ViewFactory');
 $container->setFactory('error', 'Services\ErrorHandlerFactory');
 
 // -------------------------------------------------------------------
@@ -56,20 +64,6 @@ $container->addInitializer(new SharedInitializer);
 // -------------------------------------------------------------------
 //
 $request = $container->get('request');
-
-// -------------------------------------------------------------------
-// Exception Handler
-// -------------------------------------------------------------------
-//
-set_exception_handler(array($container->get('error'), 'handle'));
-
-// -------------------------------------------------------------------
-// Error Handler
-// -------------------------------------------------------------------
-//
-set_error_handler(function($errno, $errstr, $errfile, $errline) {      
-    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
-});
 
 // -------------------------------------------------------------------
 // Stack Queue
@@ -99,7 +93,7 @@ $response = $kernel->handleRequest($request);
 // -------------------------------------------------------------------
 //
 $stack = new Stack($container);
-foreach ($kernel->getQueue() as $value) {
+foreach ($kernel->getMiddlewares() as $value) {
     $stack = $stack->withMiddleware($value);
 }
 $stack = $stack->withMiddleware(new Middleware\SendResponse($response));

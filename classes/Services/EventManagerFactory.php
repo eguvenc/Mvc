@@ -22,16 +22,13 @@ class EventManagerFactory implements FactoryInterface
 
         $events = new EventManager;
         $listeners = [
-            'Event\ErrorListener',
             'Event\HttpMethodListener',
             'Event\RouteListener',
             'Event\SendResponseListener',
         ];
         foreach ($listeners as $listener) { // Create listeners
             $object = new $listener;
-            if ($object instanceof ContainerAwareInterface) {
-                $object->setContainer($container);
-            }
+            $object->setContainer($container);
             $object->attach($events);   
         }
         return $events;
