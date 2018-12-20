@@ -7,27 +7,29 @@ use Psr\{
     Http\Message\ServerRequestInterface as Request,
     Http\Message\ResponseInterface as Response
 };
+use ReflectionClass;
+use Zend\EventManager\{
+    Event,
+    EventManagerInterface as EventManager
+};
 use Obullo\Router\{
     Router
 };
-use ReflectionClass;
-use Zend\EventManager\Event;
-use Zend\Diactoros\Response\EmptyResponse;
-
 use Obullo\Http\{
-    Bundle,
+    ControllerResolver,
     Exception\RuntimeException,
     SubRequestInterface as SubRequest
 };
+use Obullo\Error\ErrorTemplate;
+
 /**
  * Kernel of micro mvc
  *
- * @copyright 2019 Obullo
+ * @copyright 2018-2019 Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
  */
 class Kernel implements HttpKernelInterface
 {
-    protected $queue = array();
     protected $router;
     protected $events;
     protected $container;
@@ -39,16 +41,24 @@ class Kernel implements HttpKernelInterface
      * @param object $events             EventManager
      * @param object $router             Router
      * @param object $controllerResolver ControllerResolver
-     * @param object $queue              Stack queue (optional)
      */
-    public function __construct($events, Router $router, $controllerResolver, $queue = array())
+    public function __construct(EventManager $events, Router $router, $controllerResolver)
     {
-        $this->queue  = $queue;
         $this->router = $router;
         $this->events = $events;
         $this->container = $controllerResolver->getContainer();
         $this->controllerResolver = $controllerResolver;
         $this->controllerResolver->setRouter($router);
+    }
+
+    /**
+     * Returns to router
+     * 
+     * @return object
+     */
+    public function getRouter() : Router
+    {
+        return $this->router;
     }
 
     /**
@@ -60,15 +70,23 @@ class Kernel implements HttpKernelInterface
      */
     public function handleRequest(Request $request) : Response
     {
-        $params = array();
-        $handler = null;
-        if ($route = $this->router->matchRequest()) {
-            $params  = $route->getArguments();
-            $handler = $route->getHandler();
+        $route = $this->router->matchRequest();
+        if ($route && is_callable($route->getHandler())) {
             $this->events->trigger('route.match', null, ['route' => $route]);
+            $handler = $route->getHandler();
+            $bundle = $this->createBundle($handler, $request);
+            $this->controllerResolver->resolve($handler);
+            $class = $this->controllerResolver->getClassInstance();
+            $response = $class->handlePsr7Response($bundle, $request, $this);
+            return $response;
         }
-        $response = $this->dispatch($handler, $request, $params);
-        return $response;
+        $error = new ErrorTemplate;
+        $error->setTranslator($this->container->get('translator'));
+        $error->setView($this->container->get('view'));
+        $error->setStatusCode(404);
+        $error->setMessage(404);
+
+        return $error->renderView('View::_404.phtml');
     }
 
     /**
@@ -87,135 +105,63 @@ class Kernel implements HttpKernelInterface
         $params  = $request->getAttribute('params');
         $handler = $request->getAttribute('handler');
         
-        $response = $this->dispatch($handler, $request, $params);
+        if (false == is_callable($handler)) {
+            throw new RuntimeException(
+                sprintf("The sub view '%s' could not found.", $handler)
+            );
+        }
+        $this->createBundle($handler, $request);
+        $this->controllerResolver->resolve($handler);
+        $response = $this->dispatch($request, $params);
         return $response;
     }
 
     /**
-     * Create bundle event
+     * Create bundle  & error listeners
      * 
      * @param  string $handler handler
+     * @param  object $request psr7 request
+     * 
      * @return void
      */
-    protected function createBundleEvents($handler, $request)
+    protected function createBundle($handler, $request)
     {
-        $bundle = new Bundle($handler);
-        $bundleName = $bundle->getName();
-        $bundleListener = '\\'.$bundleName.'\Event\BundleListener';
-
-        $object = new $bundleListener;
-        $object->setBundle($bundle);
-        $object->setContainer($this->container);
-        $object->attach($this->events);
-
-        $event = new Event;
-        $event->setName($bundleName.'.bootstrap');
-        $event->setTarget($this); 
-        $this->events->triggerEvent($event); // create bootstrap event foreach bundles.
-
-        if (false == $request instanceof SubRequest) {  // set error listeners only for master requests.
-            $errorListener  = '\\'.$bundleName.'\Event\ErrorListener';
-            $object = new $errorListener;
-            $object->setBundle($bundle);
-            $object->setContainer($this->container);
-            $object->attach($this->events);
-            $params = $this->container->get('config')
-                ->{$bundleName}
-                ->view;
-            $this->container->build('error', // create error handler foreach bundles.
-                [
-                    'error_handler' => $params['error_handler'],
-                    'error_template' => $params['error_template'],
-                    '404_template' => $params['404_template'],
-                ]
-            );
+        $bundleName = strstr($handler, '\\', true);
+        $bundleClass = $bundleName.'\Bundle';
+        $bundle = null;
+        if (! class_exists($bundleClass, false)) { // prevent bundle creation for multiple sub requests.
+            $bundle = new $bundleClass;
+            $bundle->setContainer($this->container);
+            $bundle->setRequest($request);
+            $bundle->onBootstrap();
         }
+        return $bundle;
     }
 
     /**
      * Dispatch application process
      * 
-     * @param  Request $request   Psr7 Request / Sub Request 
      * @param  array   $arguments arguments
+     * @param  Request $request   Psr7 Request / Sub Request 
      * 
      * @return Response
      */
-    public function dispatch($handler, Request $request, $arguments = array()) : Response
+    public function dispatch(Request $request, $arguments = array()) : Response
     {
-        if (is_callable($handler)) {
-            $this->createBundleEvents($handler, $request);
-            $this->controllerResolver->resolve($handler);
-            $args = array();
-            $class  = $this->controllerResolver->getClassInstance();
-            $method = $this->controllerResolver->getClassMethod();
+        $args = array();
+        $class  = $this->controllerResolver->getClassInstance();
+        $method = $this->controllerResolver->getClassMethod();
 
-            $reflection = new ReflectionClass($class);
-            $parameters = $reflection->getMethod($method)->getParameters();
-            foreach ($parameters as $param) {
-                $name = $param->getName();
-                if (isset($arguments[$name])) {
-                    $args[] = $arguments[$name];
-                }
-            }      
-            $response = call_user_func_array(
-                array(
-                    $class,
-                    $method
-                ),
-                $args
-            );
-            return $response;
-        }
-        return new EmptyResponse(404);
-    }
-
-    /**
-     * Build application middlewares with dependencies
-     * 
-     * @return handler
-     */
-    public function getMiddlewares() : array
-    {
-        $middlewares = array();
-        $instance = $this->controllerResolver->getClassInstance();
-        if (is_object($instance) && $instance->middlewareManager !== null) {
-            $middlewares = $instance->middlewareManager->getStack();
-        }
-        /**
-         * Middleware order
-         * 
-         * 1 - Global (index.php) middlewares
-         * 2 - Route middlewares
-         * 3 - Controller middlewares
-         */
-        $queue = $this->queue;
-        $queue = array_merge($queue, $this->router->getStack());
-        $queue = array_merge($queue, $middlewares);
-        $queue = $this->resolveDependencies($queue);
-        return $queue;
-    }
-
-    /**
-     * Resolve middleware dependencies
-     * 
-     * @param array $middlewares middlewares
-     * 
-     * @return array
-     */
-    protected function resolveDependencies(array $middlewares)
-    {
-        $resolvedMiddlewares = array();
-        foreach ($middlewares as $data) {
-            $class = $data;
-            $arguments = array();
-            if (is_array($data)) {
-                $class = $data['class'];
-                $arguments = $data['arguments'];
-                $data = $class;
+        $reflection = new ReflectionClass($class);
+        $parameters = $reflection->getMethod($method)->getParameters();
+        foreach ($parameters as $param) {
+            $name = $param->getName();
+            if (isset($arguments[$name])) {
+                $args[] = $arguments[$name];
             }
-            $resolvedMiddlewares[] = new $class(...$arguments);
         }
-        return $resolvedMiddlewares;
+        $response = $class->$method(...$args);
+        return $response;
     }
 
     /**

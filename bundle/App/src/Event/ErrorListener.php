@@ -6,7 +6,6 @@ use Zend\EventManager\EventInterface;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateTrait;
 use Zend\EventManager\ListenerAggregateInterface;
-use Obullo\Http\BundleAwareTrait;
 use Obullo\Container\{
     ContainerAwareInterface,
     ContainerAwareTrait
@@ -16,14 +15,12 @@ use RuntimeException;
 
 class ErrorListener implements ListenerAggregateInterface,ContainerAwareInterface
 {
-    use BundleAwareTrait;
     use ContainerAwareTrait;
     use ListenerAggregateTrait;
 
     public function attach(EventManagerInterface $events, $priority = null)
     {
-        $this->bundle = $this->getBundle();
-        $this->listeners[] = $events->attach($this->bundle->getName().'.error.handler', [$this, 'onErrorHandler']);
+        $this->listeners[] = $events->attach(strstr(__NAMESPACE__, '\\', true).'.error.handler', [$this, 'onErrorHandler']);
     }
 
     public function onErrorHandler(EventInterface $e)

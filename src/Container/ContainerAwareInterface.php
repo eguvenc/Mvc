@@ -7,16 +7,16 @@ use Psr\Container\ContainerInterface;
 interface ContainerAwareInterface
 {
     /**
-     * Set a container
-     *
-     * @param \Psr\Container\ContainerInterface $container
+     * Set psr11 container
+     * 
+     * @param ContainerInterface $container container
      */
     public function setContainer(ContainerInterface $container);
 
     /**
-     * Get the container
-     *
-     * @return \Psr\Container\ContainerInterface
+     * Returns to psr11 container
+     * 
+     * @return object
      */
     public function getContainer() : ContainerInterface;
 }

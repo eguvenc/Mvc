@@ -2,16 +2,17 @@
 
 namespace Obullo\Http;
 
-use Obullo\Http\HttpControllerInterface;
 use Obullo\Container\{
     ContainerAwareTrait,
     ContainerProxyTrait,
     ContainerAwareInterface
 };
-use Psr\Http\Message\ResponseInterface;
-
+use Psr\Http\{
+    Message\ResponseInterface as Response,
+    Message\ServerRequestInterface as Request
+};
 /**
- * Default Controller
+ * Http Controller
  *
  * @copyright Obullo
  * @license   http://opensource.org/licenses/MIT MIT license
@@ -20,18 +21,22 @@ class Controller implements HttpControllerInterface, ContainerAwareInterface
 {
     use ContainerAwareTrait;
 
-    public $middlewareManager;
-
     /**
-     * Returns to new middleware manager
+     * Handler psr7 response
      * 
-     * @return object
+     * @param  Bundle  $bundle  object
+     * @param  Request $request request
+     * @param  Kernel  $kernel  http kernel
+     * @return void
      */
-    public function getMiddlewareManager()
+    public function handlePsr7Response($bundle, Request $request, Kernel $kernel) : Response
     {
-    	$this->middlewareManager = new MiddlewareManager($this);
-    	return $this->middlewareManager;
-    }
+    	$bundle = null;
+		$router = $kernel->getRouter();
+		$route  = $router->getMatchedRoute();
+		$response = $kernel->dispatch($request, $route->getArguments());
+		return $response;
+	}
 
 	/**
 	 * Render view

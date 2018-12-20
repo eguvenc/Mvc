@@ -8,7 +8,6 @@ use Obullo\Http\{
     ControllerResolver,
     Kernel
 }; 
-use Obullo\Stack\Builder as Stack;
 use ServiceManager\SharedInitializer;
 use Zend\ServiceManager\ServiceManager;
 use Dotenv\Dotenv;
@@ -39,25 +38,25 @@ if ('prod' !== $env) {
 // Service Manager
 // -------------------------------------------------------------------
 //
-$container = new ServiceManager();
-$container->setFactory('request', 'Services\RequestFactory');
-$container->setFactory('config', 'Services\ConfigFactory');
-$container->setFactory('router', 'Services\RouterFactory');
-$container->setFactory('translator', 'Services\TranslatorFactory');
-$container->setFactory('events', 'Services\EventManagerFactory');
-$container->setFactory('session', 'Services\SessionFactory');
-$container->setFactory('adapter', 'Services\ZendDbFactory');
-$container->setFactory('logger', 'Services\LoggerFactory');
-$container->setFactory('flash', 'Services\FlashMessengerFactory');
-$container->setFactory('escaper', 'Services\EscaperFactory');
-$container->setFactory('view', 'Services\ViewFactory');
-$container->setFactory('error', 'Services\ErrorHandlerFactory');
+$container = new ServiceManager;
+$container->setFactory('request', 'Service\RequestFactory');
+$container->setFactory('config', 'Service\ConfigFactory');
+$container->setFactory('router', 'Service\RouterFactory');
+$container->setFactory('translator', 'Service\TranslatorFactory');
+$container->setFactory('events', 'Service\EventManagerFactory');
+$container->setFactory('session', 'Service\SessionFactory');
+$container->setFactory('adapter', 'Service\ZendDbFactory');
+$container->setFactory('logger', 'Service\LoggerFactory');
+$container->setFactory('flash', 'Service\FlashMessengerFactory');
+$container->setFactory('escaper', 'Service\EscaperFactory');
+$container->setFactory('view', 'Service\ViewFactory');
 
 // -------------------------------------------------------------------
-// Service Manager Initializers
+// Service Manager Global Configuration
 // -------------------------------------------------------------------
 //
 $container->addInitializer(new SharedInitializer);
+$container->addAbstractFactory(new Middleware\LazyMiddlewareFactory);
 
 // -------------------------------------------------------------------
 // Initialize Packages
@@ -66,17 +65,10 @@ $container->addInitializer(new SharedInitializer);
 $request = $container->get('request');
 
 // -------------------------------------------------------------------
-// Stack Queue
-// -------------------------------------------------------------------
-//
-$queue = [
-    new Middleware\HttpMethod
-];
-// -------------------------------------------------------------------
 // Http Kernel
 // -------------------------------------------------------------------
 //
-$kernel = new Kernel($container->get('events'), $container->get('router'), new ControllerResolver($container), $queue);
+$kernel = new Kernel($container->get('events'), $container->get('router'), new ControllerResolver($container));
 
 // -------------------------------------------------------------------
 // Handle Process
@@ -86,17 +78,6 @@ $kernel = new Kernel($container->get('events'), $container->get('router'), new C
 // by dispatching route, calling a controller, and returning the response
 // 
 $response = $kernel->handleRequest($request);
-
-// -------------------------------------------------------------------
-// Stack Builder
-// -------------------------------------------------------------------
-//
-$stack = new Stack($container);
-foreach ($kernel->getMiddlewares() as $value) {
-    $stack = $stack->withMiddleware($value);
-}
-$stack = $stack->withMiddleware(new Middleware\SendResponse($response));
-$response = $stack->process($request);
 
 // -------------------------------------------------------------------
 // Send Response

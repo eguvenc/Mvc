@@ -11,6 +11,7 @@ use Psr\Http\{
     Server\MiddlewareInterface,
     Server\RequestHandlerInterface as RequestHandler
 };
+use Obullo\Error\ErrorTemplate;
 use Obullo\Container\{
     ContainerAwareTrait,
     ContainerAwareInterface
@@ -48,18 +49,14 @@ class Error implements MiddlewareInterface, ContainerAwareInterface
     public function process(Request $request, RequestHandler $handler) : ResponseInterface
     {
         $container = $this->getContainer();
-        $params = $this->container->get('config')
-                ->App
-                ->view;
 
-        $errorHandler = $container->build('error', // create a error handler
-            [
-                'error_handler' => $params['error_handler'],
-                'error_template' => $params['error_template'],
-                '404_template' => $params['404_template']
-            ]
-        );
-        $response = $errorHandler->render($this->message, $this->code, $this->headers);
-        return $response;
+        $error = new ErrorTemplate;
+        $error->setTranslator($container->get('translator'));
+        $error->setView($container->get('view'));
+        $error->setStatusCode($this->code);
+        $error->setMessage($this->message);
+        $error->setHeaders($this->headers);
+
+        return $error->renderView('View::_Error.phtml');
     }
 }

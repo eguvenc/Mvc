@@ -20,10 +20,10 @@ return [
     505 => 'HTTP Sürümü desteklenmiyor',
 
     // -------------------------------------------------------------------
-    // Application Errors
+    // Mvc Errors
     // -------------------------------------------------------------------
     //
     'An error was encountered' => 'Bilinmeyen bir hata oluştu',
     'The page you are looking for could not be found' => 'Aradığınız sayfa bulunamadı',
-    'Application Error' => 'Uygulama Hatası',
+    'Mvc Error' => 'Uygulama Hatası',
 ];

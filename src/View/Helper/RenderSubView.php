@@ -46,7 +46,6 @@ class RenderSubView
 
         $kernel = new Kernel($events, $router, new ControllerResolver($this->container));
         $response = $kernel->handleSubRequest($request);
-
         return $response->getBody();
     }
 }

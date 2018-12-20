@@ -7,17 +7,21 @@ namespace App\Controller;
 // use Zend\Db\Sql\Sql;
 // use Zend\Db\TableGateway\TableGateway;
 // use Zend\Db\TableGateway\Feature\RowGatewayFeature;
-
-use Obullo\Http\Controller;
+// 
+// use Obullo\Http\Controller;
+use Obullo\Http\MiddlewareController;
 use Zend\Diactoros\Response\HtmlResponse;
 use Psr\Http\Message\RequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
-class DefaultController extends Controller
+class DefaultController extends MiddlewareController
 {
 	public function __construct(Request $request)
 	{
         $this->request = $request;
+
+        // $this->middleware = $this->getMiddlewareManager()
+        //     ->add('Translation');
 
 
         // $this->logger->info('My logger is now ready');
@@ -29,11 +33,14 @@ class DefaultController extends Controller
   //           ->addArguments([404, '404 - sayfa bulunamadı']);
 
         // $stack = $this->middleware->getStack();
-        //  print_r($stack); 
+        // print_r($stack); 
 	}
 
     public function index() : Response
     {
+        // $return = substr('Middleware\Translation', 0, 11);
+        // var_dump($return);
+
         // echo $a;
         // $container = $this->getContainer();
         // echo get_class($container);

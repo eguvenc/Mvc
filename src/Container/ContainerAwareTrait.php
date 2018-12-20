@@ -6,16 +6,12 @@ use Psr\Container\ContainerInterface;
 
 trait ContainerAwareTrait
 {
-    /**
-     * @var \Psr\Container\ContainerInterface
-     */
     protected $container;
 
     /**
-     * Set a container.
-     *
-     * @param  \Psr\Container\ContainerInterface $container
-     * @return $this
+     * Set psr11 container
+     * 
+     * @param ContainerInterface $container container
      */
     public function setContainer(ContainerInterface $container)
     {
@@ -25,7 +21,7 @@ trait ContainerAwareTrait
     }
 
     /**
-     * Returns to container
+     * Returns to psr11 container
      * 
      * @return object
      */

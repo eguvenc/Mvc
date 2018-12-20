@@ -8,13 +8,22 @@ use Psr\Http\{
     Server\MiddlewareInterface,
     Server\RequestHandlerInterface as RequestHandler
 };
-use Obullo\Container\{
-    ContainerAwareTrait,
-    ContainerAwareInterface
-};
-class Translation implements MiddlewareInterface,ContainerAwareInterface
+use Obullo\Router\Router;
+use Zend\I18n\Translator\Translator;
+
+class Translation implements MiddlewareInterface
 {
-    use ContainerAwareTrait;
+    /**
+     * Constructor
+     * 
+     * @param Router     $router     router
+     * @param Translator $translator translator
+     */
+    public function __construct(Router $router, Translator $translator)
+    {
+        $this->router = $router;
+        $this->translator = $translator;
+    }
 
     /**
      * Process request
@@ -26,14 +35,9 @@ class Translation implements MiddlewareInterface,ContainerAwareInterface
      */
     public function process(Request $request, RequestHandler $handler) : Response
     {
-        $container = $this->getContainer();
-        
-        $router     = $container->get('router');
-        $translator = $container->get('translator');
-
-        if ($router->hasMatch()) {
-            $route = $router->getMatchedRoute();
-            $translator->setLocale($route->getArgument('locale'));
+        if ($this->router->hasMatch()) {
+            $route = $this->router->getMatchedRoute();
+            $this->translator->setLocale($route->getArgument('locale'));
             $route->removeArgument('locale');
         }
         return $handler->handle($request);

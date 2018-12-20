@@ -8,28 +8,20 @@ use Psr\Http\{
     Message\ResponseInterface as Response,
     Message\ServerRequestInterface as Request
 };
-use Interop\Container\ContainerInterface;
-use Zend\Diactoros\Response\EmptyResponse;
-use Obullo\Container\{
-    ContainerAwareTrait,
-    ContainerAwareInterface
-};
-use Middleware\Error;
+use Obullo\Http\Kernel;
 
-class SendResponse implements MiddlewareInterface,ContainerAwareInterface
+class SendResponse implements MiddlewareInterface
 {
-    use ContainerAwareTrait;
-
-    protected $response;
+    protected $kernel;
 
     /**
      * Constructor
      * 
-     * @param null|object $response Psr7 Response
+     * @param Kernel $kernel kernel
      */
-    public function __construct(Response $response)
+    public function __construct(Kernel $kernel)
     {
-        $this->response = $response;
+        $this->kernel = $kernel;
     }
 
     /**
@@ -42,9 +34,10 @@ class SendResponse implements MiddlewareInterface,ContainerAwareInterface
      */
     public function process(Request $request, RequestHandler $handler) : Response
     {
-        if ($this->response->getStatusCode() == 404) {
-            return $handler->process(new Error('404'));
-        }
-        return $this->response;
+        $router = $this->kernel->getRouter();
+        $route  = $router->getMatchedRoute();
+
+        $response = $this->kernel->dispatch($request, $route->getArguments());
+        return $response;
     }
 }

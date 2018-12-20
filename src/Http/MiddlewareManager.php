@@ -109,7 +109,7 @@ class MiddlewareManager implements MiddlewareManagerInterface
     public function getStack() : array
     {
         foreach ($this->middleware as $data) {
-            if ((isset($data['method'][0]) && $data['method'][0] == '__construct')) {
+            if (isset($data['method'][0]) && $data['method'][0] == '__construct') {
                 $this->stack[] = $data;
             }
         }

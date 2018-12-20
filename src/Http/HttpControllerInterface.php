@@ -10,13 +10,6 @@ namespace Obullo\Http;
  */
 interface HttpControllerInterface
 {
-    /**
-     * Returns to new middleware manager
-     * 
-     * @return object
-     */
-    public function getMiddlewareManager();
-
 	/**
 	 * Render view
 	 * 

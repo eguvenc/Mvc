@@ -20,10 +20,10 @@ return [
     505 => 'HTTP Version not supported',
 
     // -------------------------------------------------------------------
-    // Application Errors
+    // Mvc Errors
     // -------------------------------------------------------------------
     //
     'An error was encountered' => 'An error was encountered',
     'The page you are looking for could not be found' => 'The page you are looking for could not be found',
-    'Application Error' => 'Application Error',
+    'Mvc Error' => 'Mvc Error',
 ];

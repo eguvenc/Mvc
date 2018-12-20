@@ -8,15 +8,24 @@ use Psr\Http\{
     Server\MiddlewareInterface,
     Server\RequestHandlerInterface as RequestHandler
 };
-use Obullo\Container\{
-    ContainerAwareTrait,
-    ContainerAwareInterface
+use Obullo\Router\Router;
+use Zend\EventManager\{
+    Event,
+    EventManager
 };
-use Zend\EventManager\Event;
-
-class HttpMethod implements MiddlewareInterface,ContainerAwareInterface
+class HttpMethod implements MiddlewareInterface
 {
-    use ContainerAwareTrait;
+    /**
+     * Constructor
+     * 
+     * @param Router       $router router
+     * @param EventManager $events events
+     */
+    public function __construct(Router $router, EventManager $events)
+    {
+        $this->router = $router;
+        $this->events = $events;
+    }
 
     /**
      * Process request
@@ -28,20 +37,15 @@ class HttpMethod implements MiddlewareInterface,ContainerAwareInterface
      */
     public function process(Request $request, RequestHandler $handler) : ResponseInterface
     {
-        $container = $this->getContainer();
-
-        $events = $container->get('events');
-        $router = $container->get('router');
-
-        if ($router->hasMatch()) {
-            $methods = $router->getMatchedRoute()
+        if ($this->router->hasMatch()) {
+            $methods = $this->router->getMatchedRoute()
                 ->getMethods();
 
             if (! in_array($request->getMethod(), $methods)) {
                 $event = new Event;
                 $event->setName('dissallowed.method');
                 $event->setParam('methods', $methods);
-                $message = $events->triggerEvent($event)->last();
+                $message = $this->events->triggerEvent($event)->last();
 
                 return $handler->process(
                     new Error('405',$message,['Allow' => implode(', ', $methods)])
@@ -50,7 +54,7 @@ class HttpMethod implements MiddlewareInterface,ContainerAwareInterface
             $event = new Event;
             $event->setName('allowed.method');
             $event->setParam('methods', $methods);
-            $events->triggerEvent($event);
+            $this->events->triggerEvent($event);
         }
         return $handler->handle($request);
     }
